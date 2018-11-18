@@ -153,7 +153,6 @@ export default {
     /* border: 1px solid #b9b9b9; */
     -webkit-transition: bottom 0.3s ease 0s;
     transition: bottom 0.3s ease 0s;
-    /* margin: 0 auto; */
     left: 50%;
     transform: translate(-50%, -4%);
     color: #04BB73;
