@@ -8,24 +8,24 @@
 </template>
 
 <script>
-import TheFooter from '@/components/TheFooter';
+import TheFooter from '@/components/TheFooter'
 export default {
   name: 'App',
   components: {
     TheFooter
   },
-  data() {
+  data () {
     return {
-      transitionName: 'slide-left',
+      transitionName: 'slide-left'
     }
   },
   watch: {
-    '$route'(to, from) {
-      //如果to索引大于from索引,判断为前进状态,反之
+    '$route' (to, from) {
+      // 如果to索引大于from索引,判断为前进状态,反之
       if (to.meta.z_index > from.meta.z_index) {
-        this.transitionName = 'slide-left';
+        this.transitionName = 'slide-left'
       } else {
-        this.transitionName = 'slide-right';
+        this.transitionName = 'slide-right'
       }
     }
   }

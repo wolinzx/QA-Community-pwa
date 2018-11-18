@@ -8,7 +8,7 @@
 export default {
   name: 'Popular',
 
-  data() {
+  data () {
     return {
       msg: 'this is Popular '
     }
@@ -18,5 +18,3 @@ export default {
 
 <style scoped>
 </style>
-
-

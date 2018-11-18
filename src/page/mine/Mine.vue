@@ -54,22 +54,22 @@ import store from '@/vuex/store'
 import { mapState, mapMutations, mapActions } from 'vuex'
 export default {
   name: 'Mine',
-  data() {
+  data () {
     return {
 
     }
   },
   store,
   methods: {
-    logout() {
+    logout () {
       this.$http.get('/api/logout', {})
         .then((res) => {
-          console.log(res.data);
-          this.SET_USERINFO({ logined: false });
-          this.$router.push({ name: 'Login' });
+          console.log(res.data)
+          this.SET_USERINFO({ logined: false })
+          this.$router.push({ name: 'Login' })
         })
         .catch((err) => {
-          console.log(err);
+          console.log(err)
         })
     },
     ...mapMutations(['SET_USERINFO', 'CLEAR_USERINFO']),
@@ -186,5 +186,3 @@ a.disabled {
   background: rgb(206, 72, 19);
 }
 </style>
-
-

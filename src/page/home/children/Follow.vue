@@ -140,17 +140,17 @@
 </template>
 
 <script>
-import TheContainer from '@/components/TheContainer';
+import TheContainer from '@/components/TheContainer'
 export default {
   name: 'Follow',
 
-  data() {
+  data () {
     return {
       msg: 'this is Follow '
     }
   },
   components: {
-    'the-container': TheContainer,
+    'the-container': TheContainer
   }
 }
 </script>
@@ -239,5 +239,3 @@ export default {
   color: #b6b6b6;
 }
 </style>
-
-

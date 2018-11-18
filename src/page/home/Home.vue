@@ -25,26 +25,26 @@
 <script>
 export default {
   name: 'Home',
-  data() {
+  data () {
     return {
-      msg: 'this is test',
+      msg: 'this is test'
     }
   },
   methods: {
-    test() {
+    test () {
       this.$http.get('/api/test', {
 
       })
         .then((res) => {
-          console.log(res);
+          console.log(res)
         })
         .catch((err) => {
-          throw err;
+          throw err
         })
     }
   },
   created: function () {
-    //this.$router.push({path: '/Home/Follow'});
+    // this.$router.push({path: '/Home/Follow'});
   }
 }
 </script>
@@ -140,5 +140,3 @@ export default {
     padding: 0.6rem;
 } */
 </style>
-
-

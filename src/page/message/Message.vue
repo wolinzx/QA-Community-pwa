@@ -13,32 +13,31 @@
 <script>
 export default {
   name: 'Message',
-  data() {
+  data () {
     return {
-      msg: 'this is test',
+      msg: 'this is test'
     }
   },
   methods: {
-    test() {
+    test () {
       this.$http.get('/img/test', {
 
       })
         .then((res) => {
-          console.log(res);
+          console.log(res)
         })
         .catch((err) => {
-          throw err;
+          throw err
         })
     },
-    uploadtest(e) {
-      var self = this
-      console.log(e.target);
+    uploadtest (e) {
+      // var self = this
+      console.log(e.target)
       let file = e.target.files[0]
       /* eslint-disable no-undef */
-      let param = new FormData()  // 创建form对象
-      param.append('file', file, file.name)  // 通过append向form对象添加数据
+      let param = new FormData() // 创建form对象
+      param.append('file', file, file.name) // 通过append向form对象添加数据
       param.append('chunk', '0') // 添加form表单中其他数据
-      console.log("222222");
       console.log(param.get('file')) // FormData私有类对象，访问不到，可以通过get判断值是否传进去
 
       let config = {
@@ -47,9 +46,8 @@ export default {
       // 添加请求头
       this.$http.post('/api/testupload', param, config)
         .then(response => {
-          console.log("222222");
           if (response.data.code === 0) {
-            console.log(response.data.data);
+            console.log(response.data.data)
           }
           console.log(response.data)
         })
@@ -69,5 +67,3 @@ export default {
   font-size: 1rem;
 }
 </style>
-
-

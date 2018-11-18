@@ -58,11 +58,11 @@
 
 <script>
 // import store from '@/vuex/store'
-import { mapState, mapMutations, mapActions } from 'vuex'
+import { mapState, mapMutations } from 'vuex'
 import MessageBox from '@/components/TheMessageBox'
 export default {
   name: 'Login',
-  data() {
+  data () {
     return {
       user: {
         avatar: '',
@@ -78,7 +78,7 @@ export default {
       showSignUp: false,
       msg: '',
       showMsg: false,
-      checkFail: false,
+      checkFail: false
     }
   },
   components: {
@@ -86,13 +86,12 @@ export default {
   },
   methods: {
     ...mapMutations(['SET_USERINFO']),
-    routerBack() {
-      this.$router.go(-1);
+    routerBack () {
+      this.$router.go(-1)
     },
-    login() {
-
+    login () {
       if (!this.loginCheck()) {
-        return;
+        return
       }
 
       this.$http.post('/api/login', {
@@ -100,83 +99,83 @@ export default {
         password: this.user.password
       })
         .then((res) => {
-          console.log(res.data);
+          console.log(res.data)
           if (res.data) {
             this.SET_USERINFO({
               logined: true,
               data: res.data
-            });
-            console.log(res.data);
-            this.$router.push('/Home');
+            })
+            console.log(res.data)
+            this.$router.push('/Home')
           } else {
-            this.$refs.messageBox.showMsgBox('账号或密码错误！');
+            this.$refs.messageBox.showMsgBox('账号或密码错误！')
           }
         })
         .catch((err) => {
-          console.log(err);
-        });
+          console.log(err)
+        })
     },
-    loginCheck() {
-      if (this.user.account == '') {
-        this.$refs.messageBox.showMsgBox('请输入账号！');
-        return false;
-      } else if (this.user.password == '') {
-        this.$refs.messageBox.showMsgBox('请输入密码！');
-        return false;
+    loginCheck () {
+      if (this.user.account === '') {
+        this.$refs.messageBox.showMsgBox('请输入账号！')
+        return false
+      } else if (this.user.password === '') {
+        this.$refs.messageBox.showMsgBox('请输入密码！')
+        return false
       } else {
-        return true;
+        return true
       }
     },
-    registration() {
+    registration () {
       if (!this.regCheck()) {
-        return;
+        return
       }
       let user = {
         account: this.user.account,
         password: this.new_password,
         email: this.user.email
       }
-      console.log(user);
+      console.log(user)
       this.$http.post('/api/login/createAccount', user)
         .then((res) => {
-          console.log(res.data);
-          if (res.data == true) {
-            this.$refs.messageBox.showMsgBox('创建成功！');
+          console.log(res.data)
+          if (res.data === true) {
+            this.$refs.messageBox.showMsgBox('创建成功！')
           } else {
-            this.$refs.messageBox.showMsgBox('用户名或邮箱已经使用！');
+            this.$refs.messageBox.showMsgBox('用户名或邮箱已经使用！')
           }
         })
-        .catch((err) => {
-          this.$refs.messageBox.showMsgBox('创建失败！');
-        });
+        .catch(() => {
+          this.$refs.messageBox.showMsgBox('创建失败！')
+        })
     },
-    regCheck() {
-      let reg = /^([0-9A-Za-z\-_\.]+)@([0-9a-z]+\.[a-z]{2,3}(\.[a-z]{2})?)$/g;
-      if (this.user.account == '') {
-        this.$refs.messageBox.showMsgBox('请输入账号！');
-        return false;
-      } else if (this.user.email == '') {
-        this.$refs.messageBox.showMsgBox('请输入邮箱！');
-        return false;
-      } else if (this.user.email.match(reg) == null) {
-        this.$refs.messageBox.showMsgBox('请输入正确的邮箱地址！');
-        return false;
-      } else if (this.new_password == '' && this.input_password == '') {
-        this.$refs.messageBox.showMsgBox('请输入密码！');
-        return false;
-      } else if (this.new_password != this.input_password) {
-        this.$refs.messageBox.showMsgBox('两次密码输入不一致！');
-        return false;
+    regCheck () {
+      let reg = /^([0-9A-Za-z\-_.]+)@([0-9a-z]+\.[a-z]{2,3}(\.[a-z]{2})?)$/g
+      if (this.user.account === '') {
+        this.$refs.messageBox.showMsgBox('请输入账号！')
+        return false
+      } else if (this.user.email === '') {
+        this.$refs.messageBox.showMsgBox('请输入邮箱！')
+        return false
+      } else if (this.user.email.match(reg) === null) {
+        this.$refs.messageBox.showMsgBox('请输入正确的邮箱地址！')
+        return false
+      } else if (this.new_password === '' && this.input_password === '') {
+        this.$refs.messageBox.showMsgBox('请输入密码！')
+        return false
+      } else if (this.new_password !== this.input_password) {
+        this.$refs.messageBox.showMsgBox('两次密码输入不一致！')
+        return false
       } else {
-        return true;
+        return true
       }
     },
-    showSignUpFun() {
-      this.showSignUp = true;
+    showSignUpFun () {
+      this.showSignUp = true
     },
-    btnClose() {
-      this.showSignUp = false;
-    },
+    btnClose () {
+      this.showSignUp = false
+    }
     // showMsgBox (msg) {
     //     this.msg = msg;
     //     this.showMsg = true;
@@ -427,5 +426,3 @@ export default {
   bottom: 0.5rem;
 }
 </style>
-
-

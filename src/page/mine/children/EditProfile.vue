@@ -43,7 +43,7 @@ import MessageBox from '@/components/TheMessageBox'
 import ChildHeader from '@/components/TheChildHeader'
 
 export default {
-  data() {
+  data () {
     return {
       title: '修改个人资料',
       showAvatarMenu: false,
@@ -55,19 +55,19 @@ export default {
     ChildHeader
   },
   computed: {
-    ...mapState(['userInfo']),
+    ...mapState(['userInfo'])
   },
   methods: {
-    routerBack() {
-      this.$router.go(-1);
+    routerBack () {
+      this.$router.go(-1)
     },
-    upLoadAvatar(e) {
-      var self = this
+    upLoadAvatar (e) {
+      // var self = this
       // console.log(e.target);
       let file = e.target.files[0]
-      let param = new FormData()  // 创建form对象
-      param.append('file', file, file.name)  // 通过append向form对象添加数据
-      console.log(this.userInfo);
+      let param = new FormData() // 创建form对象
+      param.append('file', file, file.name) // 通过append向form对象添加数据
+      console.log(this.userInfo)
       param.append('account', this.userInfo.user_datas[0].account) // 添加form表单中其他数据
       let config = {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -76,18 +76,18 @@ export default {
       this.$http.post('/img/uploadavatar', param, config)
         .then((res) => {
           if (res.data) {
-            this.showAvatarMenu = false;
-            this.$refs.messageBox.showMsgBox('上传成功！');
+            this.showAvatarMenu = false
+            this.$refs.messageBox.showMsgBox('上传成功！')
             setTimeout(() => {
-              window.location.reload();
-            }, 1500);
+              window.location.reload()
+            }, 1500)
           }
         })
         .catch((err) => {
-          console.log(err);
+          console.log(err)
         })
     }
-  },
+  }
 }
 </script>
 
@@ -211,5 +211,3 @@ export default {
   width: 100%;
 }
 </style>
-
-

@@ -11,7 +11,7 @@
 
 <script>
 export default {
-  data() {
+  data () {
     return {
 
     }
@@ -20,8 +20,8 @@ export default {
     'title'
   ],
   methods: {
-    routerBack() {
-      this.$router.go(-1);
+    routerBack () {
+      this.$router.go(-1)
     }
   }
 }
@@ -58,5 +58,3 @@ export default {
   font-size: 1.2rem;
 }
 </style>
-
-

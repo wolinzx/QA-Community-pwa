@@ -6,29 +6,29 @@ import router from './router'
 import axios from 'axios'
 import store from '@/vuex/store'
 import {
-	mapState,
-	mapMutations,
-	mapActions
+  mapState,
+  // mapMutations,
+  mapActions
 } from 'vuex'
+
 Vue.prototype.$http = axios
 // Vue.use(Vuex);
 Vue.config.productionTip = false
 /* eslint-disable no-new */
-// function sleep(numberMillis) { 
-//   var now = new Date(); 
-//   var exitTime = now.getTime() + numberMillis; 
-//   while (true) { 
-//   now = new Date(); 
-//   if (now.getTime() > exitTime) 
-//   return; 
-//   } 
+// function sleep(numberMillis) {
+//   var now = new Date();
+//   var exitTime = now.getTime() + numberMillis;
+//   while (true) {
+//   now = new Date();
+//   if (now.getTime() > exitTime)
+//   return;
 //   }
-
+//   }
 
 // //定义一个请求拦截器
 // axios.interceptors.request.use(function(config){
 //   store.commit('SHOW_LODING',true);
-//   return config; 
+//   return config;
 // })
 
 // //定义一个响应拦截器
@@ -39,20 +39,20 @@ Vue.config.productionTip = false
 // })
 
 new Vue({
-	el: '#app',
-	router,
-	store,
-	components: {
-		App
-	},
-	template: '<App/>',
-	methods: {
-		...mapActions(['GET_USERINFO'])
-	},
-	computed: {
-		...mapState(['userInfo'])
-	},
-	created: function () {
-		this.$store.dispatch('GET_USERINFO');
-	}
+  el: '#app',
+  router,
+  store,
+  components: {
+    App
+  },
+  template: '<App/>',
+  methods: {
+    ...mapActions(['GET_USERINFO'])
+  },
+  computed: {
+    ...mapState(['userInfo'])
+  },
+  created: () => {
+    store.dispatch('GET_USERINFO')
+  }
 })

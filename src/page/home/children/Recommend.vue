@@ -9,9 +9,9 @@
 
 export default {
   name: 'Recommend',
-  data() {
+  data () {
     return {
-      msg: 'this is recommend',
+      msg: 'this is recommend'
     }
   }
 }
@@ -19,4 +19,3 @@ export default {
 
 <style scoped>
 </style>
-

@@ -1,13 +1,8 @@
-//引入自定义中间件api
-const api = require('./api')
+const api = require('./api')//引入自定义中间件api
 const path = require('path');
-// 引入处理post数据的模块
-const bodyParser = require('body-parser');
-
-// 引入Express
-const express = require('express');
+const bodyParser = require('body-parser'); // 引入处理post数据的模块
+const express = require('express'); // 引入Express
 const app = express();
-
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 
@@ -17,8 +12,6 @@ app.use(session({
 	resave: true,
 	saveUninitialized: true
 }));
-
-
 
 app.use(bodyParser.json());
 app.use(api);

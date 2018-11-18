@@ -51,7 +51,7 @@ import ChildHeader from '@/components/TheChildHeader'
 
 export default {
   name: 'Prifile',
-  data() {
+  data () {
     return {
       title: '个人主页'
     }
@@ -65,9 +65,9 @@ export default {
   },
   computed: {
     ...mapState(['userInfo']),
-    Msgs() {
-      var Msgs = this.$store.state.userInfo.isLogined;
-      console.log(Msgs);
+    Msgs: () => {
+      var Msgs = this.$store.state.userInfo.isLogined
+      console.log(Msgs)
     }
   }
 }
@@ -169,5 +169,3 @@ export default {
   transform: translate3d(100%, 0, 0);
 }
 </style>
-
-
