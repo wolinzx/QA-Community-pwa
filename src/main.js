@@ -4,8 +4,12 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import axios from 'axios'
-import store  from '@/vuex/store'
-import { mapState,mapMutations,mapActions } from 'vuex'
+import store from '@/vuex/store'
+import {
+	mapState,
+	mapMutations,
+	mapActions
+} from 'vuex'
 Vue.prototype.$http = axios
 // Vue.use(Vuex);
 Vue.config.productionTip = false
@@ -35,18 +39,20 @@ Vue.config.productionTip = false
 // })
 
 new Vue({
-  el: '#app',
-  router,
-  store,
-  components: { App },
-  template: '<App/>',
-  methods:{
-    ...mapActions(['GET_USERINFO'])
-  },
-  computed:{
-    ...mapState(['userInfo'])
-  },
-  created: function(){
-    this.$store.dispatch('GET_USERINFO');
-  }
+	el: '#app',
+	router,
+	store,
+	components: {
+		App
+	},
+	template: '<App/>',
+	methods: {
+		...mapActions(['GET_USERINFO'])
+	},
+	computed: {
+		...mapState(['userInfo'])
+	},
+	created: function () {
+		this.$store.dispatch('GET_USERINFO');
+	}
 })

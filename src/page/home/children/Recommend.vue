@@ -1,23 +1,22 @@
 <template>
-    <div id="recommend">
-        {{msg}}
+  <div id="recommend">
+    {{msg}}
 
-    </div>
+  </div>
 </template>
 
 <script>
 
 export default {
-    name: 'Recommend',
-    data () {
-        return {
-            msg: 'this is recommend',
-        }
+  name: 'Recommend',
+  data() {
+    return {
+      msg: 'this is recommend',
     }
+  }
 }
 </script>
 
 <style scoped>
-
 </style>
 

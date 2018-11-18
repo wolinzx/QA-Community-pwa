@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <transition :name="transitionName">
-        <router-view class="child-view"></router-view>
+      <router-view class="child-view"></router-view>
     </transition>
     <the-footer></the-footer>
   </div>
@@ -14,19 +14,19 @@ export default {
   components: {
     TheFooter
   },
-  data () {
+  data() {
     return {
       transitionName: 'slide-left',
     }
   },
   watch: {
-    '$route' (to, from) {
-          //如果to索引大于from索引,判断为前进状态,反之
-          if (to.meta.z_index > from.meta.z_index) {
-            this.transitionName = 'slide-left';
-          } else {
-            this.transitionName = 'slide-right';
-          }
+    '$route'(to, from) {
+      //如果to索引大于from索引,判断为前进状态,反之
+      if (to.meta.z_index > from.meta.z_index) {
+        this.transitionName = 'slide-left';
+      } else {
+        this.transitionName = 'slide-right';
+      }
     }
   }
 }
@@ -39,7 +39,7 @@ export default {
   top: 0;
   left: 0;
   width: 100%;
-  transition: transform .6s cubic-bezier(.55,0,.1,1);
+  transition: transform 0.6s cubic-bezier(0.55, 0, 0.1, 1);
 }
 .slide-right-enter-active,
 .slide-right-leave-active,

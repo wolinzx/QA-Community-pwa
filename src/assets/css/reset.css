@@ -1,69 +1,89 @@
-body{
-    /* 移动端常用字体 */
-    font-family: Helvetica;
-    /* color: #646263;  */
-    margin: 0;
+body {
+	/* 移动端常用字体 */
+	font-family: Helvetica;
+	/* color: #646263;  */
+	margin: 0;
 }
-body *{
-    /* 禁止用户缩放字体 */
-    -webkit-text-size-adjust: 100%;
-    /* ios下禁止用户选中文字 */
-    /* -webkit-user-select: none; */
+
+body * {
+	/* 禁止用户缩放字体 */
+	-webkit-text-size-adjust: 100%;
+	/* ios下禁止用户选中文字 */
+	/* -webkit-user-select: none; */
 }
-a,button,input{
-    /* ios下清除选中的阴影 */
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-    /* -webkit-tap-highlight-color:transparent; */
+
+a,
+button,
+input {
+	/* ios下清除选中的阴影 */
+	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+	/* -webkit-tap-highlight-color:transparent; */
 }
-button,input{
-    /* 清除默认外观 */
-    -webkit-appearance: none;
-    border-radius: 0;
+
+button,
+input {
+	/* 清除默认外观 */
+	-webkit-appearance: none;
+	border-radius: 0;
 }
-a{
-    color: #646263; 
-    text-decoration: none;
+
+a {
+	color: #646263;
+	text-decoration: none;
 }
-input,button{
-    outline: none;
-    vertical-align: middle;
+
+input,
+button {
+	outline: none;
+	vertical-align: middle;
 }
-ul{
-    margin: 0;
-    padding: 0;
-    list-style: none;
+
+ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
 }
-img{
-    vertical-align: middle;
+
+img {
+	vertical-align: middle;
 }
-h3,h4,p{
-    margin: 0;
+
+h3,
+h4,
+p {
+	margin: 0;
 }
-.left{
-    float: left;
+
+.left {
+	float: left;
 }
-.right{
-    float: right;
+
+.right {
+	float: right;
 }
-.clearfix:after{
-    content: '';
-    display: block;
-    clear: both;
+
+.clearfix:after {
+	content: '';
+	display: block;
+	clear: both;
 }
-.flex{
-    display: flex;
+
+.flex {
+	display: flex;
 }
-.container-inner{
-    margin: 0.5rem 0;
-    box-sizing: border-box;
-    padding: 0.6rem;
-    background: #FFFFFF;
-    /* box-shadow: 0 0 1px rgb(133, 133, 133); */
-    border: 1px solid #F2F2F2;
+
+.container-inner {
+	margin: 0.5rem 0;
+	box-sizing: border-box;
+	padding: 0.6rem;
+	background: #FFFFFF;
+	/* box-shadow: 0 0 1px rgb(133, 133, 133); */
+	border: 1px solid #F2F2F2;
 }
-.nomore{
-    padding: 0.5rem 0 5rem;
-    text-align: center;
-    font-size: 0.7rem;
-    color: #B6B6B6;
+
+.nomore {
+	padding: 0.5rem 0 5rem;
+	text-align: center;
+	font-size: 0.7rem;
+	color: #B6B6B6;
 }

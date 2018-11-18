@@ -13,9 +13,9 @@ const session = require('express-session');
 
 app.use(cookieParser('sessiontest'));
 app.use(session({
- secret: 'sessiontest',//与cookieParser中的一致
- resave: true,
- saveUninitialized:true
+	secret: 'sessiontest', //与cookieParser中的一致
+	resave: true,
+	saveUninitialized: true
 }));
 
 
