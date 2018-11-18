@@ -8,7 +8,6 @@
                     <input class="search" type="text" placeholder="搜索">
                     <a class="edit" href=""><i class="iconfont icon-bianji"></i></a>
                 </div>
-                <!-- <h2 class="home-title">首页</h2> -->
                 <div class="home-nav"> 
                     <router-link :to="{name:'Follow'}"><span>关注</span></router-link>
                     <router-link :to="{name:'Recommend' }"><span>推荐</span></router-link>
