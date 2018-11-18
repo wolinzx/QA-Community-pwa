@@ -12,7 +12,7 @@
                     <router-link :to="{name:'Follow'}"><span>关注</span></router-link>
                     <router-link :to="{name:'Recommend' }"><span>推荐</span></router-link>
                     <router-link :to="{name:'Popular'}"><span>热门</span></router-link>
-                </div>
+                </div>   
             </nav>
         </header>
         <section class="container">
