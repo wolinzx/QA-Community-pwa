@@ -3,10 +3,10 @@
     <div class="container-inner message-title">
       <h3>消息</h3>
     </div>
-    <div>
+    <!-- <div>
       <input name="file" type="file" accept="image/png,image/gif,image/jpeg" @change="uploadtest" />
       <button @click="test"></button>
-    </div>
+    </div> -->
   </div>
 </template>
 

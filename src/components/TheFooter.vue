@@ -15,14 +15,13 @@
 <script>
 export default {
   name: 'TheFooter',
-  data() {
+  data () {
     return {
 
     }
   }
 }
 </script>
-
 
 <style scoped>
 #footer {
@@ -56,4 +55,3 @@ export default {
   color: #04bb73 !important;
 }
 </style>
-

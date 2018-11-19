@@ -51,16 +51,17 @@ img {
 h3,
 h4,
 p {
-	margin: 0;
+  margin: 0;
+  font-weight: normal;
 }
 
-.left {
+/* .left {
 	float: left;
 }
 
 .right {
 	float: right;
-}
+} */
 
 .clearfix:after {
 	content: '';

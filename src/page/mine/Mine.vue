@@ -13,35 +13,21 @@
           <h4 v-else>您还没有登陆</h4>
         </div>
         <div class="right-ico">
-          <i class="iconfont icon-you-copy-copy"></i>
+          <i class="iconfont icon-iconfontyoujiantou"></i>
         </div>
       </router-link>
     </div>
     <div class="container-inner menu">
-      <a href="">
-        <h5>浏览历史</h5>
-        <div class="right-ico">
-          <i class="iconfont icon-you-copy-copy"></i>
-        </div>
-      </a>
-      <a href="">
-        <h5>浏览历史</h5>
-        <div class="right-ico">
-          <i class="iconfont icon-you-copy-copy"></i>
-        </div>
-      </a>
-      <a href="">
-        <h5>浏览历史</h5>
-        <div class="right-ico">
-          <i class="iconfont icon-you-copy-copy"></i>
-        </div>
-      </a>
+      <menu-list-bar title="浏览历史"></menu-list-bar>
+      <menu-list-bar title="我的收藏"></menu-list-bar>
+      <menu-list-bar title="我的关注"></menu-list-bar>
     </div>
     <div class="sign-in" v-if="!userInfo.isLogined">
       <router-link to="/Mine/Login">登陆</router-link>
     </div>
     <div class="sign-out" v-else>
       <a @click="logout()">注销</a>
+      <!-- <form-button title="注销" align="center" type="danger" @click.native="logout()"></form-button> -->
     </div>
     <transition name="router-slid" mode="out-in">
       <router-view class="child-view"></router-view>
@@ -50,6 +36,8 @@
 </template>
 
 <script>
+import MenuListBar from '@/components/MenuListBar'
+import FormButton from '@/components/form/FormButton'
 import store from '@/vuex/store'
 import { mapState, mapMutations, mapActions } from 'vuex'
 export default {
@@ -58,6 +46,10 @@ export default {
     return {
 
     }
+  },
+  components: {
+    MenuListBar,
+    FormButton
   },
   store,
   methods: {
@@ -143,8 +135,7 @@ a.disabled {
   width: 100%;
   height: 100%;
 }
-.user-tag a,
-.menu a {
+.user-tag a{
   display: flex;
   flex-direction: row;
   /* align-content: center; */
@@ -157,18 +148,6 @@ a.disabled {
 }
 .right-ico {
   font-size: 0.8rem;
-  color: #bababa;
-}
-.menu {
-  padding: 0 0 0 0.6rem;
-}
-.menu a {
-  height: 2.3rem;
-  font-size: 0.8rem;
-  border-bottom: 1px solid #f5f4f4;
-}
-.menu a .right-ico {
-  margin-right: 0.6rem;
 }
 .sign-in a,
 .sign-out a {
@@ -180,7 +159,7 @@ a.disabled {
   text-align: center;
   line-height: 2.1rem;
   border-radius: 2rem;
-  color: white;
+  color: #FFFFFF;
 }
 .sign-out a {
   background: rgb(206, 72, 19);

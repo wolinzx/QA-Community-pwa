@@ -8,11 +8,11 @@
 
 <script>
 export default {
-  data() {
+  data () {
     return {
       msg: '',
       showMsg: false,
-      t: '',
+      t: ''
     }
   },
   // props:['msg','showMsg'],
@@ -22,17 +22,15 @@ export default {
     // },
     showMsgBox: function (msg) {
       // this.$options.methods.clearTimeOut();
-      this.msg = msg;
-      this.showMsg = true;
+      this.msg = msg
+      this.showMsg = true
       this.t = setTimeout(() => {
-        this.showMsg = false;
-      }, 1500);
-    },
-
+        this.showMsg = false
+      }, 1500)
+    }
   }
 }
 </script>
-
 
 <style scoped>
 .msgbox {

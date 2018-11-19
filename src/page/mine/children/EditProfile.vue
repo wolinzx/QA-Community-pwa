@@ -8,14 +8,13 @@
       <i class="iconfont icon-xiangji camera-ico" @click="showAvatarMenu=true"></i>
     </div>
     <div class="container-inner profile-form">
-      <div class="profile-edit-input">
-        <span>昵称</span>
-        <input type="text">
-      </div>
-      <div class="profile-edit-input">
-        <span>性别</span>
-        <input type="text">
-      </div>
+      <form-input-text title="昵称"></form-input-text>
+      <form-input-radio title="性别"></form-input-radio>
+      <form-input-text title="个人介绍"></form-input-text>
+      <form-input-text title="行业"></form-input-text>
+      <form-input-text title="居住地"></form-input-text>
+      <form-input-text title="教育经历"></form-input-text>
+      <form-button title="保存修改" align="center" type="primary"></form-button>
     </div>
     <div class="black-float" v-show="showAvatarMenu" @click="showAvatarMenu=false"></div>
     <div class="avatar-menu" :class="{'avatar-menu-show':showAvatarMenu}">
@@ -41,6 +40,9 @@
 import { mapState } from 'vuex'
 import MessageBox from '@/components/TheMessageBox'
 import ChildHeader from '@/components/TheChildHeader'
+import FormInputText from '@/components/form/FormInputText'
+import FormInputRadio from '@/components/form/FormInputRadio'
+import FormButton from '@/components/form/FormButton'
 
 export default {
   data () {
@@ -52,7 +54,10 @@ export default {
   },
   components: {
     MessageBox,
-    ChildHeader
+    ChildHeader,
+    FormInputText,
+    FormInputRadio,
+    FormButton
   },
   computed: {
     ...mapState(['userInfo'])

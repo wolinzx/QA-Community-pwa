@@ -6,7 +6,7 @@
         <div class="search-bar">
           <span class="search-ico"><i class="iconfont icon-sousuo search-ico-size"></i></span>
           <input class="search" type="text" placeholder="搜索">
-          <a class="edit" href=""><i class="iconfont icon-bianji"></i></a>
+          <a class="edit" href=""><i class="iconfont icon-fabiao"></i></a>
         </div>
         <div class="home-nav">
           <router-link :to="{name:'Follow'}"><span>关注</span></router-link>
@@ -86,7 +86,7 @@ export default {
   color: #646263;
 }
 .search-bar .search {
-  width: 13.5rem;
+  width: 14.5rem;
   height: 1.5rem;
   border: none;
   border-radius: 0.2rem;
@@ -95,9 +95,9 @@ export default {
   font-size: 0.6rem;
 }
 .search-bar .edit {
-  width: 1.8rem;
-  height: 1.2rem;
-  font-size: 1.2rem;
+  width: 1.5rem;
+  height: 1.4rem;
+  font-size: 1.3rem;
   /* align-self: center; */
   color: #04bb73;
 }
