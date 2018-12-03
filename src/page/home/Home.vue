@@ -6,7 +6,8 @@
         <div class="search-bar">
           <span class="search-ico"><i class="iconfont icon-sousuo search-ico-size"></i></span>
           <input class="search" type="text" placeholder="搜索">
-          <a class="edit" href=""><i class="iconfont icon-fabiao"></i></a>
+          <router-link class="edit" :to="{name:'Edit'}"><i class="iconfont icon-fabiao"></i></router-link>
+          <!-- <a class="edit" href=""><i class="iconfont icon-fabiao"></i></a> -->
         </div>
         <div class="home-nav">
           <router-link :to="{name:'Follow'}"><span>关注</span></router-link>

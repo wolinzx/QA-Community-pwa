@@ -9,6 +9,7 @@ import Login from '@/page/mine/children/Login'
 import Profile from '@/page/mine/children/Profile'
 import EditProfile from '@/page/mine/children/EditProfile'
 import Message from '@/page/message/Message'
+import Edit from '@/page/Edit'
 
 Vue.use(Router)
 
@@ -102,6 +103,11 @@ export default new Router({
           }
         }]
       }]
+    },
+    {
+      path: '/Edit',
+      name: 'Edit',
+      component: Edit
     }
   ]
 })
