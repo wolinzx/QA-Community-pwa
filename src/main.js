@@ -10,35 +10,15 @@ import {
   // mapMutations,
   mapActions
 } from 'vuex'
+import MuseUI from 'muse-ui'
+import 'muse-ui/dist/muse-ui.css'
+
+Vue.use(MuseUI)
 
 Vue.prototype.$http = axios
-// Vue.use(Vuex);
 Vue.config.productionTip = false
-/* eslint-disable no-new */
-// function sleep(numberMillis) {
-//   var now = new Date();
-//   var exitTime = now.getTime() + numberMillis;
-//   while (true) {
-//   now = new Date();
-//   if (now.getTime() > exitTime)
-//   return;
-//   }
-//   }
 
-// //定义一个请求拦截器
-// axios.interceptors.request.use(function(config){
-//   store.commit('SHOW_LODING',true);
-//   return config;
-// })
-
-// //定义一个响应拦截器
-// axios.interceptors.response.use(function(config){
-//   sleep(500);
-//   store.commit('SHOW_LODING',false);
-//   return config;
-// })
-
-new Vue({
+export default new Vue({
   el: '#app',
   router,
   store,
