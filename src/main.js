@@ -12,8 +12,12 @@ import {
 } from 'vuex'
 import MuseUI from 'muse-ui'
 import 'muse-ui/dist/muse-ui.css'
+import Toast from 'muse-ui-toast'
+import Loading from 'muse-ui-loading'
 
 Vue.use(MuseUI)
+Vue.use(Toast)
+Vue.use(Loading)
 
 Vue.prototype.$http = axios
 Vue.config.productionTip = false

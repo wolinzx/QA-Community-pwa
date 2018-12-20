@@ -1,8 +1,8 @@
 <template>
   <div id="Mine">
-    <div class="container-inner mine-title">
+    <!-- <div class="container-inner mine-title">
       <h3>我的</h3>
-    </div>
+    </div> -->
     <div class="container-inner user-tag">
       <router-link to="/Mine/Profile" :class="{disabled:!userInfo.isLogined}">
         <div class="user-avatar">
