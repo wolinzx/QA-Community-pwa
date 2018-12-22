@@ -1,20 +1,34 @@
 <template>
   <div id="index">
-    <mu-appbar style="width: 100%;" color="primary">
-      <mu-button icon slot="left" @click="open = !open">
+    <mu-appbar style="width: 100%;" color="primary"  v-if="this.routeMainPath">
+      <mu-button class="menu-left" icon slot="left" @click="open = !open">
         <mu-icon value="menu"></mu-icon>
       </mu-button>
-        我的
+      <mu-avatar size="30" slot="left" @click="open = !open">
+        <img :src="userInfo.user_datas[0].avatar || this.default_avatar" alt="">
+      </mu-avatar>
+      <!-- <div v-if="this.routeFirstPath !== 'Home'" class="appbar-title">
+        {{this.routerName[this.routeFirstPath]}}
+      </div> -->
+      <div class="appbar-title">
+        {{this.routerName[this.routeFirstPath]}}
+      </div>
+      <mu-button icon slot="right">
+        <mu-icon value="search"></mu-icon>
+      </mu-button>
     </mu-appbar>
     <!-- <transition :name="transitionName"> -->
       <router-view class="child-view"></router-view>
     <!-- </transition> -->
     <mu-drawer :open.sync="open" :docked="docked" :right="position === 'right'">
       <mu-container class="login-block">
-        <div class="user-base"  @click="!userInfo.isLogined ? openFullscreenDialog() : ''">
-          <div class="user-avatar">
+        <div class="user-base"  @click="!userInfo.isLogined ? openFullscreenDialog() : openProfile()">
+          <!-- <div class="user-avatar">
             <img :src="userInfo.user_datas[0].avatar || this.default_avatar" alt="">
-          </div>
+          </div> -->
+          <mu-avatar size="55">
+            <img :src="userInfo.user_datas[0].avatar || this.default_avatar" alt="">
+          </mu-avatar>
           <h3>{{ userInfo.user_datas[0].account || '点击头像登陆' }}</h3>
         </div>
         <div class="back-img"></div>
@@ -34,8 +48,8 @@
         </mu-button>
       </div>
       <mu-divider></mu-divider>
-      <mu-list>
-        <mu-list-item button :class="{ 'home-selected': this.$route.name == 'Home' }" :to="{ name:'Home'}">
+      <mu-list :value="this.routeFirstPath" @change="open = false">
+        <mu-list-item button value="Home" :to="{ name:'Home'}">
           <mu-list-item-title>首页</mu-list-item-title>
         </mu-list-item>
         <mu-list-item button>
@@ -67,7 +81,7 @@
         </div>
       </mu-list>
     </mu-drawer>
-    <mu-bottom-nav class="app-footer" :value="this.$route.name">
+    <mu-bottom-nav class="app-footer" :value="this.routeFirstPath" v-show="this.routeMainPath">
       <mu-bottom-nav-item title="首页" icon="restore" value="Home" :to="{name:'Home'}"></mu-bottom-nav-item>
       <mu-bottom-nav-item title="消息" icon="favorite"  value="Message" :to="{name:'Message'}"></mu-bottom-nav-item>
       <mu-bottom-nav-item title="我的" icon="location_on"  value="Mine" :to="{name:'Mine'}"></mu-bottom-nav-item>
@@ -167,6 +181,14 @@ export default {
       { validate: (val) => val.length >= 3 && val.length <= 10, message: '密码长度大于3小于10' }
     ]
     return {
+      routerName: {
+        Home: '首页',
+        Message: '消息',
+        Mine: '我的',
+        Profile: '我的'
+      },
+      routeFirstPath: this.$route.matched[0].path.substring(1),
+      routeMainPath: this.$route.meta.class === 'main',
       transitionName: 'slide-left',
       docked: false,
       open: false,
@@ -240,7 +262,7 @@ export default {
       })
     },
     yyy () {
-      console.log(this.$route)
+      console.log(this.$route.meta)
     },
     // 注册
     registration () {
@@ -310,10 +332,20 @@ export default {
     },
     showSignUpFun () {
       this.openRegistrationForm = true
+    },
+    openProfile () {
+      this.open = false
+      this.$router.push({ name: 'Profile' })
     }
   },
   computed: {
     ...mapState(['loadingShow', 'userInfo'])
+  },
+  watch: {
+    $route (to, from) {
+      this.routeFirstPath = this.$route.matched[0].path.substring(1)
+      this.routeMainPath = this.$route.meta.class === 'main'
+    }
   }
 }
 </script>
@@ -361,7 +393,10 @@ export default {
   background: #f7f8fa;
   font-size: 0.7rem;
 }
-
+.appbar-title{
+  text-align: center;
+  margin-left: -20px;
+}
 .sign-up {
   width: 100%;
   display: flex;
@@ -450,14 +485,6 @@ export default {
   background: url('../assets/image/back-img.png') 60% 65% no-repeat;
   background-size: 70%;
 }
-.user-base .user-avatar{
-  width: 2.4rem;
-  overflow: hidden;
-  border-radius: 2rem;
-}
-.user-base .user-avatar img{
-  width: 100%;
-}
 .user-base h3{
   font-weight: normal;
   font-size: 0.6rem;
@@ -478,8 +505,11 @@ export default {
 .user-bar .mu-button >>> div{
   flex-direction: column;
 }
-.home-selected{
+.mu-list >>> .router-link-active{
   background: #eeeeee;
+}
+.mu-list >>> .mu-item.is-selected{
+  color: inherit;
 }
 .setting-button{
   position: fixed;
@@ -488,5 +518,8 @@ export default {
 }
 .mu-paper-round{
   border-radius: 0;
+}
+.menu-left{
+  margin-left: -26px;
 }
 </style>

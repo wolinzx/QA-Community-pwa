@@ -14,6 +14,12 @@ import 'muse-ui/dist/muse-ui.css'
 import Toast from 'muse-ui-toast'
 import Loading from 'muse-ui-loading'
 import router from './router'
+// import theme from 'muse-ui/lib/theme'
+// theme.add('teal', {
+//   primary: '#474A4F'
+// }, 'light')
+
+// theme.use('teal')
 
 Vue.use(MuseUI)
 Vue.use(Toast)

@@ -5,8 +5,8 @@ import Follow from '@/page/home/children/Follow'
 import Recommend from '@/page/home/children/Recommend'
 import Popular from '@/page/home/children/Popular'
 import Mine from '@/page/mine/Mine'
-import Login from '@/page/mine/children/Login'
-import Profile from '@/page/mine/children/Profile'
+// import Login from '@/page/mine/children/Login'
+import Profile from '@/page/mine/Profile'
 import EditProfile from '@/page/mine/children/EditProfile'
 import Message from '@/page/message/Message'
 import Edit from '@/page/Edit'
@@ -28,22 +28,22 @@ export default new Router({
       path: '/Home',
       component: Home,
       meta: {
-        z_index: 1
+        class: 'main'
       },
       children: [{
         path: '/',
         name: 'Home',
         redirect: '/Home/Follow',
         meta: {
-          z_index: 1
+          class: 'main'
         }
       },
       {
         path: '/Home/Follow',
-        name: 'Home',
+        name: 'Follow',
         component: Follow,
         meta: {
-          z_index: 1
+          class: 'main'
         }
       },
       {
@@ -51,7 +51,7 @@ export default new Router({
         name: 'Recommend',
         component: Recommend,
         meta: {
-          z_index: 1
+          class: 'main'
         }
       },
       {
@@ -59,7 +59,7 @@ export default new Router({
         name: 'Popular',
         component: Popular,
         meta: {
-          z_index: 1
+          class: 'main'
         }
       }
       ]
@@ -69,7 +69,7 @@ export default new Router({
       name: 'Message',
       component: Message,
       meta: {
-        z_index: 3
+        class: 'main'
       }
     },
     {
@@ -77,37 +77,53 @@ export default new Router({
       name: 'Mine',
       component: Mine,
       meta: {
-        z_index: 4
-      },
-      children: [{
-        path: '/Mine/Login',
-        name: 'Login',
-        component: Login,
-        meta: {
-          isChild: true
-        }
-      },
-      {
-        path: '/Mine/Profile',
-        name: 'Profile',
-        component: Profile,
-        meta: {
-          isChild: true
-        },
-        children: [{
-          path: '/Mine/Profile/EditProfile',
-          name: 'EditProfile',
-          component: EditProfile,
-          meta: {
-            isChild: true
-          }
-        }]
-      }]
+        class: 'main'
+      }
+      // children: [{
+      //   path: '/Mine/Login',
+      //   name: 'Login',
+      //   component: Login,
+      //   meta: {
+      //     isChild: true
+      //   }
+      // },
+      // {
+      //   path: '/Mine/Profile',
+      //   name: 'Profile',
+      //   component: Profile,
+      //   meta: {
+      //     isChild: true
+      //   },
+      //   children: [{
+      //     path: '/Mine/Profile/EditProfile',
+      //     name: 'EditProfile',
+      //     component: EditProfile,
+      //     meta: {
+      //       isChild: true
+      //     }
+      //   }]
+      // }]
     },
     {
       path: '/Edit',
       name: 'Edit',
       component: Edit
+    },
+    {
+      path: '/Profile',
+      name: 'Profile',
+      component: Profile,
+      meta: {
+        isChild: true
+      },
+      children: [{
+        path: '/Mine/Profile/EditProfile',
+        name: 'EditProfile',
+        component: EditProfile,
+        meta: {
+          isChild: true
+        }
+      }]
     }
   ]
 })
