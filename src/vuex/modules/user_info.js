@@ -4,7 +4,7 @@ import * as localStorage from '../localStorage'
 
 const state = {
   isLogined: false, // 登陆状态
-  user_datas: localStorage.userInfo.get() || []
+  user_datas: localStorage.userInfo.get() || [ { avatar: '' } ]
 }
 
 const mutations = {
@@ -29,7 +29,6 @@ const mutations = {
     }
   },
   [types.CLEAR_USERINFO] () {
-    state.user_datas = []
     localStorage.userInfo.clear()
   },
   [types.SHOW_LODING] (state, loadingShow) {

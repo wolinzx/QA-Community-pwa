@@ -40,7 +40,7 @@ export default new Router({
       },
       {
         path: '/Home/Follow',
-        name: 'Follow',
+        name: 'Home',
         component: Follow,
         meta: {
           z_index: 1
