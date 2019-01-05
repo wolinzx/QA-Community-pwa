@@ -1,6 +1,6 @@
 <template>
   <div id="index">
-    <mu-appbar style="width: 100%;" color="primary"  v-if="this.routeMainPath">
+    <mu-appbar style="width: 100%;" z-depth="0" color="primary"  v-if="this.routeMainPath">
       <mu-button class="menu-left" icon slot="left" @click="open = !open">
         <mu-icon value="menu"></mu-icon>
       </mu-button>
@@ -34,7 +34,7 @@
         <div class="back-img"></div>
       </mu-container>
       <div class="user-bar" v-if="userInfo.isLogined">
-        <mu-button flat @click="yyy">
+        <mu-button flat>
           <p>0</p>
           动态
         </mu-button>
@@ -50,15 +50,27 @@
       <mu-divider></mu-divider>
       <mu-list :value="this.routeFirstPath" @change="open = false">
         <mu-list-item button value="Home" :to="{ name:'Home'}">
+          <mu-list-item-action>
+            <mu-icon value="home"></mu-icon>
+          </mu-list-item-action>
           <mu-list-item-title>首页</mu-list-item-title>
         </mu-list-item>
         <mu-list-item button>
+          <mu-list-item-action>
+            <mu-icon value="history"></mu-icon>
+          </mu-list-item-action>
           <mu-list-item-title>浏览历史</mu-list-item-title>
         </mu-list-item>
         <mu-list-item button>
+          <mu-list-item-action>
+            <mu-icon value="grade"></mu-icon>
+          </mu-list-item-action>
           <mu-list-item-title>我的收藏</mu-list-item-title>
         </mu-list-item>
         <mu-list-item button>
+          <mu-list-item-action>
+            <mu-icon value="favorite"></mu-icon>
+          </mu-list-item-action>
           <mu-list-item-title>我的关注</mu-list-item-title>
         </mu-list-item>
         <!-- <mu-list-item  @click="open = false" button>
@@ -66,26 +78,56 @@
         </mu-list-item> -->
         <mu-divider></mu-divider>
         <mu-list-item button @click="openLogoutDialog = true" v-if="userInfo.isLogined">
+          <mu-list-item-action>
+            <mu-icon value="cancel"></mu-icon>
+          </mu-list-item-action>
           <mu-list-item-title>注销登陆</mu-list-item-title>
         </mu-list-item>
         <mu-dialog title="注销" width="600" max-width="80%" :esc-press-close="false" :overlay-close="false" :open.sync="openLogoutDialog">
           确定注销登陆?
-          <mu-button slot="actions" flat color="primary" @click="openLogoutDialog = false">点错了</mu-button>
-          <mu-button slot="actions" color="error" @click="logout">注销</mu-button>
+          <mu-button slot="actions" flat color="primary" @click="openLogoutDialog = false">手滑</mu-button>
+          <mu-button slot="actions" flat color="primary" @click="logout">注销</mu-button>
         </mu-dialog>
         <div class="setting-button">
           <mu-divider></mu-divider>
-          <mu-list-item button>
+          <!-- <mu-list-item button>
             <mu-list-item-title>设置</mu-list-item-title>
           </mu-list-item>
+          <mu-list-item button @click="themeSwitch('light')" v-if="this.themeMode === 'dark'">
+            <mu-list-item-title>日间模式</mu-list-item-title>
+          </mu-list-item>
+          <mu-list-item button @click="themeSwitch('dark')" v-if="this.themeMode === 'light'">
+            <mu-list-item-title>夜间模式</mu-list-item-title>
+          </mu-list-item> -->
+          <div class="user-bar bar-foot">
+            <mu-button flat>
+              <mu-icon value="settings"></mu-icon>
+              设置
+            </mu-button>
+            <mu-button flat>
+              <mu-icon value="color_lens"></mu-icon>
+              主题
+            </mu-button>
+            <mu-button flat  @click="themeSwitch('light')" v-if="this.themeMode === 'dark'">
+              <mu-icon value="brightness_1"></mu-icon>
+              日间
+            </mu-button>
+            <mu-button flat  @click="themeSwitch('dark')" v-if="this.themeMode === 'light'">
+              <mu-icon value="brightness_2"></mu-icon>
+              夜间
+            </mu-button>
+          </div>
         </div>
       </mu-list>
     </mu-drawer>
-    <mu-bottom-nav class="app-footer" :value="this.routeFirstPath" v-show="this.routeMainPath">
-      <mu-bottom-nav-item title="首页" icon="restore" value="Home" :to="{name:'Home'}"></mu-bottom-nav-item>
-      <mu-bottom-nav-item title="消息" icon="favorite"  value="Message" :to="{name:'Message'}"></mu-bottom-nav-item>
-      <mu-bottom-nav-item title="我的" icon="location_on"  value="Mine" :to="{name:'Mine'}"></mu-bottom-nav-item>
-    </mu-bottom-nav>
+    <mu-slide-bottom-transition>
+      <!-- <mu-bottom-nav :class="[ app.scrolled ? 'app-footer-scroll': ''  ,'app-footer']" :value="this.routeFirstPath" v-show="this.routeMainPath && app.scrolled"> -->
+        <mu-bottom-nav :class="['app-footer']" :value="this.routeFirstPath" v-show="this.routeMainPath && !app.scrolled">
+        <mu-bottom-nav-item title="首页" icon="home" value="Home" :to="{name:'Home'}"></mu-bottom-nav-item>
+        <mu-bottom-nav-item title="消息" icon="notifications"  value="Message" :to="{name:'Message'}"></mu-bottom-nav-item>
+        <mu-bottom-nav-item title="我的" icon="person"  value="Mine" :to="{name:'Mine'}"></mu-bottom-nav-item>
+      </mu-bottom-nav>
+    </mu-slide-bottom-transition>
     <mu-dialog width="360" transition="slide-bottom" fullscreen :open.sync="openFullscreen">
       <mu-appbar color="primary" title="登陆">
         <mu-button slot="left" icon @click="closeFullscreenDialog">
@@ -227,7 +269,8 @@ export default {
       loading2: false,
       openRegistrationForm: false,
       openLogoutDialog: false,
-      default_avatar: '/static/img/default_avatar.jpeg'
+      default_avatar: '/static/img/default_avatar.jpeg',
+      themeMode: 'light'
     }
   },
   methods: {
@@ -260,9 +303,6 @@ export default {
           }, 500)
         }
       })
-    },
-    yyy () {
-      console.log(this.$route.meta)
     },
     // 注册
     registration () {
@@ -336,10 +376,14 @@ export default {
     openProfile () {
       this.open = false
       this.$router.push({ name: 'Profile' })
+    },
+    themeSwitch (theme) {
+      this.$mu_theme.use(theme)
+      this.themeMode = theme
     }
   },
   computed: {
-    ...mapState(['loadingShow', 'userInfo'])
+    ...mapState(['userInfo', 'app'])
   },
   watch: {
     $route (to, from) {
@@ -355,6 +399,7 @@ export default {
   width: 100%;
   position: fixed;
   bottom: 0;
+  border-top: 1px solid rgba(0,0,0,.12);
 }
 .login-logo img{
   width: 100%;
@@ -370,15 +415,6 @@ export default {
 .demo-loading-wrap .mu-button {
     margin: 6px 8px;
 }
-/* .loading-button>div:last{
-  position: absolute;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-} */
 .mu-form-item .mu-button{
   margin: 0;
 }
@@ -395,7 +431,7 @@ export default {
 }
 .appbar-title{
   text-align: center;
-  margin-left: -20px;
+  margin-left: -10px;
 }
 .sign-up {
   width: 100%;
@@ -501,15 +537,23 @@ export default {
   flex: 1;
   padding: 4px;
 }
+.bar-foot .mu-button{
+  padding: 6px;
+  height: 48px;
+  color: rgba(0,0,0,.54);
+}
 /* 深度作用选择器 >>> */
 .user-bar .mu-button >>> div{
   flex-direction: column;
 }
+.bar-foot .mu-button >>> div{
+  flex-direction: row;
+}
+.user-bar .mu-button >>> p{
+  margin: 0;
+}
 .mu-list >>> .router-link-active{
   background: #eeeeee;
-}
-.mu-list >>> .mu-item.is-selected{
-  color: inherit;
 }
 .setting-button{
   position: fixed;
@@ -518,6 +562,7 @@ export default {
 }
 .mu-paper-round{
   border-radius: 0;
+  width: 14rem;
 }
 .menu-left{
   margin-left: -26px;

@@ -5,7 +5,7 @@
         <mu-icon value="arrow_back"></mu-icon>
       </mu-button>
       我的
-      <mu-menu slot="right">
+      <mu-menu slot="right" cover placement="bottom-end">
         <mu-button icon>
           <mu-icon value="more_vert"></mu-icon>
         </mu-button>

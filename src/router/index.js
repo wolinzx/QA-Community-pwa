@@ -1,15 +1,17 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from '@/page/home/Home'
-import Follow from '@/page/home/children/Follow'
-import Recommend from '@/page/home/children/Recommend'
-import Popular from '@/page/home/children/Popular'
+// import Follow from '@/page/home/children/Follow'
+// import Recommend from '@/page/home/children/Recommend'
+// import Popular from '@/page/home/children/Popular'
 import Mine from '@/page/mine/Mine'
 // import Login from '@/page/mine/children/Login'
 import Profile from '@/page/mine/Profile'
 import EditProfile from '@/page/mine/children/EditProfile'
 import Message from '@/page/message/Message'
 import Edit from '@/page/Edit'
+// const Home = () => import('@/page/home/Home')
+// const Message = () => import('@/page/message/Message')
 
 Vue.use(Router)
 
@@ -27,42 +29,43 @@ export default new Router({
     {
       path: '/Home',
       component: Home,
+      name: 'Home',
       meta: {
         class: 'main'
-      },
-      children: [{
-        path: '/',
-        name: 'Home',
-        redirect: '/Home/Follow',
-        meta: {
-          class: 'main'
-        }
-      },
-      {
-        path: '/Home/Follow',
-        name: 'Follow',
-        component: Follow,
-        meta: {
-          class: 'main'
-        }
-      },
-      {
-        path: '/Home/Recommend',
-        name: 'Recommend',
-        component: Recommend,
-        meta: {
-          class: 'main'
-        }
-      },
-      {
-        path: '/Home/Popular',
-        name: 'Popular',
-        component: Popular,
-        meta: {
-          class: 'main'
-        }
       }
-      ]
+      // children: [{
+      //   path: '/',
+      //   name: 'Home',
+      //   redirect: '/Home/Follow',
+      //   meta: {
+      //     class: 'main'
+      //   }
+      // },
+      // {
+      //   path: '/Home/Follow',
+      //   name: 'Follow',
+      //   component: Follow,
+      //   meta: {
+      //     class: 'main'
+      //   }
+      // },
+      // {
+      //   path: '/Home/Recommend',
+      //   name: 'Recommend',
+      //   component: Recommend,
+      //   meta: {
+      //     class: 'main'
+      //   }
+      // },
+      // {
+      //   path: '/Home/Popular',
+      //   name: 'Popular',
+      //   component: Popular,
+      //   meta: {
+      //     class: 'main'
+      //   }
+      // }
+      // ]
     },
     {
       path: '/Message',

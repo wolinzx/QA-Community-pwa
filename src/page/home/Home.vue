@@ -1,143 +1,272 @@
 <template>
   <div id="home">
-    <header id="home-header">
-      <nav id="home-nav">
-        <!-- <span class="home-logo"><img src="/static/img/logos/login_logo2.png" alt=""></span>/ -->
-        <div class="search-bar">
-          <span class="search-ico"><i class="iconfont icon-sousuo search-ico-size"></i></span>
-          <input class="search" type="text" placeholder="搜索">
-          <router-link class="edit" :to="{name:'Edit'}"><i class="iconfont icon-fabiao"></i></router-link>
-          <!-- <a class="edit" href=""><i class="iconfont icon-fabiao"></i></a> -->
+    <mu-tabs class="home-tabs" :value.sync="active1" inverse color="primary" indicator-color="primary" text-color="rgba(0, 0, 0, .54)" full-width>
+      <mu-tab>关注</mu-tab>
+      <mu-tab>推荐</mu-tab>
+      <mu-tab>热门</mu-tab>
+    </mu-tabs>
+    <div v-show="active1 === 0">
+      <div class="demo-loadmore-wrap" ref="container">
+        <div ref="container1" class="demo-loadmore-content">
+          <mu-load-more @refresh="refresh" :refreshing="refreshing" :loading="loading" @load="load">
+            <template v-for="i in num">
+              <div>
+                <mu-card style="width: 100%; margin: 10px auto;">
+                  <mu-card-header title="奔跑的兔子" sub-title="赞同了回答·1天前">
+                    <mu-avatar slot="avatar">
+                      <img src="../../assets/logo.png">
+                    </mu-avatar>
+                  </mu-card-header>
+                  <mu-card-title title="为什么很多职位都要招[应届毕业生]？"></mu-card-title>
+                  <mu-card-text>
+                    奔跑的兔子: 好骗（相信加班能提升自我价值升职加薪）
+                    干的多（肯加班）要的少（肯无偿加班）
+                  </mu-card-text>
+                  <mu-card-actions class="list-buttom">
+                    <span>219 赞同 · 66 评论</span>
+                    <mu-menu cover placement="bottom-end">
+                      <mu-button icon color="rgba(0,0,0,.57)">
+                        <mu-icon value="more_vert"></mu-icon>
+                      </mu-button>
+                      <mu-list slot="content">
+                        <mu-list-item button>
+                          <mu-list-item-title>不感兴趣</mu-list-item-title>
+                        </mu-list-item>
+                        <mu-list-item button>
+                          <mu-list-item-title>取消关注</mu-list-item-title>
+                        </mu-list-item>
+                        <mu-list-item button>
+                          <mu-list-item-title>举报</mu-list-item-title>
+                        </mu-list-item>
+                      </mu-list>
+                    </mu-menu>
+                  </mu-card-actions>
+                </mu-card>
+              </div>
+            </template>
+          </mu-load-more>
         </div>
-        <div class="home-nav">
-          <router-link :to="{name:'Follow'}"><span>关注</span></router-link>
-          <router-link :to="{name:'Recommend' }"><span>推荐</span></router-link>
-          <router-link :to="{name:'Popular'}"><span>热门</span></router-link>
+      </div>
+    </div>
+    <div v-show="active1 === 1">
+      <div class="demo-loadmore-wrap" ref="container">
+        <div ref="container2" class="demo-loadmore-content">
+          <mu-load-more @refresh="refresh" :refreshing="refreshing" :loading="loading" @load="load">
+            <mu-list>
+              <template v-for="i in num">
+                <div>
+                  <mu-card style="width: 100%; margin: 10px auto;">
+                    <mu-card-title title="为什么很多职位都要招[应届毕业生]？"></mu-card-title>
+                    <mu-card-text>
+                      奔跑的兔子: 好骗（相信加班能提升自我价值升职加薪）
+                      干的多（肯加班）要的少（肯无偿加班）
+                    </mu-card-text>
+                    <mu-card-actions class="list-buttom">
+                      <span>219 赞同 · 66 评论</span>
+                      <mu-menu cover placement="bottom-end">
+                        <mu-button icon color="rgba(0,0,0,.57)">
+                          <mu-icon value="more_vert"></mu-icon>
+                        </mu-button>
+                        <mu-list slot="content">
+                          <mu-list-item button>
+                            <mu-list-item-title>不感兴趣</mu-list-item-title>
+                          </mu-list-item>
+                          <mu-list-item button>
+                            <mu-list-item-title>举报</mu-list-item-title>
+                          </mu-list-item>
+                        </mu-list>
+                      </mu-menu>
+                    </mu-card-actions>
+                  </mu-card>
+                </div>
+              </template>
+            </mu-list>
+          </mu-load-more>
         </div>
-      </nav>
-    </header>
-    <section class="container">
-      <router-view></router-view>
-    </section>
-    <p class="nomore">没有更多内容</p>
+      </div>
+    </div>
+    <div v-show="active1 === 2">
+      <div class="demo-loadmore-wrap" ref="container">
+        <div ref="container3" class="demo-loadmore-content">
+          <mu-load-more @refresh="refresh" :refreshing="refreshing" :loading="loading" @load="load">
+            <template v-for="i in num">
+              <div class="hot-list">
+                <p>{{i}}</p>
+                <div>
+                  <h3>如何评价网易云音乐2018年年度报告？</h3>
+                  <span>4092 万热度</span>
+                </div>
+              </div>
+              <mu-divider />
+            </template>
+          </mu-load-more>
+        </div>
+      </div>
+    </div>
+    <div class="edit-action">
+      <mu-scale-transition>
+        <mu-button fab color="premary" v-show="showEdit" @click="openQuiz = true">
+          <mu-icon value="edit"></mu-icon>
+        </mu-button>
+      </mu-scale-transition>
+    </div>
+    <div>
+      <mu-dialog width="360" transition="slide-bottom" fullscreen :open.sync="openQuiz">
+        <mu-appbar color="primary" title="提问">
+          <mu-button slot="left" icon @click="openQuiz = false">
+            <mu-icon value="arrow_back"></mu-icon>
+          </mu-button>
+          <mu-button slot="right" flat @click="openSelect = true">
+            下一步
+          </mu-button>
+        </mu-appbar>
+        <div style="padding: 24px;">
+          <mu-text-field placeholder="请输入标题" full-width style="font-weight: bold"></mu-text-field><br/>
+          <mu-text-field multi-line :rows="10" placeholder="请输入问题描述（选填）" full-width></mu-text-field><br/>
+        </div>
+      </mu-dialog>
+      <mu-dialog width="360" transition="slide-right" :overlay="false" fullscreen :open.sync="openSelect">
+        <mu-appbar color="primary" title="添加话题">
+          <mu-button slot="left" icon @click="openSelect = false">
+            <mu-icon value="arrow_back"></mu-icon>
+          </mu-button>
+          <mu-button slot="right" flat>
+            提交
+          </mu-button>
+        </mu-appbar>
+        <div style="padding: 24px;">
+          <mu-text-field placeholder="搜索并添加相关话题" full-width style="font-weight: bold" icon="search"></mu-text-field><br/>
+        </div>
+      </mu-dialog>
+    </div>
   </div>
 </template>
 
 <script>
+import { mapMutations } from 'vuex'
 export default {
-  name: 'Home',
   data () {
     return {
-      msg: 'this is test'
+      active1: 0,
+      num: 10,
+      refreshing: false,
+      loading: false,
+      text: 'List',
+      containerScroll: 0,
+      showEdit: true,
+      open: false,
+      openQuiz: false,
+      openSelect: false
     }
   },
   methods: {
-    test () {
-      this.$http.get('/api/test', {
-
-      })
-        .then((res) => {
-          console.log(res)
-        })
-        .catch((err) => {
-          throw err
-        })
+    ...mapMutations(['SET_SCROLLED']),
+    refresh () {
+      this.refreshing = true
+      this.$refs.container1.scrollTop = 0
+      setTimeout(() => {
+        this.refreshing = false
+        this.text = this.text === 'List' ? 'Menu' : 'List'
+        this.num = 10
+      }, 1000)
+    },
+    load () {
+      this.loading = true
+      setTimeout(() => {
+        this.loading = false
+        this.num += 10
+      }, 1000)
+    },
+    handleScroll () {
+      let scrollTop = this.$refs.container1.scrollTop || this.$refs.container2.scrollTop || this.$refs.container3.scrollTop
+      let scrollTopBool = this.containerScroll < scrollTop
+      this.SET_SCROLLED(scrollTopBool)
+      this.containerScroll = scrollTop
+      scrollTopBool ? this.showEdit = false : this.showEdit = true
     }
   },
-  created: function () {
-    // this.$router.push({path: '/Home/Follow'});
+  mounted () {
+    this.$refs.container1.addEventListener('scroll', this.handleScroll)
+    this.$refs.container2.addEventListener('scroll', this.handleScroll)
+    this.$refs.container3.addEventListener('scroll', this.handleScroll)
   }
 }
 </script>
 
-<style scoped>
-#home {
-  background: #f9f9fa;
-}
-#home-header {
+<style>
+.demo-loadmore-wrap {
   width: 100%;
-  background: #ffffff;
-}
-#home-nav {
-  /* height: 2.4rem; */
-  /* display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center; */
-  /* color: #000000; */
-  /* box-shadow: 0 0 5px rgb(133, 133, 133); */
-  border: 1px solid #f2f2f2;
-  font-size: 0.8rem;
-}
-.search-bar {
-  position: relative;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  /* height: 2.3rem; */
-  box-sizing: border-box;
-  padding: 0.6rem;
-}
-.search-bar .search-ico {
+  /* max-width: 360px; */
   position: absolute;
-  left: 1.1rem;
-  /* top: 0.8rem; */
-  font-size: 0.6rem;
-  color: #646263;
-}
-.search-bar .search {
-  width: 14.5rem;
-  height: 1.5rem;
-  border: none;
-  border-radius: 0.2rem;
-  background: #f2f2f2;
-  text-indent: 1.6rem;
-  font-size: 0.6rem;
-}
-.search-bar .edit {
-  width: 1.5rem;
-  height: 1.4rem;
-  font-size: 1.3rem;
-  /* align-self: center; */
-  color: #04bb73;
-}
-.search-ico-size {
-  font-size: 0.7rem;
-}
-.home-title {
-  box-sizing: border-box;
-  padding: 0.6rem;
-  margin: 0;
-  width: 100%;
-}
-.home-nav {
-  display: -webkit-box;
-  display: -ms-flexbox;
+  top: 100px;
+  bottom: 0px;
+  left: 0px;
   display: flex;
-  -webkit-box-orient: horizontal;
-  -webkit-box-direction: normal;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  background: #ffffff;
-  box-sizing: border-box;
-  padding: 0 0.6rem;
+  flex-direction: column;
 }
-.home-nav a {
-  -webkit-box-flex: 1;
-  -ms-flex: 1;
-  height: 1.5rem;
-  text-align: center;
-  /* line-height: 2.2rem; */
-  color: #646263;
-  margin-right: 1.4rem;
+.mu-appbar {
+    width: 100%;
 }
-.router-link-active {
-  border-bottom: 0.08rem solid #04bb73;
-  color: #04bb73 !important;
+.demo-loadmore-content {
+  flex: 1;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
-/* .container{
-    box-sizing: border-box;
-    padding: 0.6rem;
-} */
+.demo-loadmore-content .mu-icon-button{
+  padding: 0;
+  width: inherit;
+  height: inherit;
+}
+.home-tabs{
+  border-bottom: 1px solid rgba(0,0,0,.12);
+}
+.edit-action{
+  position: fixed;
+  right: 16px;
+  bottom: 80px;
+}
+.mu-card-title-container,
+.mu-card-text,
+.mu-card-actions,
+.mu-card-header
+{
+  padding: 0;
+}
+.mu-card-actions{
+  margin-top: 12px;
+}
+.mu-card-title-container .mu-card-title{
+  font-size: 18px;
+  font-weight: bold;
+}
+.list-buttom span{
+  display: flex;
+  align-items: center;
+  color: rgba(0,0,0,.57);
+}
+.list-buttom{
+  display: flex;
+  justify-content: space-between;
+}
+.mu-card{
+  box-shadow: 0 2px 2px -1px rgba(0,0,0,.14);
+  border-radius: 0;
+  padding: 16px;
+}
+.hot-list{
+  display: flex;
+}
+.hot-list p{
+  padding: 0 16px;
+  font-weight: bold;
+  color: brown;
+}
+.hot-list h3{
+  margin: 13px 0 0;
+}
+.hot-list span{
+  margin: 10px 0;
+  display: inline-block;
+  color: rgba(0,0,0,.57);
+}
 </style>
