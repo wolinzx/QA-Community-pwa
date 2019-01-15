@@ -1,6 +1,6 @@
 <template>
   <div id="home">
-    <mu-tabs class="home-tabs" :value.sync="active1" inverse color="primary" indicator-color="primary" text-color="rgba(0, 0, 0, .54)" full-width>
+    <mu-tabs class="home-tabs" :value.sync="active1" indicator-color="white" full-width>
       <mu-tab>关注</mu-tab>
       <mu-tab>推荐</mu-tab>
       <mu-tab>热门</mu-tab>
@@ -14,11 +14,11 @@
                 <mu-card style="width: 100%; margin: 10px auto;">
                   <mu-card-header title="奔跑的兔子" sub-title="赞同了回答·1天前">
                     <mu-avatar slot="avatar">
-                      <img src="../../assets/logo.png">
+                      <img src="../../assets/image/avatar.jpeg">
                     </mu-avatar>
                   </mu-card-header>
-                  <mu-card-title title="为什么很多职位都要招[应届毕业生]？"></mu-card-title>
-                  <mu-card-text>
+                  <mu-card-title title="为什么很多职位都要招[应届毕业生]？" @click="toDetail"></mu-card-title>
+                  <mu-card-text  @click="toDetail">
                     奔跑的兔子: 好骗（相信加班能提升自我价值升职加薪）
                     干的多（肯加班）要的少（肯无偿加班）
                   </mu-card-text>
@@ -52,35 +52,33 @@
       <div class="demo-loadmore-wrap" ref="container">
         <div ref="container2" class="demo-loadmore-content">
           <mu-load-more @refresh="refresh" :refreshing="refreshing" :loading="loading" @load="load">
-            <mu-list>
-              <template v-for="i in num">
-                <div>
-                  <mu-card style="width: 100%; margin: 10px auto;">
-                    <mu-card-title title="为什么很多职位都要招[应届毕业生]？"></mu-card-title>
-                    <mu-card-text>
-                      奔跑的兔子: 好骗（相信加班能提升自我价值升职加薪）
-                      干的多（肯加班）要的少（肯无偿加班）
-                    </mu-card-text>
-                    <mu-card-actions class="list-buttom">
-                      <span>219 赞同 · 66 评论</span>
-                      <mu-menu cover placement="bottom-end">
-                        <mu-button icon color="rgba(0,0,0,.57)">
-                          <mu-icon value="more_vert"></mu-icon>
-                        </mu-button>
-                        <mu-list slot="content">
-                          <mu-list-item button>
-                            <mu-list-item-title>不感兴趣</mu-list-item-title>
-                          </mu-list-item>
-                          <mu-list-item button>
-                            <mu-list-item-title>举报</mu-list-item-title>
-                          </mu-list-item>
-                        </mu-list>
-                      </mu-menu>
-                    </mu-card-actions>
-                  </mu-card>
-                </div>
-              </template>
-            </mu-list>
+            <template v-for="i in num">
+              <div>
+                <mu-card style="width: 100%; margin: 10px auto;">
+                  <mu-card-title title="为什么很多职位都要招[应届毕业生]？"></mu-card-title>
+                  <mu-card-text>
+                    奔跑的兔子: 好骗（相信加班能提升自我价值升职加薪）
+                    干的多（肯加班）要的少（肯无偿加班）
+                  </mu-card-text>
+                  <mu-card-actions class="list-buttom">
+                    <span>219 赞同 · 66 评论</span>
+                    <mu-menu cover placement="bottom-end">
+                      <mu-button icon color="rgba(0,0,0,.57)">
+                        <mu-icon value="more_vert"></mu-icon>
+                      </mu-button>
+                      <mu-list slot="content">
+                        <mu-list-item button>
+                          <mu-list-item-title>不感兴趣</mu-list-item-title>
+                        </mu-list-item>
+                        <mu-list-item button>
+                          <mu-list-item-title>举报</mu-list-item-title>
+                        </mu-list-item>
+                      </mu-list>
+                    </mu-menu>
+                  </mu-card-actions>
+                </mu-card>
+              </div>
+            </template>
           </mu-load-more>
         </div>
       </div>
@@ -131,7 +129,7 @@
             <mu-icon value="arrow_back"></mu-icon>
           </mu-button>
           <mu-button slot="right" flat>
-            提交
+            <mu-icon value="send"></mu-icon>
           </mu-button>
         </mu-appbar>
         <div style="padding: 24px;">
@@ -183,6 +181,9 @@ export default {
       this.SET_SCROLLED(scrollTopBool)
       this.containerScroll = scrollTop
       scrollTopBool ? this.showEdit = false : this.showEdit = true
+    },
+    toDetail () {
+      this.$router.push({ name: 'Detail' })
     }
   },
   mounted () {
@@ -193,12 +194,12 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .demo-loadmore-wrap {
   width: 100%;
   /* max-width: 360px; */
   position: absolute;
-  top: 100px;
+  top: 103px;
   bottom: 0px;
   left: 0px;
   display: flex;
@@ -218,22 +219,13 @@ export default {
   height: inherit;
 }
 .home-tabs{
-  border-bottom: 1px solid rgba(0,0,0,.12);
+  /* border-bottom: 1px solid rgba(0,0,0,.12); */
+  box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14);
 }
 .edit-action{
   position: fixed;
   right: 16px;
   bottom: 80px;
-}
-.mu-card-title-container,
-.mu-card-text,
-.mu-card-actions,
-.mu-card-header
-{
-  padding: 0;
-}
-.mu-card-actions{
-  margin-top: 12px;
 }
 .mu-card-title-container .mu-card-title{
   font-size: 18px;
@@ -251,7 +243,6 @@ export default {
 .mu-card{
   box-shadow: 0 2px 2px -1px rgba(0,0,0,.14);
   border-radius: 0;
-  padding: 16px;
 }
 .hot-list{
   display: flex;

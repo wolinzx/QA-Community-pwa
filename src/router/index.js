@@ -9,7 +9,13 @@ import Mine from '@/page/mine/Mine'
 import Profile from '@/page/mine/Profile'
 import EditProfile from '@/page/mine/children/EditProfile'
 import Message from '@/page/message/Message'
+import Think from '@/page/think/Think'
 import Edit from '@/page/Edit'
+import _History from '@/page/History'
+import Collection from '@/page/Collection'
+import Follow from '@/page/Follow'
+import Detail from '@/page/Detail'
+import Answer from '@/page/Answer'
 // const Home = () => import('@/page/home/Home')
 // const Message = () => import('@/page/message/Message')
 
@@ -74,6 +80,39 @@ export default new Router({
       meta: {
         class: 'main'
       }
+    },
+    {
+      path: '/Think',
+      name: 'Think',
+      component: Think,
+      meta: {
+        class: 'main'
+      }
+    },
+    {
+      path: '/History',
+      name: 'History',
+      component: _History
+    },
+    {
+      path: '/Collection',
+      name: 'Collection',
+      component: Collection
+    },
+    {
+      path: '/Follow',
+      name: 'Follow',
+      component: Follow
+    },
+    {
+      path: '/Detail',
+      name: 'Detail',
+      component: Detail
+    },
+    {
+      path: '/Answer',
+      name: 'Answer',
+      component: Answer
     },
     {
       path: '/Mine',

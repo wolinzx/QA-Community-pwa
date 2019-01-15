@@ -55,21 +55,21 @@
           </mu-list-item-action>
           <mu-list-item-title>首页</mu-list-item-title>
         </mu-list-item>
-        <mu-list-item button>
+        <mu-list-item button :to="{ name:'History'}">
           <mu-list-item-action>
-            <mu-icon value="history"></mu-icon>
+            <mu-icon value="query_builder"></mu-icon>
           </mu-list-item-action>
           <mu-list-item-title>浏览历史</mu-list-item-title>
         </mu-list-item>
-        <mu-list-item button>
+        <mu-list-item button :to="{ name:'Collection' }">
           <mu-list-item-action>
-            <mu-icon value="grade"></mu-icon>
+            <mu-icon value="folder_open"></mu-icon>
           </mu-list-item-action>
           <mu-list-item-title>我的收藏</mu-list-item-title>
         </mu-list-item>
-        <mu-list-item button>
+        <mu-list-item button :to="{ name:'Follow' }">
           <mu-list-item-action>
-            <mu-icon value="favorite"></mu-icon>
+            <mu-icon value="favorite_border"></mu-icon>
           </mu-list-item-action>
           <mu-list-item-title>我的关注</mu-list-item-title>
         </mu-list-item>
@@ -79,7 +79,7 @@
         <mu-divider></mu-divider>
         <mu-list-item button @click="openLogoutDialog = true" v-if="userInfo.isLogined">
           <mu-list-item-action>
-            <mu-icon value="cancel"></mu-icon>
+            <mu-icon value="close"></mu-icon>
           </mu-list-item-action>
           <mu-list-item-title>注销登陆</mu-list-item-title>
         </mu-list-item>
@@ -124,8 +124,9 @@
       <!-- <mu-bottom-nav :class="[ app.scrolled ? 'app-footer-scroll': ''  ,'app-footer']" :value="this.routeFirstPath" v-show="this.routeMainPath && app.scrolled"> -->
         <mu-bottom-nav :class="['app-footer']" :value="this.routeFirstPath" v-show="this.routeMainPath && !app.scrolled">
         <mu-bottom-nav-item title="首页" icon="home" value="Home" :to="{name:'Home'}"></mu-bottom-nav-item>
-        <mu-bottom-nav-item title="消息" icon="notifications"  value="Message" :to="{name:'Message'}"></mu-bottom-nav-item>
-        <mu-bottom-nav-item title="我的" icon="person"  value="Mine" :to="{name:'Mine'}"></mu-bottom-nav-item>
+        <mu-bottom-nav-item title="通知" icon="notifications"  value="Message" :to="{name:'Message'}"></mu-bottom-nav-item>
+        <mu-bottom-nav-item title="想法" icon="chat"  value="Think" :to="{name:'Think'}"></mu-bottom-nav-item>
+        <!-- <mu-bottom-nav-item title="我的" icon="person"  value="Mine" :to="{name:'Mine'}"></mu-bottom-nav-item> -->
       </mu-bottom-nav>
     </mu-slide-bottom-transition>
     <mu-dialog width="360" transition="slide-bottom" fullscreen :open.sync="openFullscreen">
@@ -225,7 +226,8 @@ export default {
     return {
       routerName: {
         Home: '首页',
-        Message: '消息',
+        Message: '通知',
+        Think: '想法',
         Mine: '我的',
         Profile: '我的'
       },
@@ -399,7 +401,7 @@ export default {
   width: 100%;
   position: fixed;
   bottom: 0;
-  border-top: 1px solid rgba(0,0,0,.12);
+  box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12);  
 }
 .login-logo img{
   width: 100%;

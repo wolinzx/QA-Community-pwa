@@ -33,6 +33,7 @@
     <div class="img-container" v-show="showLargeImage" @click="showLargeImage = false">
       <img :src="userInfo.user_datas[0].avatar" alt="">
     </div>
+    <input name="file" type="file" accept="image/png,image/gif,image/jpeg" @change="upLoadAvatar" />
   </div>
 </template>
 
