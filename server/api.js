@@ -82,28 +82,50 @@ router.post('/api/login/createAccount', (req, res) => {
         res.send(false)
       }
     } else {
+      // 创建成功后也写进account表
+      let accountModels = new models.Account({ accountName: req.body.account })
+      accountModels.save((err, data) => {
+        console.log(err)
+      })
       res.send(true)
     }
   })
 })
 
-// 获取用户资料
-router.get('/api/login/getAccount', (req, res) => {
+// 用户是否已经登陆
+router.get('/api/login/accountState', (req, res) => {
   let _id = req.session._id
   // console.log(_id);
   if (_id) {
-    models.Login.findOne({
-      _id
-    }, (err, docs) => {
-      if (!err) {
-        res.send(docs)
-      } else {
-        res.send(false)
-      }
-    })
+    res.send(true)
   } else {
     res.send(false)
   }
+})
+
+router.get('/api/accountProfileGet', (req, res) => {
+  models.Account.findOne({
+    accountName: req.query.account
+  }, (err, docs) => {
+    if (!err) {
+      res.send(docs)
+    } else {
+      res.send(false)
+    }
+  })
+})
+
+router.get('/api/setProfileGet', (req, res) => {
+  console.log('333', req.query)
+  models.Account.updateOne({ _id: req.query._id }, { $set: req.query }, (err, docs) => {
+    if (err) {
+      console.log(err)
+      console.log('更新数据库失败！')
+      res.send(false)
+    } else {
+      res.send(true)
+    }
+  })
 })
 
 module.exports = router

@@ -11,39 +11,65 @@ db.once('open', () => {
 })
 
 /**
- * 定义模式loginSchema
+ * 定义模式Schema
  */
+// 登陆
 const loginSchema = mongoose.Schema({
   avatar: {
     type: String
   },
   account: {
     type: String,
-    unique: true
+    unique: true,
+    default: '',
+    trim: true
   },
   password: {
-    type: String
-  },
-  sex: {
     type: String,
-    enum: ['男', '女']
-  },
-  describe: {
-    type: String
+    default: '000000',
+    trim: true
   },
   email: {
     type: String,
-    unique: true
+    unique: true,
+    trim: true
+  }
+})
+// 用户
+const accountSchema = mongoose.Schema({
+  accountName: {
+    type: String,
+    unique: true,
+    default: '',
+    trim: true
   },
-  industry: {
-    type: String
+  userSex: {
+    type: Number,
+    default: 0
+  },
+  userBirth: {
+    type: Date,
+    default: Date.now()
+  },
+  userDescribe: {
+    type: String,
+    default: '这个人很懒，什么都没留下'
+  },
+  userIndustry: {
+    type: String,
+    default: ''
+  },
+  userAvatar: {
+    type: String,
+    default: ''
   }
 })
 /**
  * 定义模型Model
  */
 const Models = {
-  Login: mongoose.model('Login', loginSchema)
+  Login: mongoose.model('Login', loginSchema),
+  Account: mongoose.model('Account', accountSchema)
 }
 
 module.exports = Models

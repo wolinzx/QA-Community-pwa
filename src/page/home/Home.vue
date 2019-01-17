@@ -120,7 +120,11 @@
         </mu-appbar>
         <div style="padding: 24px;">
           <mu-text-field placeholder="请输入标题" full-width style="font-weight: bold"></mu-text-field><br/>
-          <mu-text-field multi-line :rows="10" placeholder="请输入问题描述（选填）" full-width></mu-text-field><br/>
+          <!-- <mu-text-field multi-line :rows="10" placeholder="请输入问题描述（选填）" full-width></mu-text-field><br/> -->
+          <quill-editor v-model="content"
+            ref="myQuillEditor"
+            :options="editorOption">
+          </quill-editor>
         </div>
       </mu-dialog>
       <mu-dialog width="360" transition="slide-right" :overlay="false" fullscreen :open.sync="openSelect">
@@ -142,6 +146,14 @@
 
 <script>
 import { mapMutations } from 'vuex'
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
+
+import { quillEditor } from 'vue-quill-editor'
+// import ImageResize from 'quill-image-resize-module'
+// Quill.register('modules/imageResize', ImageResize)
+
 export default {
   data () {
     return {
@@ -154,7 +166,22 @@ export default {
       showEdit: true,
       open: false,
       openQuiz: false,
-      openSelect: false
+      openSelect: false,
+      content: '<h2>I am Example</h2>',
+      editorOption: {
+        modules: {
+          toolbar: [
+            ['bold', 'italic'],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+            ['link', 'image']
+          ],
+          history: {
+            delay: 1000,
+            maxStack: 50,
+            userOnly: false
+          }
+        }
+      }
     }
   },
   methods: {
@@ -190,6 +217,9 @@ export default {
     this.$refs.container1.addEventListener('scroll', this.handleScroll)
     this.$refs.container2.addEventListener('scroll', this.handleScroll)
     this.$refs.container3.addEventListener('scroll', this.handleScroll)
+  },
+  components: {
+    quillEditor
   }
 }
 </script>

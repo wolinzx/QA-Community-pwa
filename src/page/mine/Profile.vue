@@ -18,12 +18,12 @@
         </mu-list>
       </mu-menu>
     </mu-appbar>
-    <mu-dialog width="360" transition="slide-bottom" fullscreen :open.sync="openEdit">
+    <mu-dialog v-loading="loading2" width="360" transition="slide-bottom" fullscreen :open.sync="openEdit">
       <mu-appbar color="primary" title="编辑个人资料">
         <mu-button slot="left" icon @click="openEdit = false">
           <mu-icon value="close"></mu-icon>
         </mu-button>
-        <mu-button slot="right" flat  @click="openEdit = false">
+        <mu-button slot="right" flat  @click="updateProfile">
           <mu-icon value="check"></mu-icon>
         </mu-button>
       </mu-appbar>
@@ -52,21 +52,21 @@
           </mu-bottom-sheet>
         </mu-avatar>
         <mu-form :model="form" class="mu-demo-form">
-          <mu-form-item prop="username" icon="account_circle" label="用户名" label-float>
-             <mu-text-field v-model="form.username" full-width></mu-text-field>
+          <mu-form-item prop="accountName" icon="account_circle" label="用户名" label-float>
+             <mu-text-field v-model="form.accountName" full-width disabled></mu-text-field>
           </mu-form-item>
-          <mu-form-item prop="sex" icon="face"  label="性别">
-            <mu-radio v-model="form.sex" value="male" label="男"></mu-radio>
-            <mu-radio v-model="form.sex" value="female" label="女"></mu-radio>
+          <mu-form-item prop="userSex" icon="face"  label="性别">
+            <mu-radio v-model="form.userSex" :value="0" label="男"></mu-radio>
+            <mu-radio v-model="form.userSex" :value="1" label="女"></mu-radio>
           </mu-form-item>
-          <mu-form-item prop="birthday" icon="today" label="生日" label-float>
-            <mu-date-input v-model="form.birthday"  container="bottomSheet" full-width></mu-date-input>
+          <mu-form-item prop="userBirth" icon="today" label="生日" label-float>
+            <mu-date-input v-model="form.userBirth"  container="bottomSheet" full-width></mu-date-input>
           </mu-form-item>
-          <mu-form-item prop="describe" icon="description" label="一句话描述" label-float>
-             <mu-text-field v-model="form.describe" full-width></mu-text-field>
+          <mu-form-item prop="userDescribe" icon="description" label="一句话描述" label-float>
+             <mu-text-field v-model="form.userDescribe" full-width></mu-text-field>
           </mu-form-item>
-          <mu-form-item prop="business" icon="business" label="行业" label-float>
-             <mu-text-field v-model="form.business" full-width></mu-text-field>
+          <mu-form-item prop="userIndustry" icon="business" label="行业" label-float>
+             <mu-text-field v-model="form.userIndustry" full-width></mu-text-field>
           </mu-form-item>
         </mu-form>
       </mu-container>
@@ -151,6 +151,7 @@
 
 <script>
 import { mapState } from 'vuex'
+import { accountProfileGet, setProfileGet } from '../../api/api.js'
 export default {
   data () {
     return {
@@ -158,12 +159,13 @@ export default {
       openEdit: false,
       openMenu: false,
       form: {
-        username: '奔跑的兔子',
-        sex: 'male',
-        describe: '计科,web前端方向',
-        business: '计算机软件',
-        birthday: '1997-05-27'
-      }
+        accountName: '',
+        userSex: '',
+        userDescribe: '',
+        userIndustry: '',
+        userBirth: ''
+      },
+      loading2: false
     }
   },
   methods: {
@@ -195,10 +197,35 @@ export default {
         .catch((err) => {
           console.log(err)
         })
+    },
+    updateProfile () {
+      this.loading2 = true
+      setTimeout(() => {
+        let param = Object.assign({}, this.form)
+        console.log(param)
+        setProfileGet(param).then(res => {
+          this.$toast.success('修改成功')
+        }).catch(err => {
+          console.log(err)
+          this.$toast.error('修改错误')
+        })
+        this.loading2 = false
+      }, 1000)
     }
   },
   computed: {
     ...mapState(['userInfo'])
+  },
+  mounted () {
+    console.log(this.userInfo.user_datas[0].account)
+    let param = {
+      account: this.userInfo.user_datas[0].account
+    }
+    accountProfileGet(param).then(res => {
+      this.form = Object.assign({}, res.data)
+    }).catch(err => {
+      console.log(err)
+    })
   }
 }
 </script>

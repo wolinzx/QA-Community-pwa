@@ -39,7 +39,7 @@ const mutations = {
 const actions = {
   [types.GET_USERINFO] (context) {
     if (localStorage.userInfo.get()) {
-      axios.get('/api/login/getAccount')
+      axios.get('/api/login/accountState')
         .then((response) => {
           if (response.data) {
             context.commit('SET_USERINFO', {
