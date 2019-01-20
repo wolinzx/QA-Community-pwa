@@ -37,41 +37,9 @@ export default new Router({
       component: Home,
       name: 'Home',
       meta: {
-        class: 'main'
+        class: 'main',
+        keepAlive: true // 需要被缓存
       }
-      // children: [{
-      //   path: '/',
-      //   name: 'Home',
-      //   redirect: '/Home/Follow',
-      //   meta: {
-      //     class: 'main'
-      //   }
-      // },
-      // {
-      //   path: '/Home/Follow',
-      //   name: 'Follow',
-      //   component: Follow,
-      //   meta: {
-      //     class: 'main'
-      //   }
-      // },
-      // {
-      //   path: '/Home/Recommend',
-      //   name: 'Recommend',
-      //   component: Recommend,
-      //   meta: {
-      //     class: 'main'
-      //   }
-      // },
-      // {
-      //   path: '/Home/Popular',
-      //   name: 'Popular',
-      //   component: Popular,
-      //   meta: {
-      //     class: 'main'
-      //   }
-      // }
-      // ]
     },
     {
       path: '/Message',
@@ -108,6 +76,10 @@ export default new Router({
       path: '/Detail',
       name: 'Detail',
       component: Detail
+      // meta: {
+      //   keepAlive: true, // 需要被缓存
+      //   isBack: false
+      // }
     },
     {
       path: '/Answer',

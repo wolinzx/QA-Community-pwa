@@ -6,6 +6,9 @@ const app = express()
 const cookieParser = require('cookie-parser')
 const session = require('express-session')
 
+app.use(bodyParser.json({ limit: '50mb' }))
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }))
+
 app.use(cookieParser('sessiontest'))
 app.use(session({
   secret: 'sessiontest', // 与cookieParser中的一致

@@ -19,29 +19,25 @@
       </mu-menu>
     </mu-appbar>
     <mu-card style="width: 100%; margin: 0 auto;">
-      <mu-card-title title="如何看待“舔狗”一词忽然火了？"></mu-card-title>
+      <mu-card-title :title="questionTitle"></mu-card-title>
       <mu-card-text :class="{'detail-content': showMore}" @click="showMore = true">
-        最近几月，多年来早已出现的一种现象——舔狗，忽然爆红网络。
-
-        各种段子、感悟、表情包，夹杂着戏谑、自嘲又或是辛酸，出现在各个角落。
-
-        基本涉及了爱情，友情，又或是其他关系。
-
-        题主作为曾经当过“舔狗”，也被人“舔过”的人，忽然对全网忽然纷纷开始谈论“舔狗”的现象感兴趣，不知道这是否意味着什么呢？
-
-        你怎么看呢？
+        <div v-html="questionContent"></div>
       </mu-card-text>
       <mu-card-actions class="detail-action">
-        <span>1,418 人关注  28 条评论</span>
-        <mu-button color="primary">
+        <span>{{followCount}} 人关注  28 条评论</span>
+        <mu-button color="primary" small @click="setFollow" v-if="!isFollow">
           <mu-icon left value="add"></mu-icon>
           关注问题
+        </mu-button>
+        <mu-button color="#e6e6e6" textColor="rgba(0,0,0,.3)" small @click="unFollow" v-else>
+          <mu-icon left value="check"></mu-icon>
+          已关注
         </mu-button>
       </mu-card-actions>
     </mu-card>
     <mu-list>
       <mu-sub-header class="detail-answer-bar">
-        <span>349 个回答</span>
+        <span>{{answers.length}} 个回答</span>
         <mu-menu slot="right" cover placement="bottom-end">
           {{sortWay}}
           <mu-button icon>
@@ -64,66 +60,31 @@
         </mu-menu>
       </mu-sub-header>
     </mu-list>
-    <mu-card style="width: 100%; margin: 0 auto 10px;">
-      <mu-card-header title="Myron Avatar">
+    <mu-card style="width: 100%; margin: 0 auto 10px;" v-for="(answer,index) of answers" :key="index">
+      <mu-card-header :title="answer.answerer">
         <mu-avatar slot="avatar" :size="20">
           <img src="../assets/image/avatar.jpeg">
         </mu-avatar>
       </mu-card-header>
-      <mu-card-text @click="toAnswer">
-        散落在指尖的阳光，我试着轻轻抓住光影的踪迹，它却在眉宇间投下一片淡淡的阴影。
-        调皮的阳光掀动了四月的心帘，温暖如约的歌声渐起。
-        似乎在诉说着，我也可以在漆黑的角落里，找到阴影背后的阳光，
-        找到阳光与阴影奏出和谐的旋律。我要用一颗敏感赤诚的心迎接每一缕滑过指尖的阳光！
+      <mu-card-text @click="toAnswer(index)" v-html="answer.contentData.replace(/<[^>]+>/g,'')">
       </mu-card-text>
       <mu-card-actions>
-        <span>331 赞同 · 40 评论 · 12 小时前</span>
-      </mu-card-actions>
-    </mu-card>
-    <mu-card style="width: 100%; margin: 0 auto 10px;">
-      <mu-card-header title="Myron Avatar">
-        <mu-avatar slot="avatar" :size="20">
-          <img src="../assets/image/avatar.jpeg">
-        </mu-avatar>
-      </mu-card-header>
-      <mu-card-text>
-        散落在指尖的阳光，我试着轻轻抓住光影的踪迹，它却在眉宇间投下一片淡淡的阴影。
-        调皮的阳光掀动了四月的心帘，温暖如约的歌声渐起。
-        似乎在诉说着，我也可以在漆黑的角落里，找到阴影背后的阳光，
-        找到阳光与阴影奏出和谐的旋律。我要用一颗敏感赤诚的心迎接每一缕滑过指尖的阳光！
-      </mu-card-text>
-      <mu-card-actions>
-        <span>331 赞同 · 40 评论 · 12 小时前</span>
-      </mu-card-actions>
-    </mu-card>
-    <mu-card style="width: 100%; margin: 0 auto 10px;">
-      <mu-card-header title="Myron Avatar">
-        <mu-avatar slot="avatar" :size="20">
-          <img src="../assets/image/avatar.jpeg">
-        </mu-avatar>
-      </mu-card-header>
-      <mu-card-text>
-        散落在指尖的阳光，我试着轻轻抓住光影的踪迹，它却在眉宇间投下一片淡淡的阴影。
-        调皮的阳光掀动了四月的心帘，温暖如约的歌声渐起。
-        似乎在诉说着，我也可以在漆黑的角落里，找到阴影背后的阳光，
-        找到阳光与阴影奏出和谐的旋律。我要用一颗敏感赤诚的心迎接每一缕滑过指尖的阳光！
-      </mu-card-text>
-      <mu-card-actions>
-        <span>331 赞同 · 40 评论 · 12 小时前</span>
+        <span>{{ answer.endorseCount }} 赞同 · 40 评论 · 12 小时前</span>
       </mu-card-actions>
     </mu-card>
     <mu-dialog width="360" transition="slide-bottom" fullscreen :open.sync="openAnswer">
-      <mu-appbar color="primary" title="如何看待“舔狗”一词忽然火了？">
+      <mu-appbar color="primary" :title="questionTitle">
         <mu-button slot="left" icon @click="openAnswer = false">
           <mu-icon value="close"></mu-icon>
         </mu-button>
-        <mu-button slot="right" flat  @click="openAnswer = false">
+        <mu-button slot="right" flat  @click="commitAnswer">
           <mu-icon value="send"></mu-icon>
         </mu-button>
       </mu-appbar>
-      <div style="padding: 24px;">
-        <mu-text-field multi-line :rows="10" placeholder="写回答..." full-width></mu-text-field><br/>
-      </div>
+      <quill-editor class="question-edit" v-model="content"
+        ref="myQuillEditor"
+        :options="editorOption">
+      </quill-editor>
     </mu-dialog>
     <div class="answer-action">
       <mu-button fab color="premary" @click="openAnswer = true">
@@ -134,21 +95,150 @@
 </template>
 
 <script>
+import { getQuestionGet, commitAnswerGet, getAnswerListGet, setFollowGet, unFollowGet, getFollowGet } from '../api/api.js'
+import { mapState } from 'vuex'
+import { quillEditor } from 'vue-quill-editor'
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
 export default {
   data () {
     return {
       sortWay: '按质量排序',
       openAnswer: false,
-      showMore: false
+      showMore: false,
+      questionTitle: '',
+      questionContent: '',
+      questionFollow: 0,
+      content: '',
+      editorOption: {
+        modules: {
+          toolbar: [
+            ['bold', 'italic'],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+            ['link', 'image']
+          ],
+          history: {
+            delay: 1000,
+            maxStack: 50,
+            userOnly: false
+          }
+        },
+        placeholder: '写回答...'
+      },
+      answers: [],
+      routerFrom: '',
+      endorseList: [],
+      followCount: 0,
+      isFollow: false
     }
   },
   methods: {
     routerBack () {
       this.$router.go(-1)
     },
-    toAnswer () {
-      this.$router.push({ name: 'Answer' })
+    toAnswer (index) {
+      this.$router.push({ name: 'Answer', params: { answers: this.answers, tapAnswer: index, questionTitle: this.questionTitle, questionId: this.$route.query.questionId } })
+    },
+    getAnswerList () {
+      let param = {
+        questionId: this.$route.query.questionId
+      }
+      getAnswerListGet(param).then(res => {
+        this.answers = res.data.concat()
+        console.log('俩hi了', res)
+        console.log('哈哈哈', this.answers)
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    commitAnswer () {
+      let param = {
+        questionId: this.$route.query.questionId,
+        answerer: this.userInfo.user_datas[0].account,
+        content: this.content
+      }
+      commitAnswerGet(param).then(res => {
+        this.$toast.success('发表回答成功')
+        this.getAnswerList()
+        this.openAnswer = false
+      }).catch(err => {
+        console.log(err)
+        this.$toast.error('发表回答失败')
+      })
+    },
+    getFollow () {
+      getFollowGet({
+        follower: this.userInfo.user_datas[0].account,
+        questionId: this.$route.query.questionId
+      }).then(res => {
+        console.log(res)
+        let questionIdArr = res.data.doc.questionId
+        this.isFollow = questionIdArr.includes(this.$route.query.questionId)
+        this.followCount = res.data.followCount
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    setFollow () {
+      let param = {
+        follower: this.userInfo.user_datas[0].account,
+        questionId: this.$route.query.questionId
+      }
+      setFollowGet(param).then(res => {
+        if (res) {
+          this.getFollow()
+          this.$toast.success('关注成功')
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    unFollow () {
+      let param = {
+        follower: this.userInfo.user_datas[0].account,
+        questionId: this.$route.query.questionId
+      }
+      unFollowGet(param).then(res => {
+        if (res) {
+          this.getFollow()
+          this.$toast.success('取消关注成功')
+        }
+      }).catch(err => {
+        console.log(err)
+      })
     }
+  },
+  /**
+   * activated 用于缓存的路由组件(keep-alive)的钩子函数，启用keep-alive的页面created和mounted失效
+   * 有关缓存路由参考  https://segmentfault.com/a/1190000012083511?_ea=2864002
+   */
+  // beforeRouteEnter (to, from, next) {
+  //   from.name === 'Answer' ? to.meta.isBack = true : to.meta.isBack = false
+  //   next()
+  // },
+  created () {
+    if (!this.$route.meta.isBack) {
+      let param = {
+        questionId: this.$route.query.questionId
+      }
+      getQuestionGet(param).then(res => {
+        this.questionTitle = res.data.title
+        this.questionContent = res.data.contentData
+        this.questionFollow = res.data.follows
+        console.log(res.data)
+      }).catch(err => {
+        console.log(err)
+      })
+      this.getAnswerList()
+      this.getFollow()
+    }
+  },
+  components: {
+    quillEditor
+  },
+  computed: {
+    ...mapState(['userInfo'])
   }
 }
 </script>
@@ -185,5 +275,17 @@ export default {
 }
 .detail-content{
   -webkit-line-clamp: unset;
+}
+.question-edit >>> .ql-toolbar.ql-snow{
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  z-index: 9999;
+  left: 0;
+  border: none;
+  box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12);
+}
+.question-edit >>> .ql-toolbar.ql-snow + .ql-container.ql-snow{
+  border: none;
 }
 </style>

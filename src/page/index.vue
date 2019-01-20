@@ -18,7 +18,11 @@
       </mu-button>
     </mu-appbar>
     <!-- <transition :name="transitionName"> -->
-      <router-view class="child-view"></router-view>
+      <!-- <router-view class="child-view"></router-view> -->
+      <keep-alive>
+          <router-view class="child-view" v-if="$route.meta.keepAlive"></router-view>
+      </keep-alive>
+      <router-view class="child-view" v-if="!$route.meta.keepAlive"></router-view>
     <!-- </transition> -->
     <mu-drawer :open.sync="open" :docked="docked" :right="position === 'right'">
       <mu-container class="login-block">
