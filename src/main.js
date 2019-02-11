@@ -14,7 +14,10 @@ import 'muse-ui/dist/muse-ui.css'
 import Toast from 'muse-ui-toast'
 import Loading from 'muse-ui-loading'
 import router from './router'
+// import VueSocketio from 'vue-socket.io'
+// import socketio from 'socket.io-client'
 
+// Vue.use(VueSocketio, socketio('http://localhost:8088/'))
 Vue.use(MuseUI)
 Vue.use(Toast)
 Vue.use(Loading)

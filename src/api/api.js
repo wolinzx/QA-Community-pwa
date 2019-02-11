@@ -41,3 +41,33 @@ export const getEndorseAnswerGet = params => { return axios.get(`/api/getEndorse
 export const getFollowQuestionGet = params => { return axios.get(`/api/getFollowQuestionGet`, { params: params }) }
 
 export const getFollowUsersGet = params => { return axios.get(`/api/getFollowUsersGet`, { params: params }) }
+
+export const isAnsweredGet = params => { return axios.get(`/api/isAnsweredGet`, { params: params }) }
+
+export const addCollectionGet = params => { return axios.get(`/api/addCollectionGet`, { params: params }) }
+
+export const addCollectionListGet = params => { return axios.get(`/api/addCollectionListGet`, { params: params }) }
+
+export const getCollectionListGet = params => { return axios.get(`/api/getCollectionListGet`, { params: params }) }
+
+export const getQaListGet = params => { return axios.get(`/api/getQaListGet`, { params: params }) }
+
+export const deleteCollectionListGet = params => { return axios.get(`/api/deleteCollectionListGet`, { params: params }) }
+
+export const deleteCollectionGet = params => { return axios.get(`/api/deleteCollectionGet`, { params: params }) }
+
+export const getFollowQuestionMsgGet = params => { return axios.get(`/api/getFollowQuestionMsgGet`, { params: params }) }
+
+export const getTopicGet = params => { return axios.get(`/api/getTopicGet`, { params: params }) }
+
+export const followTopicGet = params => { return axios.get(`/api/followTopicGet`, { params: params }) }
+
+export const getFollowTopicGet = params => { return axios.get(`/api/getFollowTopicGet`, { params: params }) }
+
+export const getFollowListGet = params => { return axios.get(`/api/getFollowListGet`, { params: params }) }
+
+export const getFollwTopicListGet = params => { return axios.get(`/api/getFollwTopicListGet`, { params: params }) }
+
+export const getTopicDetailGet = params => { return axios.get(`/api/getTopicDetailGet`, { params: params }) }
+
+export const unFollowTopicGet = params => { return axios.get(`/api/unFollowTopicGet`, { params: params }) }

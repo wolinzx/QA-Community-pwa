@@ -82,7 +82,14 @@ const questionSchema = mongoose.Schema({
   answers: {
     type: Number,
     default: 0
-  }
+  },
+  topics: {
+    type: Array
+  },
+  answersDetail: [{
+    answerer: String,
+    answerDate: Date
+  }]
 })
 // 提问评论
 const questionCommentSchema = mongoose.Schema({
@@ -114,7 +121,8 @@ const answerSchema = mongoose.Schema({
     type: String
   },
   questionId: {
-    type: String
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Question'
   },
   answerer: {
     type: String
@@ -195,6 +203,29 @@ const followUserSchema = mongoose.Schema({
     default: []
   }
 })
+// 话题关注
+const followTopicSchema = mongoose.Schema({
+  follower: {
+    type: String
+  },
+  topics: {
+    type: Array
+  }
+})
+// 收藏
+const collectionsSchema = mongoose.Schema({
+  collecter: String,
+  collections: [{
+    collectionTitle: String,
+    collectionContent: Array
+  }]
+})
+// 话题
+const topicSchema = mongoose.Schema({
+  topicName: String,
+  topicDescribe: String,
+  topicQList: Array
+})
 /**
  * 定义模型Model
  */
@@ -210,7 +241,10 @@ const Models = {
   AnswerEndorse: mongoose.model('AnswerEndorse', answerEndorseSchema),
   QaRelation: mongoose.model('QaRelation', qaRelationSchema),
   FollowQuestion: mongoose.model('FollowQuestion', followQuestionSchema),
-  FollowUser: mongoose.model('FollowUser', followUserSchema)
+  FollowUser: mongoose.model('FollowUser', followUserSchema),
+  FollowTopic: mongoose.model('FollowTopic', followTopicSchema),
+  Collections: mongoose.model('Collections', collectionsSchema),
+  Topic: mongoose.model('Topic', topicSchema)
 }
 
 module.exports = Models

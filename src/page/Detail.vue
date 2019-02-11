@@ -2,7 +2,7 @@
   <div class="detail">
     <mu-appbar style="width: 100%;" color="primary">
       <mu-button icon slot="left" @click="routerBack">
-        <mu-icon value="arrow_back"></mu-icon>
+        <mu-icon value="home"></mu-icon>
       </mu-button>
         提问详情
       <mu-menu slot="right" cover placement="bottom-end">
@@ -19,12 +19,15 @@
       </mu-menu>
     </mu-appbar>
     <mu-card style="width: 100%; margin: 0 auto;">
-      <mu-card-title :title="questionTitle"></mu-card-title>
+      <mu-chip color="#f2f2f2" text-color="#bfbfbf" v-for="(topic, i) of questionDetail.topics" :key="i">
+        {{topic}}
+      </mu-chip>
+      <mu-card-title :title="questionDetail.title"></mu-card-title>
       <mu-card-text :class="{'detail-content': showMore}" @click="showMore = true">
-        <div v-html="questionContent"></div>
+        <div v-html="questionDetail.contentData"></div>
       </mu-card-text>
       <mu-card-actions class="detail-action">
-        <span>{{followCount}} 人关注  28 条评论</span>
+        <span>{{followCount}} 人关注</span>
         <mu-button color="primary" small @click="setFollow" v-if="!isFollow">
           <mu-icon left value="add"></mu-icon>
           关注问题
@@ -44,13 +47,13 @@
             <mu-icon value="expand_more"></mu-icon>
           </mu-button>
           <mu-list slot="content">
-            <mu-list-item button @click="sortWay = '按质量排序'">
+            <mu-list-item button @click="getAnswerList('按质量排序')">
               <mu-list-item-content class="detail-bar-sort">
                 <mu-list-item-title>按质量排序</mu-list-item-title>&nbsp;
                 <mu-icon value="done" color="primary" v-show="sortWay === '按质量排序'"></mu-icon>
               </mu-list-item-content>
             </mu-list-item>
-            <mu-list-item button @click="sortWay = '按时间排序'">
+            <mu-list-item button @click="getAnswerList('按时间排序')">
               <mu-list-item-content class="detail-bar-sort">
                 <mu-list-item-title>按时间排序</mu-list-item-title>&nbsp;
                 <mu-icon value="done" color="primary" v-show="sortWay === '按时间排序'"></mu-icon>
@@ -60,18 +63,21 @@
         </mu-menu>
       </mu-sub-header>
     </mu-list>
-    <mu-card style="width: 100%; margin: 0 auto 10px;" v-for="(answer,index) of answers" :key="index">
-      <mu-card-header :title="answer.answerer">
-        <mu-avatar slot="avatar" :size="20">
-          <img src="../assets/image/avatar.jpeg">
-        </mu-avatar>
-      </mu-card-header>
-      <mu-card-text @click="toAnswer(index)" v-html="answer.contentData.replace(/<[^>]+>/g,'')">
-      </mu-card-text>
-      <mu-card-actions>
-        <span>{{ answer.endorseCount }} 赞同 · 40 评论 · 12 小时前</span>
-      </mu-card-actions>
-    </mu-card>
+    <div>
+      <mu-card style="width: 100%; margin: 0 auto 10px;" v-for="(answer,index) of answers" :key="index">
+        <mu-card-header :title="answer.answerer">
+          <mu-avatar slot="avatar" :size="20">
+            <img src="../assets/image/avatar.jpeg">
+          </mu-avatar>
+        </mu-card-header>
+        <mu-card-text @click="toAnswer(index)">
+          {{answer.contentData | contentFilter}}
+        </mu-card-text>
+        <mu-card-actions>
+          <span>{{ answer.endorseCount }} 赞同 · 40 评论 · {{answer.computedDate}}</span>
+        </mu-card-actions>
+      </mu-card>
+    </div>
     <mu-dialog width="360" transition="slide-bottom" fullscreen :open.sync="openAnswer">
       <mu-appbar color="primary" :title="questionTitle">
         <mu-button slot="left" icon @click="openAnswer = false">
@@ -87,7 +93,7 @@
       </quill-editor>
     </mu-dialog>
     <div class="answer-action">
-      <mu-button fab color="premary" @click="openAnswer = true">
+      <mu-button fab color="premary" @click="isAnswered">
         <mu-icon value="create"></mu-icon>
       </mu-button>
     </div>
@@ -95,8 +101,11 @@
 </template>
 
 <script>
-import { getQuestionGet, commitAnswerGet, getAnswerListGet, setFollowGet, unFollowGet, getFollowGet } from '../api/api.js'
+import { getQuestionGet, commitAnswerGet, getAnswerListGet, setFollowGet, unFollowGet, getFollowGet, isAnsweredGet } from '../api/api.js'
 import { mapState } from 'vuex'
+import * as localStorage from '../util/localStorage'
+import dateDiff from '../util/dateDiff.js'
+import contentFilter from '../util/contentFilter.js'
 import { quillEditor } from 'vue-quill-editor'
 import 'quill/dist/quill.core.css'
 import 'quill/dist/quill.snow.css'
@@ -109,6 +118,8 @@ export default {
       showMore: false,
       questionTitle: '',
       questionContent: '',
+      topics: '',
+      questionDetail: {},
       questionFollow: 0,
       content: '',
       editorOption: {
@@ -135,28 +146,67 @@ export default {
   },
   methods: {
     routerBack () {
-      this.$router.go(-1)
+      this.$router.push({ name: 'Home' })
     },
     toAnswer (index) {
-      this.$router.push({ name: 'Answer', params: { answers: this.answers, tapAnswer: index, questionTitle: this.questionTitle, questionId: this.$route.query.questionId } })
+      let user = this.userInfo.user_datas[0].account
+      console.log()
+      let hhh = localStorage.userHistory.get() || {}
+      if (!localStorage.userHistory.get()[user]) {
+        hhh[user] = []
+      }
+      // let storageH = localStorage.userHistory.get()[user]
+      // hhh[user] = storageH ? storageH.concat() : []
+      let fff = hhh[user].filter(item => item.questionId !== this.$route.query.questionId)
+      fff.push({ questionTitle: this.questionTitle, questionId: this.$route.query.questionId, hDate: Date.now() })
+      console.log(1, hhh)
+      hhh[user] = fff
+      console.log(2, hhh)
+      localStorage.userHistory.set(hhh)
+      this.$router.push({
+        name: 'Answer',
+        params: {
+          answers: this.answers,
+          tapAnswer: index,
+          questionTitle: this.questionTitle,
+          questionId: this.$route.query.questionId,
+          sortWay: this.sortWay,
+          answersCount: this.questionDetail.answers
+        }
+      })
     },
-    getAnswerList () {
+    getAnswerList (sortWay) {
+      this.sortWay = sortWay || '按质量排序'
       let param = {
-        questionId: this.$route.query.questionId
+        questionId: this.$route.query.questionId,
+        sortWay: this.sortWay === '按质量排序' ? 'quality' : 'time'
       }
       getAnswerListGet(param).then(res => {
         this.answers = res.data.concat()
-        console.log('俩hi了', res)
-        console.log('哈哈哈', this.answers)
+        this.insertTime(this.answers)
+        // this.qualitySort()
+
+        console.log(this.answers)
       }).catch(err => {
         console.log(err)
       })
     },
+    insertTime (answers) {
+      console.log(answers)
+      for (const answer of answers) {
+        let answerDate = answer.answerDate
+        answer['computedDate'] = dateDiff(answerDate).diff
+        answer['sec'] = dateDiff(answerDate).sec
+      }
+    },
     commitAnswer () {
+      var date = new Date()
+      let infoDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+      let info = `<p class="answer-info">编辑于 ${infoDate} · 著作权归作者所有</p>`
       let param = {
         questionId: this.$route.query.questionId,
         answerer: this.userInfo.user_datas[0].account,
-        content: this.content
+        content: this.content + info
       }
       commitAnswerGet(param).then(res => {
         this.$toast.success('发表回答成功')
@@ -207,7 +257,31 @@ export default {
       }).catch(err => {
         console.log(err)
       })
+    },
+    isAnswered () {
+      isAnsweredGet({
+        questionId: this.$route.query.questionId,
+        answerer: this.userInfo.user_datas[0].account
+      }).then(res => {
+        if (!res.data) {
+          this.openAnswer = true
+        } else {
+          this.$toast.error('已经回答过该问题')
+        }
+      })
     }
+    // qualitySort () {
+    //   this.answers.sort((a, b) => {
+    //     return b.endorseCount - a.endorseCount
+    //   })
+    //   this.sortWay = '按质量排序'
+    // },
+    // timeSort () {
+    //   this.answers.sort((a, b) => {
+    //     return a.sec - b.sec
+    //   })
+    //   this.sortWay = '按时间排序'
+    // }
   },
   /**
    * activated 用于缓存的路由组件(keep-alive)的钩子函数，启用keep-alive的页面created和mounted失效
@@ -217,28 +291,31 @@ export default {
   //   from.name === 'Answer' ? to.meta.isBack = true : to.meta.isBack = false
   //   next()
   // },
-  created () {
-    if (!this.$route.meta.isBack) {
-      let param = {
-        questionId: this.$route.query.questionId
-      }
-      getQuestionGet(param).then(res => {
-        this.questionTitle = res.data.title
-        this.questionContent = res.data.contentData
-        this.questionFollow = res.data.follows
-        console.log(res.data)
-      }).catch(err => {
-        console.log(err)
-      })
-      this.getAnswerList()
-      this.getFollow()
+  mounted () {
+    let param = {
+      questionId: this.$route.query.questionId
     }
+    getQuestionGet(param).then(res => {
+      this.questionDetail = res.data
+      this.questionTitle = res.data.title
+      this.questionContent = res.data.contentData
+      this.questionFollow = res.data.follows
+      this.topics = res.data.topics
+      console.log(res.data)
+    }).catch(err => {
+      console.log(err)
+    })
+    this.getAnswerList()
+    this.getFollow()
   },
   components: {
     quillEditor
   },
   computed: {
     ...mapState(['userInfo'])
+  },
+  filters: {
+    contentFilter
   }
 }
 </script>
@@ -287,5 +364,11 @@ export default {
 }
 .question-edit >>> .ql-toolbar.ql-snow + .ql-container.ql-snow{
   border: none;
+}
+.mu-card-title-container .mu-card-title{
+  margin-top: 10px;
+}
+.mu-chip{
+  margin-right: 8px;
 }
 </style>

@@ -8,42 +8,39 @@
     <div v-show="active1 === 0">
       <div class="demo-loadmore-wrap" ref="container">
         <div ref="container1" class="demo-loadmore-content">
-          <mu-load-more @refresh="refresh" :refreshing="refreshing" :loading="loading" @load="load">
-            <template v-for="i in num">
-              <div>
-                <mu-card style="width: 100%; margin: 10px auto;">
-                  <mu-card-header title="奔跑的兔子" sub-title="赞同了回答·1天前">
-                    <mu-avatar slot="avatar">
-                      <img src="../../assets/image/avatar.jpeg">
-                    </mu-avatar>
-                  </mu-card-header>
-                  <mu-card-title title="为什么很多职位都要招[应届毕业生]？" @click="toDetail"></mu-card-title>
-                  <mu-card-text  @click="toDetail">
-                    奔跑的兔子: 好骗（相信加班能提升自我价值升职加薪）
-                    干的多（肯加班）要的少（肯无偿加班）
-                  </mu-card-text>
-                  <mu-card-actions class="list-buttom">
-                    <span>219 赞同 · 66 评论</span>
-                    <mu-menu cover placement="bottom-end">
-                      <mu-button icon color="rgba(0,0,0,.57)">
-                        <mu-icon value="more_vert"></mu-icon>
-                      </mu-button>
-                      <mu-list slot="content">
-                        <mu-list-item button>
-                          <mu-list-item-title>不感兴趣</mu-list-item-title>
-                        </mu-list-item>
-                        <mu-list-item button>
-                          <mu-list-item-title>取消关注</mu-list-item-title>
-                        </mu-list-item>
-                        <mu-list-item button>
-                          <mu-list-item-title>举报</mu-list-item-title>
-                        </mu-list-item>
-                      </mu-list>
-                    </mu-menu>
-                  </mu-card-actions>
-                </mu-card>
-              </div>
-            </template>
+          <mu-load-more @refresh="refresh1" :refreshing="refreshing1" :loading="loading1" @load="load1">
+            <div v-for="(answer, i) in answerList" :key="i">
+              <mu-card style="width: 100%; margin: 10px auto;">
+                <mu-card-header :title="answer.answerer" :sub-title="'回答了问题 · ' + answer.computedDate">
+                  <mu-avatar slot="avatar">
+                    <img src="../../assets/image/avatar.jpeg">
+                  </mu-avatar>
+                </mu-card-header>
+                <mu-card-title :title="answer.questionId.title" @click="toAnswer(answer)"></mu-card-title>
+                <mu-card-text  @click="toAnswer(answer)">
+                  {{answer.contentData | contentFilter}}
+                </mu-card-text>
+                <mu-card-actions class="list-buttom">
+                  <span>{{answer.endorseCount}} 赞同 · 66 评论</span>
+                  <mu-menu cover placement="bottom-end">
+                    <mu-button icon color="rgba(0,0,0,.57)">
+                      <mu-icon value="more_vert"></mu-icon>
+                    </mu-button>
+                    <mu-list slot="content">
+                      <mu-list-item button>
+                        <mu-list-item-title>不感兴趣</mu-list-item-title>
+                      </mu-list-item>
+                      <mu-list-item button>
+                        <mu-list-item-title>取消关注</mu-list-item-title>
+                      </mu-list-item>
+                      <mu-list-item button>
+                        <mu-list-item-title>举报</mu-list-item-title>
+                      </mu-list-item>
+                    </mu-list>
+                  </mu-menu>
+                </mu-card-actions>
+              </mu-card>
+            </div>
           </mu-load-more>
         </div>
       </div>
@@ -51,31 +48,29 @@
     <div v-show="active1 === 1">
       <div class="demo-loadmore-wrap" ref="container">
         <div ref="container2" class="demo-loadmore-content">
-          <mu-load-more @refresh="refresh" :refreshing="refreshing" :loading="loading" @load="load">
-            <template v-for="recommend of recommendlist">
-              <div>
-                <mu-card style="width: 100%; margin: 10px auto;">
-                  <mu-card-title :title="recommend.title" @click="toDetail(recommend._id)"></mu-card-title>
-                  <mu-card-text v-html="recommend.contentData.replace(/<[^>]+>/g,'')" @click="toDetail(recommend._id)"></mu-card-text>
-                  <mu-card-actions class="list-buttom">
-                    <span>219 赞同 · 66 评论</span>
-                    <mu-menu cover placement="bottom-end">
-                      <mu-button icon color="rgba(0,0,0,.57)">
-                        <mu-icon value="more_vert"></mu-icon>
-                      </mu-button>
-                      <mu-list slot="content">
-                        <mu-list-item button>
-                          <mu-list-item-title>不感兴趣</mu-list-item-title>
-                        </mu-list-item>
-                        <mu-list-item button>
-                          <mu-list-item-title>举报</mu-list-item-title>
-                        </mu-list-item>
-                      </mu-list>
-                    </mu-menu>
-                  </mu-card-actions>
-                </mu-card>
-              </div>
-            </template>
+          <mu-load-more @refresh="refresh2" :refreshing="refreshing2" :loading="loading2" @load="load2">
+            <div v-for="(recommend, i) of recommendlist" :key="i">
+              <mu-card style="width: 100%; margin: 10px auto;">
+                <mu-card-title :title="recommend.title" @click="toDetail(recommend._id, recommend.title)"></mu-card-title>
+                <mu-card-text v-html="recommend.contentData.replace(/<[^>]+>/g,'')" @click="toDetail(recommend._id, recommend.title)"></mu-card-text>
+                <mu-card-actions class="list-buttom">
+                  <span>{{recommend.follows}} 人关注</span>
+                  <mu-menu cover placement="bottom-end">
+                    <mu-button icon color="rgba(0,0,0,.57)">
+                      <mu-icon value="more_vert"></mu-icon>
+                    </mu-button>
+                    <mu-list slot="content">
+                      <mu-list-item button>
+                        <mu-list-item-title>不感兴趣</mu-list-item-title>
+                      </mu-list-item>
+                      <mu-list-item button>
+                        <mu-list-item-title>举报</mu-list-item-title>
+                      </mu-list-item>
+                    </mu-list>
+                  </mu-menu>
+                </mu-card-actions>
+              </mu-card>
+            </div>
           </mu-load-more>
         </div>
       </div>
@@ -83,16 +78,15 @@
     <div v-show="active1 === 2">
       <div class="demo-loadmore-wrap" ref="container">
         <div ref="container3" class="demo-loadmore-content">
-          <mu-load-more @refresh="refresh" :refreshing="refreshing" :loading="loading" @load="load">
-            <template v-for="i in num">
-              <div class="hot-list">
-                <p>{{i}}</p>
+          <mu-load-more @refresh="refresh3" :refreshing="refreshing3" :loading="loading3" @load="load3">
+            <template v-for="(hot, i) of hotList">
+              <div class="hot-list" :key="i" @click="toDetail(hot._id, hot.title)">
+                <p>{{i + 1}}</p>
                 <div>
-                  <h3>如何评价网易云音乐2018年年度报告？</h3>
-                  <span>4092 万热度</span>
+                  <h3>{{hot.title}}</h3>
+                  <span>{{hot.computedHotValue}} 热度</span>
                 </div>
               </div>
-              <mu-divider />
             </template>
           </mu-load-more>
         </div>
@@ -111,7 +105,7 @@
           <mu-button slot="left" icon @click="openQuiz = false">
             <mu-icon value="arrow_back"></mu-icon>
           </mu-button>
-          <mu-button slot="right" flat @click="openSelect = true" :disabled="!title">
+          <mu-button slot="right" flat @click="openSelectDialog" :disabled="!title">
             下一步
           </mu-button>
         </mu-appbar>
@@ -134,7 +128,9 @@
           </mu-button>
         </mu-appbar>
         <div style="padding: 24px;">
-          <mu-text-field placeholder="搜索并添加相关话题" full-width style="font-weight: bold" icon="search"></mu-text-field><br/>
+          <mu-select label="搜索并添加相关话题" v-model="selsectTags" chips multiple tags full-width>
+            <mu-option v-for="language,index in languages" :key="language" :label="language" :value="language"></mu-option>
+          </mu-select>
         </div>
       </mu-dialog>
     </div>
@@ -146,19 +142,25 @@ import { mapMutations, mapState } from 'vuex'
 import 'quill/dist/quill.core.css'
 import 'quill/dist/quill.snow.css'
 import 'quill/dist/quill.bubble.css'
-
 import { quillEditor } from 'vue-quill-editor'
+import * as localStorage from '../../util/localStorage'
+import dateDiff from '../../util/dateDiff.js'
+import contentFilter from '../../util/contentFilter.js'
 // import ImageResize from 'quill-image-resize-module'
 // Quill.register('modules/imageResize', ImageResize)
-import { commitQuestionGet, getQuestionListGet } from '../../api/api.js'
+import { commitQuestionGet, getQuestionListGet, getTopicGet, getFollowUsersGet, getFollowListGet, getFollwTopicListGet } from '../../api/api.js'
 
 export default {
   data () {
     return {
       active1: 0,
       num: 0,
-      refreshing: false,
-      loading: false,
+      refreshing1: false,
+      loading1: false,
+      refreshing2: false,
+      loading2: false,
+      refreshing3: false,
+      loading3: false,
       text: 'List',
       containerScroll: 0,
       showEdit: true,
@@ -183,25 +185,58 @@ export default {
         placeholder: '对问题进行补充说明，可以更快获得解答（选填）'
       },
       recommendlist: [],
+      hotList: [],
       pagesize: 10,
-      currentPage: 1
+      currentPage: 1,
+      selsectTags: [],
+      languages: [],
+      followUsers: [],
+      answerList: []
     }
   },
   methods: {
     ...mapMutations(['SET_SCROLLED']),
-    refresh () {
-      this.refreshing = true
+    refresh1 () {
+      this.refreshing1 = true
       this.$refs.container1.scrollTop = 0
       setTimeout(() => {
-        this.refreshing = false
+        this.refreshing1 = false
+        this.getFollowUsers()
+        // this.pagesize = 10
+        // this.currentPage = 1
+      }, 1000)
+    },
+    load1 () {
+      // this.loading = true
+      // this.getRecommendlist(this.pagesize, ++this.currentPage, false)
+    },
+    refresh2 () {
+      this.refreshing2 = true
+      this.$refs.container2.scrollTop = 0
+      setTimeout(() => {
+        this.refreshing2 = false
         this.getRecommendlist(10, 1, true)
         this.pagesize = 10
         this.currentPage = 1
       }, 1000)
     },
-    load () {
-      this.loading = true
+    load2 () {
+      this.loading2 = true
       this.getRecommendlist(this.pagesize, ++this.currentPage, false)
+    },
+    refresh3 () {
+      this.refreshing3 = true
+      this.$refs.container3.scrollTop = 0
+      setTimeout(() => {
+        this.refreshing3 = false
+        this.getHotList(10, 1, true)
+        this.pagesize = 10
+        this.currentPage = 1
+      }, 1000)
+    },
+    load3 () {
+      this.loading3 = true
+      this.getHotList(this.pagesize, ++this.currentPage, false)
     },
     handleScroll () {
       let scrollTop = this.$refs.container1.scrollTop || this.$refs.container2.scrollTop || this.$refs.container3.scrollTop
@@ -210,14 +245,41 @@ export default {
       this.containerScroll = scrollTop
       scrollTopBool ? this.showEdit = false : this.showEdit = true
     },
-    toDetail (id) {
+    toDetail (id, title) {
+      let user = this.userInfo.user_datas[0].account
+      console.log()
+      let hhh = localStorage.userHistory.get() || {}
+      if (!localStorage.userHistory.get()[user]) {
+        hhh[user] = []
+      }
+      let fff = hhh[user].filter(item => item.questionId !== id)
+      fff.push({ questionTitle: title, questionId: id, hDate: Date.now() })
+      console.log(1, hhh)
+      hhh[user] = fff
+      console.log(2, hhh)
+      localStorage.userHistory.set(hhh)
       this.$router.push({ name: 'Detail', query: { questionId: id } })
+    },
+    toAnswer (answer) {
+      let answerArr = [answer]
+      console.log(answer, 'sdfdsf')
+      this.$router.push({
+        name: 'Answer',
+        params: {
+          answers: answerArr,
+          tapAnswer: 0,
+          questionTitle: answer.questionId.title,
+          questionId: answer.questionId._id,
+          answersCount: answer.questionId.answers
+        }
+      })
     },
     commitQuestion () {
       let param = {
         account: this.userInfo.user_datas[0].account,
         title: this.title,
-        content: this.content
+        content: this.content,
+        topics: this.selsectTags
       }
       console.log(param)
       commitQuestionGet(param).then(res => {
@@ -233,13 +295,69 @@ export default {
       })
     },
     getRecommendlist (pagesize, currentPage, isFresh) {
+      getFollwTopicListGet({
+        follower: this.userInfo.user_datas[0].account
+      }).then(res => {
+        isFresh ? this.recommendlist = res.data.concat() : this.recommendlist = this.recommendlist.concat(res.data)
+        this.loading2 = false
+      })
+    },
+    openSelectDialog () {
+      this.openSelect = true
+      getTopicGet().then(res => {
+        for (const topic of res.data) {
+          this.languages.push(topic.topicName)
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    getFollowUsers () {
+      getFollowUsersGet({
+        follower: this.userInfo.user_datas[0].account
+      }).then(res => {
+        this.followUsers = res.data
+        console.log(this.followUsers, 'fsdfsdfds')
+        let arr = []
+        for (const follows of this.followUsers) {
+          arr.push(follows.accountName)
+        }
+        console.log('arr', arr)
+        getFollowListGet({
+          answerer: arr
+        }).then(res => {
+          this.answerList = res.data
+          console.log(res.data)
+          console.log('fsdfsd', this.answerList)
+          for (const answer of this.answerList) {
+            let answerDate = answer.answerDate
+            answer['computedDate'] = dateDiff(answerDate).diff
+            answer['sec'] = dateDiff(answerDate).sec
+          }
+          this.answerList.sort((a, b) => {
+            return a.sec - b.sec
+          })
+        }).catch(err => {
+          console.log(err)
+        })
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    getHotList (pagesize, currentPage, isFresh) {
       let param = {
         pagesize,
         currentPage
       }
       getQuestionListGet(param).then(res => {
-        isFresh ? this.recommendlist = res.data.concat() : this.recommendlist = this.recommendlist.concat(res.data)
-        this.loading = false
+        isFresh ? this.hotList = res.data.concat() : this.hotList = this.hotList.concat(res.data)
+        for (const hot of this.hotList) {
+          hot['computedHotValue'] = Number(hot.follows) + Number(hot.answers) * 2
+        }
+        this.hotList.sort((a, b) => {
+          return b.computedHotValue - a.computedHotValue
+        })
+        this.loading3 = false
       })
     }
   },
@@ -247,14 +365,22 @@ export default {
     this.$refs.container1.addEventListener('scroll', this.handleScroll)
     this.$refs.container2.addEventListener('scroll', this.handleScroll)
     this.$refs.container3.addEventListener('scroll', this.handleScroll)
+    // 获取关注
+    this.getFollowUsers()
     // 获取提问列表
     this.getRecommendlist(10, 1, true)
+    // 获取热门列表
+    this.getHotList(10, 1, true)
+  
   },
   components: {
     quillEditor
   },
   computed: {
     ...mapState(['userInfo'])
+  },
+  filters: {
+    contentFilter
   }
 }
 </script>
@@ -311,6 +437,7 @@ export default {
 }
 .hot-list{
   display: flex;
+  border-bottom: 1px solid #e3e0e0;
 }
 .hot-list p{
   padding: 0 16px;

@@ -129,7 +129,7 @@
         <mu-bottom-nav :class="['app-footer']" :value="this.routeFirstPath" v-show="this.routeMainPath && !app.scrolled">
         <mu-bottom-nav-item title="首页" icon="home" value="Home" :to="{name:'Home'}"></mu-bottom-nav-item>
         <mu-bottom-nav-item title="通知" icon="notifications"  value="Message" :to="{name:'Message'}"></mu-bottom-nav-item>
-        <mu-bottom-nav-item title="想法" icon="chat"  value="Think" :to="{name:'Think'}"></mu-bottom-nav-item>
+        <mu-bottom-nav-item title="话题" icon="chat"  value="Topic" :to="{name:'Topic'}"></mu-bottom-nav-item>
         <!-- <mu-bottom-nav-item title="我的" icon="person"  value="Mine" :to="{name:'Mine'}"></mu-bottom-nav-item> -->
       </mu-bottom-nav>
     </mu-slide-bottom-transition>
@@ -232,6 +232,7 @@ export default {
         Home: '首页',
         Message: '通知',
         Think: '想法',
+        Topic: '话题',
         Mine: '我的',
         Profile: '我的'
       },

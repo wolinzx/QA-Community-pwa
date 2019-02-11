@@ -1,6 +1,6 @@
 import * as types from '../mutation-types'
 import axios from 'axios'
-import * as localStorage from '../localStorage'
+import * as localStorage from '../../util/localStorage'
 
 const state = {
   isLogined: false, // 登陆状态

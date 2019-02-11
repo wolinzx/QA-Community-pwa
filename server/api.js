@@ -127,7 +127,7 @@ router.get('/api/setProfileGet', (req, res) => {
 })
 
 router.post('/api/commitQuestionGet', (req, res) => {
-  let questionModels = new models.Question({ questioner: req.body.account, title: req.body.title, contentData: req.body.content })
+  let questionModels = new models.Question({ questioner: req.body.account, title: req.body.title, contentData: req.body.content, topics: req.body.topics })
   questionModels.save((err, data) => {
     if (err) {
       res.send(false)
@@ -161,35 +161,32 @@ router.get('/api/getQuestionGet', (req, res) => {
   })
 })
 
+// 添加回答，，此处可以优化
 router.post('/api/commitAnswerGet', (req, res) => {
-  let answerModels = new models.Answer({ questionId: req.body.questionId, answerer: req.body.answerer, contentData: req.body.content, answerDate: Date.now() })
+  let aDate = Date.now()
+  let answerModels = new models.Answer({ questionId: req.body.questionId, answerer: req.body.answerer, contentData: req.body.content, answerDate: aDate })
   answerModels.save((err, data) => {
     if (err) {
       console.log(err)
       res.send(false)
     } else {
-      let insertQuestion = new models.QaRelation({ questionId: req.body.questionId, answerId: data._id })
-      insertQuestion.save((err, data) => {
+      models.Answer.count({
+        questionId: req.body.questionId
+      }, (err, count) => {
+        console.log('fsdfsdfdssdfsd', count)
         if (!err) {
-          models.QaRelation.count({
-            questionId: req.body.questionId
-          }, (err, count) => {
-            if (!err) {
-              models.Question.update(
-                { _id: req.body.questionId },
-                { $set: { answers: count } }
-              ).exec((err, data) => {
-                if (!err) {
-                  res.send(true)
-                } else {
-                  console.log(err)
-                  res.send(false)
-                }
-              })
-            } else {
-              res.send(false)
-            }
-          })
+          models.Question.update(
+            { _id: req.body.questionId },
+            { $set: { answers: count } }
+          ).exec()
+        }
+      })
+      models.Question.update(
+        { _id: req.body.questionId },
+        { $push: { answersDetail: { answerer: req.body.answerer, answerDate: aDate } } }
+      ).exec((err, data) => {
+        if (!err) {
+          res.send(true)
         } else {
           console.log(err)
           res.send(false)
@@ -203,26 +200,65 @@ router.get('/api/getAnswerListGet', (req, res) => {
   let param = {
     questionId: req.query.questionId
   }
-  models.Answer.find(param, (err, docs) => {
-    if (!err) {
-      res.send(docs)
-    } else {
-      console.log(err)
-      res.send(err)
-    }
-  })
+  if (req.query.sortWay === 'quality') {
+    console.log('质量')
+    models.Answer.find(param).sort({ endorseCount: -1 }).exec((err, docs) => {
+      if (!err) {
+        res.send(docs)
+      } else {
+        console.log(err)
+        res.send(err)
+      }
+    })
+  } else if (req.query.sortWay === 'time') {
+    console.log('时间')
+
+    models.Answer.find(param).sort({ answerDate: -1 }).exec((err, docs) => {
+      if (!err) {
+        res.send(docs)
+      } else {
+        console.log(err)
+        res.send(err)
+      }
+    })
+  } else {
+    console.log('默认')
+    models.Answer.find(param).exec((err, docs) => {
+      if (!err) {
+        res.send(docs)
+      } else {
+        console.log(err)
+        res.send(err)
+      }
+    })
+  }
 })
 
 router.get('/api/getEndorseAnswerGet', (req, res) => {
-  models.AnswerEndorse.findOne({
-    endorser: req.query.endorser
-  }, (err, data) => {
-    if (!err) {
-      console.log(data)
-      res.send(data)
-    } else {
-      res.send(false)
-    }
+  models.AnswerEndorse.update(
+    { endorser: req.query.endorser },
+    { $set: { endorser: req.query.endorser } },
+    { upsert: true }
+  ).exec(() => {
+    models.AnswerEndorse.findOne({
+      endorser: req.query.endorser
+    }, (err, data) => {
+      if (!err) {
+        console.log(req.query.answerId)
+        models.Answer.findOne({
+          _id: req.query.answerId
+        }, { endorseCount: 1 }, (err, doc) => {
+          if (!err) {
+            data._doc['endorseCount'] = doc.endorseCount
+            res.send(data._doc)
+          } else {
+            res.send(false)
+          }
+        })
+      } else {
+        res.send(false)
+      }
+    })
   })
 })
 
@@ -441,16 +477,21 @@ router.get('/api/getFollowQuestionGet', (req, res) => {
   models.FollowQuestion.findOne({
     follower: req.query.follower
   }, (err, data) => {
+    console.log('zhishi ', data)
     if (!err) {
-      models.Question.find({
-        _id: data.questionId
-      }, (err, data) => {
-        if (err) {
-          res.send(err)
-        } else {
-          res.send(data)
-        }
-      })
+      if (data) {
+        models.Question.find({
+          _id: data.questionId
+        }, (err, data) => {
+          if (err) {
+            res.send(err)
+          } else {
+            res.send(data)
+          }
+        })
+      } else {
+        res.send(err)
+      }
     }
   })
 })
@@ -460,15 +501,319 @@ router.get('/api/getFollowUsersGet', (req, res) => {
     follower: req.query.follower
   }, (err, data) => {
     if (!err) {
-      models.Account.find({
-        accountName: data.userId
+      if (data) {
+        models.Account.find({
+          accountName: data.userId
+        }, (err, docs) => {
+          if (err) {
+            res.send(err)
+          } else {
+            res.send(docs)
+          }
+        })
+      } else {
+        res.send(false)
+      }
+    }
+  })
+})
+
+router.get('/api/isAnsweredGet', (req, res) => {
+  console.log({
+    questionId: req.query.questionId,
+    answerer: req.query.answerer
+  })
+  models.Answer.findOne({
+    questionId: req.query.questionId,
+    answerer: req.query.answerer
+  }, (err, data) => {
+    if (!err) {
+      console.log(data)
+      res.send(data)
+    } else {
+      res.send(err)
+    }
+  })
+})
+
+// 添加收藏
+router.get('/api/addCollectionGet', (req, res) => {
+  models.Collections.updateMany(
+    { collecter: req.query.collecter, 'collections.collectionTitle': req.query.collectionTitle },
+    { $push: { 'collections.$.collectionContent': req.query.answerId } },
+    { upsert: true }
+  ).exec((err, data) => {
+    if (!err) {
+      res.send(data)
+    } else {
+      console.log(err)
+      res.send(false)
+    }
+  })
+  // 删除收藏
+  // models.Collections.updateOne(
+  //   { collecter: '333', 'collections.collectionTitle': 'fdfd' },
+  //   { $pull: { 'collections.$.collectionContent': 'fdfdfd222' } },
+  //   { upsert: true }
+  // ).exec((err, data) => {
+  //   if (!err) {
+  //     res.send(true)
+  //   } else {
+  //     console.log(err)
+  //     res.send(false)
+  //   }
+  // })
+  // 新键收藏目录
+  // models.Collections.updateOne(
+  //   { collecter: '333' },
+  //   { $push: { 'collections': { collectionTitle: '5555' } } },
+  //   { upsert: true }
+  // ).exec((err, data) => {
+  //   if (!err) {
+  //     res.send(true)
+  //   } else {
+  //     console.log(err)
+  //     res.send(false)
+  //   }
+  // })
+  // 删除收藏目录
+  // models.Collections.updateOne(
+  //   { collecter: '333' },
+  //   { $push: { 'collections': { collectionTitle: '5555' } } },
+  //   { upsert: true }
+  // ).exec((err, data) => {
+  //   if (!err) {
+  //     res.send(true)
+  //   } else {
+  //     console.log(err)
+  //     res.send(false)
+  //   }
+  // })
+})
+
+router.get('/api/deleteCollectionGet', (req, res) => {
+  models.Collections.updateOne(
+    { collecter: req.query.collecter },
+    { $pull: { 'collections': { collectionTitle: req.query.collectionTitle } } },
+    { upsert: true }
+  ).exec((err, data) => {
+    if (!err) {
+      res.send(true)
+    } else {
+      console.log(err)
+      res.send(false)
+    }
+  })
+})
+
+router.get('/api/deleteCollectionListGet', (req, res) => {
+  models.Collections.updateOne(
+    { collecter: req.query.collecter, 'collections.collectionTitle': req.query.collectionTitle },
+    { $pull: { 'collections.$.collectionContent': req.query.answerId } },
+    { upsert: true }
+  ).exec((err, data) => {
+    if (!err) {
+      res.send(true)
+    } else {
+      console.log(err)
+      res.send(false)
+    }
+  })
+})
+// 新建收藏目录
+router.get('/api/addCollectionListGet', (req, res) => {
+  models.Collections.updateOne(
+    { collecter: req.query.collecter },
+    { $push: { 'collections': { collectionTitle: req.query.collectionTitle } } },
+    { upsert: true }
+  ).exec((err, data) => {
+    if (!err) {
+      res.send(data)
+    } else {
+      console.log(err)
+      res.send(err)
+    }
+  })
+})
+
+// 获取收藏目录
+router.get('/api/getCollectionListGet', (req, res) => {
+  models.Collections.findOne({
+    collecter: req.query.collecter
+  }, (err, data) => {
+    if (!err) {
+      res.send(data)
+    } else {
+      res.send(err)
+    }
+  })
+})
+
+// 获取提问标题与回答内容
+router.get('/api/getQaListGet', (req, res) => {
+  console.log(req.query.answerId)
+  models.Answer.find({
+    _id: req.query.answerId
+  }).populate({ path: 'questionId', select: 'title answers' }).exec((err, data) => {
+    if (!err) {
+      res.send(data)
+    } else {
+      res.send(err)
+    }
+  })
+})
+
+// 获取关注问题消息
+router.get('/api/getFollowQuestionMsgGet', (req, res) => {
+  models.FollowQuestion.findOne({
+    follower: req.query.follower
+  }, { questionId: 1 }, (err, data) => {
+    if (!err) {
+      if (data) {
+        models.Question.find({
+          _id: data.questionId
+        }, (err, data) => {
+          if (!err) {
+            res.send(data)
+          } else {
+            res.send(err)
+          }
+        })
+      } else {
+        res.send(false)
+      }
+    } else {
+      res.send(err)
+    }
+  })
+})
+
+// 添加话题
+router.get('/api/addTopicGet', (req, res) => {
+  models.Topic.update(
+    { topicName: req.query.topicName },
+    { $push: { topicQList: req.query.topicQList }, $set: { topicDescribe: req.query.topicDescribe } },
+    { upsert: true }
+  ).exec((err, data) => {
+    if (!err) {
+      res.send(true)
+    }
+  })
+})
+
+// 获取话题列表
+router.get('/api/getTopicGet', (req, res) => {
+  models.Topic.find((err, docs) => {
+    if (!err) {
+      res.send(docs)
+    } else {
+      res.send(false)
+    }
+  })
+})
+
+// 关注话题
+router.get('/api/followTopicGet', (req, res) => {
+  models.FollowTopic.update(
+    { follower: req.query.follower },
+    { $push: { topics: req.query.topic } },
+    { upsert: true }
+  ).exec((err, data) => {
+    if (!err) {
+      res.send(true)
+    } else {
+      res.send(false)
+    }
+  })
+})
+
+// 取关话题
+router.get('/api/unFollowTopicGet', (req, res) => {
+  models.FollowTopic.update(
+    { follower: req.query.follower },
+    { $pull: { topics: req.query.topic } },
+    { upsert: true }
+  ).exec((err, data) => {
+    if (!err) {
+      res.send(true)
+    } else {
+      res.send(false)
+    }
+  })
+})
+
+// 获取关注者关注的话题
+router.get('/api/getFollowTopicGet', (req, res) => {
+  models.FollowTopic.findOne({
+    follower: req.query.follower
+  }, (err, docs) => {
+    if (!err) {
+      res.send(docs)
+    } else {
+      res.send(false)
+    }
+  })
+})
+
+// 获取提问标题与回答内容
+router.get('/api/getFollowListGet', (req, res) => {
+  console.log(req.query.answerId)
+  models.Answer.find({
+    answerer: req.query.answerer
+  }).populate({ path: 'questionId', select: 'title answers' }).exec((err, data) => {
+    if (!err) {
+      res.send(data)
+    } else {
+      res.send(err)
+    }
+  })
+})
+
+// 根据关注的话题获取问题列表
+router.get('/api/getFollwTopicListGet', (req, res) => {
+  models.FollowTopic.findOne({
+    follower: req.query.follower
+  }, (err, data) => {
+    if (!err) {
+      if (data) {
+        models.Question.find({
+          topics: { $in: data.topics }
+        }, (err, data) => {
+          if (!err) {
+            res.send(data)
+          } else {
+            res.send(false)
+          }
+        })
+      } else {
+        res.send(false)
+      }
+    }
+  })
+})
+
+// 获取话题详情
+router.get('/api/getTopicDetailGet', (req, res) => {
+  models.FollowTopic.count({
+    topics: req.query.topicName
+  }, (err, count) => {
+    if (!err) {
+      models.Topic.findOne({
+        topicName: req.query.topicName
       }, (err, data) => {
-        if (err) {
-          res.send(err)
+        if (data) {
+          if (!err) {
+            data._doc['followCount'] = count
+            res.send(data._doc)
+          } else {
+            res.send(false)
+          }
         } else {
-          res.send(data)
+          res.send(false)
         }
       })
+    } else {
+      res.send(false)
     }
   })
 })

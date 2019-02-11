@@ -30,6 +30,14 @@
     </mu-appbar>
     <mu-paper class="answer-title" :z-depth="1">
       <h3>{{this.$route.params.questionTitle}}</h3>
+      <mu-flex class="flex-wrapper" justify-content="end">
+        <mu-flex class="flex-demo" justify-content="center" >
+          <mu-button class="see-all-answers" flat color="primary" @click="toAllAnswers">
+            查看全部{{this.$route.params.answersCount}}个回答
+            <mu-icon right value="keyboard_arrow_right"></mu-icon>
+          </mu-button>
+        </mu-flex>
+      </mu-flex>
     </mu-paper>
     <mu-paper class="answer-content" :z-depth="1">
       <mu-list textline="two-line">
@@ -46,7 +54,10 @@
             </mu-list-item-sub-title>
           </mu-list-item-content>
           <mu-list-item-action>
-            <mu-button color="primary" small @click="setFollow" v-if="!isFollow">
+            <mu-button color="#e6e6e6" textColor="rgba(0,0,0,.3)" small v-if="userInfo.user_datas[0].account == answers[swiperIndex].answerer">
+              <mu-icon value="perm_identity"></mu-icon>&nbsp;&nbsp;我
+            </mu-button>
+            <mu-button color="primary" small @click="setFollow" v-else-if="!isFollow">
               <mu-icon value="add"></mu-icon>关注
             </mu-button>
             <mu-button color="#e6e6e6" textColor="rgba(0,0,0,.3)" small @click="unFollow" v-else>
@@ -66,11 +77,11 @@
       <div>
         <mu-button flat @click="endorse(1)" v-if="!isEndorse">
           <mu-icon left value="thumb_up" color="rgba(0,0,0,.54)"></mu-icon>
-          赞同 {{this.answers[this.swiperIndex].endorseCount}}
+          赞同 {{allEndorse}}
         </mu-button>
         <mu-button flat @click="endorse(0)" v-else>
           <mu-icon left value="thumb_up" color="primary"></mu-icon>
-          已赞同 {{this.answers[this.swiperIndex].endorseCount}}
+          已赞同 {{allEndorse}}
         </mu-button>
         <mu-button icon @click="endorse(2)" v-if="!isNoEndorse">
           <mu-icon value="thumb_down" color="rgba(0,0,0,.54)"></mu-icon>
@@ -80,10 +91,7 @@
         </mu-button>
       </div>
       <div>
-        <mu-button icon>
-          <mu-icon value="favorite" color="rgba(0,0,0,.54)"></mu-icon>
-        </mu-button>
-        <mu-button icon>
+        <mu-button icon @click="openBotttomSheet">
           <mu-icon value="grade" color="rgba(0,0,0,.54)"></mu-icon>
         </mu-button>
         <mu-button icon>
@@ -91,13 +99,47 @@
         </mu-button>
       </div>
     </mu-paper>
+    <mu-container>
+      <mu-bottom-sheet :open.sync="openCollection">
+        <mu-list>
+          <mu-sub-header>选择收藏夹</mu-sub-header>
+          <div class="select-control-group" >
+            <mu-list-item button @click="openFullscreenDialog">
+              <mu-list-item-action>
+                <mu-icon value="add"></mu-icon>
+              </mu-list-item-action>
+              <mu-list-item-title>新建收藏夹</mu-list-item-title>
+            </mu-list-item>
+            <mu-list-item button v-for="(list, i) of collectionList" :key="i">
+              <mu-radio :label-left="true" :value="list.collectionTitle" v-model="radio.value1" :label="list.collectionTitle"></mu-radio>
+            </mu-list-item>
+            <div class="collection-save">
+              <mu-button color="primary" full-width @click="commitCollection" :disabled="!radio.value1">完成</mu-button>
+            </div>
+          </div>
+        </mu-list>
+      </mu-bottom-sheet>
+    </mu-container>
+    <mu-dialog width="360" transition="slide-bottom" fullscreen :open.sync="openCreateCollection">
+      <mu-appbar color="primary" title="新建收藏夹">
+        <mu-button slot="left" icon @click="openCreateCollection = false">
+          <mu-icon value="close"></mu-icon>
+        </mu-button>
+        <mu-button slot="right" flat  @click="commitAddColList" :disabled="!collectionTitle">
+          完成
+        </mu-button>
+      </mu-appbar>
+      <div style="padding: 24px;">
+        <mu-text-field v-model="collectionTitle" placeholder="请输入标题" full-width></mu-text-field><br/>
+      </div>
+    </mu-dialog>
   </div>
 </template>
 
 <script>
 import 'swiper/dist/css/swiper.css'
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
-import { setEndorseGet, getAnswerListGet, getFollowUserGet, setFollowUserGet, unFollowUserGet, getEndorseAnswerGet } from '../api/api.js'
+import { setEndorseGet, getFollowUserGet, setFollowUserGet, unFollowUserGet, getEndorseAnswerGet, addCollectionGet, addCollectionListGet, getCollectionListGet } from '../api/api.js'
 import { mapState } from 'vuex'
 
 export default {
@@ -116,6 +158,7 @@ export default {
             // this.imgIndex = this.realIndex + 1
             that.swiperIndex = this.realIndex
             that.getEndorseAnswer()
+            that.isFollow = that.questionIdArr.includes(that.answers[this.realIndex].answerer)
           }
         }
       },
@@ -124,7 +167,17 @@ export default {
       allEndorse: 0,
       isEndorse: false,
       isNoEndorse: false,
-      isFollow: false
+      isFollow: false,
+      questionIdArr: [],
+      openCollection: false,
+      radio: {
+        value1: '',
+        value2: false,
+        value3: false
+      },
+      openCreateCollection: false,
+      collectionTitle: '',
+      collectionList: []
     }
   },
   // computed: {
@@ -136,7 +189,7 @@ export default {
     this.answers = this.$route.params.answers
     console.log(this.answers)
     console.log(this.$route.params.tapAnswer)
-    this.getAllEndorse()
+    this.getEndorseAnswer()
     this.getFollow()
     // console.log('this is current swiper instance object', this.swiper)
     // this.swiper.slideTo(3, 1000, false)
@@ -145,21 +198,13 @@ export default {
     routerBack () {
       this.$router.go(-1)
     },
-    getAllEndorse () {
-      console.log(this.$route.params.questionId)
-      getAnswerListGet({
-        questionId: this.$route.params.questionId
-      }).then(res => {
-        this.answers = res.data.concat()
-      }).catch(err => {
-        console.log(err)
-      })
-      this.getEndorseAnswer()
+    toAllAnswers () {
+      this.$router.push({ name: 'Detail', query: { questionId: this.$route.params.questionId } })
     },
     getEndorseAnswer () {
       getEndorseAnswerGet({
         endorser: this.userInfo.user_datas[0].account,
-        endorseAnswerId: this.answers[this.swiperIndex]._id
+        answerId: this.answers[this.swiperIndex]._id
       }).then(res => {
         if (res.data) {
           this.isEndorse = false
@@ -169,6 +214,7 @@ export default {
           } else if (res.data.unendorseAnswerId.includes(this.answers[this.swiperIndex]._id)) {
             this.isNoEndorse = true
           }
+          this.allEndorse = res.data.endorseCount
         }
       })
     },
@@ -180,7 +226,7 @@ export default {
       }
       setEndorseGet(params).then(res => {
         console.log(res)
-        this.getAllEndorse()
+        this.getEndorseAnswer()
       }).catch(err => {
         console.log(err)
       })
@@ -191,9 +237,8 @@ export default {
         questionId: this.$route.params.questionId
       }).then(res => {
         console.log(res)
-        let questionIdArr = res.data.doc.userId
-        this.isFollow = questionIdArr.includes(this.answers[this.swiperIndex].answerer)
-        this.followCount = res.data.followCount
+        this.questionIdArr = res.data.doc.userId
+        this.isFollow = this.questionIdArr.includes(this.answers[this.swiperIndex].answerer)
       }).catch(err => {
         console.log(err)
       })
@@ -222,6 +267,58 @@ export default {
           this.getFollow()
           this.$toast.success('取消关注成功')
         }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    closeBottomSheet () {
+      this.openCollection = false
+    },
+    openBotttomSheet () {
+      this.getCollectionList()
+      this.openCollection = true
+    },
+    handleCheckAll () {
+
+    },
+    openFullscreenDialog () {
+      this.openCreateCollection = true
+    },
+    commitAddColList () {
+      addCollectionListGet({
+        collecter: this.userInfo.user_datas[0].account,
+        collectionTitle: this.collectionTitle
+      }).then(res => {
+        this.$toast.success('添加收藏夹成功')
+        this.getCollectionList()
+        this.radio.value1 = this.collectionTitle
+      }).catch(err => {
+        console.log(err)
+        this.$toast.error('添加收藏夹失败')
+      })
+      this.openCreateCollection = false
+    },
+    commitCollection () {
+      addCollectionGet({
+        collecter: this.userInfo.user_datas[0].account,
+        collectionTitle: this.radio.value1,
+        answerId: this.answers[this.swiperIndex]._id
+      }).then(res => {
+        if (res) {
+          this.$toast.success('添加收藏成功')
+          this.openCollection = false
+        }
+      }).catch(err => {
+        console.log(err)
+        this.$toast.error('添加收藏失败')
+      })
+    },
+    getCollectionList () {
+      getCollectionListGet({
+        collecter: this.userInfo.user_datas[0].account
+      }).then(res => {
+        this.collectionList = res.data.collections
+        console.log(this.collectionList)
       }).catch(err => {
         console.log(err)
       })
@@ -257,5 +354,19 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+.answer-swiper div >>> .answer-info{
+  font-size: 12px;
+  color: #c8c8c8;
+}
+.see-all-answers>>>.mu-button-wrapper{
+  padding: 0;
+}
+.select-control-group .mu-radio{
+  width: 100%;
+  padding: 0 5px;
+}
+.collection-save{
+  padding: 16px 21px;
 }
 </style>

@@ -19,7 +19,7 @@
     <div class="demo-text" v-if="active === 0">
       <mu-list textline="two-line">
         <div v-for="(question,i) of followQuestions" :key="i">
-          <mu-list-item avatar :ripple="false" button @click="toDetail(question._id)">
+          <mu-list-item avatar button @click="toDetail(question._id)">
             <mu-list-item-content>
               <mu-list-item-title>{{question.title}}</mu-list-item-title>
               <mu-list-item-sub-title>{{question.answers}} 个回答 · {{question.follows}} 人关注</mu-list-item-sub-title>
@@ -29,56 +29,27 @@
         </div>
       </mu-list>
     </div>
-    <div class="demo-text" v-if="active === 1">
-      <mu-list textline="three-line">
-        <mu-list-item avatar :ripple="false" button>
-          <mu-list-item-action>
-            <mu-avatar>
-              <img src="../assets/image/avatar.jpeg">
-            </mu-avatar>
-          </mu-list-item-action>
-          <mu-list-item-content>
-            <mu-list-item-title>生活方式</mu-list-item-title>
-            <mu-list-item-sub-title>
-              生活方式不是「生活」。> 社会学中，生活型态（或生活风格、生活方式）是一个人（或团体）生活的方式。
-            </mu-list-item-sub-title>
-          </mu-list-item-content>
-        </mu-list-item>
-        <mu-divider></mu-divider>
-        <mu-list-item avatar :ripple="false" button>
-          <mu-list-item-action>
-            <mu-avatar>
-              <img src="../assets/image/avatar.jpeg">
-            </mu-avatar>
-          </mu-list-item-action>
-          <mu-list-item-content>
-            <mu-list-item-title>极简主义</mu-list-item-title>
-            <mu-list-item-sub-title>
-              极简主义(Minimalism)，并不是现今所称的简约主义，是第二次世界大战之后60年代所兴起的一个艺术派系，又可称为“Minimal Art”，作为对抽象表现主义的反动而走向极至，以最原初的物自身或形式展示于观者面前为表现方式，意图消弥作者借着作品对观者意识的压迫性，极少化作品作为文本或符号形式出现时的暴力感，开放作品自身在艺术概念上的意像空间，让观者自主参与对作品的建构，最终成为作品在不特定限制下的作者。
-            </mu-list-item-sub-title>
-          </mu-list-item-content>
-        </mu-list-item>
-        <mu-divider></mu-divider>
-        <mu-list-item avatar :ripple="false" button>
-          <mu-list-item-action>
-            <mu-avatar>
-              <img src="../assets/image/avatar.jpeg">
-            </mu-avatar>
-          </mu-list-item-action>
-          <mu-list-item-content>
-            <mu-list-item-title>因特网</mu-list-item-title>
-            <mu-list-item-sub-title>
-              互联网是由一些使用公用语言互相通信的计算机连接而成的网络，即广域网、局域网及单机按照一定的通讯协议组成的国际计算机网络。互联网（internetwork，简称internet），始于1969年（己酉年）的美国，又称因特网，是全球性的网络，是一种公用信息的载体，这种大众传媒比以往的任何一种通讯媒体都要快。
-            </mu-list-item-sub-title>
-          </mu-list-item-content>
-        </mu-list-item>
-        <mu-divider></mu-divider>
+    <div class="follow-topic" v-if="active === 1">
+      <mu-list textline="two-line">
+        <div v-for="(topic,i) of followTopics" :key="i" @click="toTopicDetail(topic)">
+          <mu-list-item avatar button>
+            <mu-list-item-action>
+              <mu-avatar>
+                <img src="../assets/image/avatar.jpeg">
+              </mu-avatar>
+            </mu-list-item-action>
+            <mu-list-item-content>
+              <mu-list-item-title>{{topic}}</mu-list-item-title>
+            </mu-list-item-content>
+          </mu-list-item>
+          <mu-divider></mu-divider>
+        </div>
       </mu-list>
     </div>
     <div class="demo-text" v-if="active === 2">
       <mu-list textline="two-line">
         <div v-for="(user,i) of followUsers" :key="i">
-          <mu-list-item avatar :ripple="false" button>
+          <mu-list-item avatar button>
             <mu-list-item-action>
               <mu-avatar>
                 <img src="../assets/image/avatar.jpeg">
@@ -100,7 +71,7 @@
         </div>
       </mu-list>
       <mu-dialog title="取消关注" width="600" max-width="80%" :esc-press-close="false" :overlay-close="false" :open.sync="openAlert">
-        确定不再关注 奔跑的兔子 吗?
+        确定不再关注 {{unFollower}} 吗?
         <mu-button slot="actions" flat color="primary" @click="openAlert = false">放弃</mu-button>
         <mu-button slot="actions" flat color="primary" @click="unFollow(unFollower)">取消关注</mu-button>
       </mu-dialog>
@@ -109,7 +80,7 @@
 </template>
 
 <script>
-import { getFollowQuestionGet, getFollowUsersGet, unFollowUserGet } from '../api/api.js'
+import { getFollowQuestionGet, getFollowUsersGet, unFollowUserGet, getFollowTopicGet } from '../api/api.js'
 import { mapState } from 'vuex'
 export default {
   data () {
@@ -119,6 +90,7 @@ export default {
       openAlert: false,
       followQuestions: [],
       followUsers: [],
+      followTopics: [],
       unFollower: ''
     }
   },
@@ -152,6 +124,9 @@ export default {
       }).catch(err => {
         console.log(err)
       })
+    },
+    toTopicDetail (topicName) {
+      this.$router.push({ name: 'TopicDetail', query: { topicName } })
     }
   },
   created () {
@@ -159,6 +134,13 @@ export default {
       follower: this.userInfo.user_datas[0].account
     }).then(res => {
       this.followQuestions = res.data
+    }).catch(err => {
+      console.log(err)
+    })
+    getFollowTopicGet({
+      follower: this.userInfo.user_datas[0].account
+    }).then(res => {
+      this.followTopics = res.data.topics
     }).catch(err => {
       console.log(err)
     })

@@ -16,6 +16,8 @@ import Collection from '@/page/Collection'
 import Follow from '@/page/Follow'
 import Detail from '@/page/Detail'
 import Answer from '@/page/Answer'
+import Topic from '@/page/topic/Topic'
+import TopicDetail from '@/page/topic/TopicDetail'
 // const Home = () => import('@/page/home/Home')
 // const Message = () => import('@/page/message/Message')
 
@@ -53,6 +55,14 @@ export default new Router({
       path: '/Think',
       name: 'Think',
       component: Think,
+      meta: {
+        class: 'main'
+      }
+    },
+    {
+      path: '/Topic',
+      name: 'Topic',
+      component: Topic,
       meta: {
         class: 'main'
       }
@@ -117,6 +127,11 @@ export default new Router({
       //     }
       //   }]
       // }]
+    },
+    {
+      path: '/TopicDetail',
+      name: 'TopicDetail',
+      component: TopicDetail
     },
     {
       path: '/Edit',
