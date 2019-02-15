@@ -29,38 +29,38 @@
       </mu-menu>
     </mu-appbar>
     <mu-paper class="answer-title" :z-depth="1">
-      <h3>{{this.$route.params.questionTitle}}</h3>
+      <h3>{{this.$route.query.questionTitle}}</h3>
       <mu-flex class="flex-wrapper" justify-content="end">
         <mu-flex class="flex-demo" justify-content="center" >
           <mu-button class="see-all-answers" flat color="primary" @click="toAllAnswers">
-            查看全部{{this.$route.params.answersCount}}个回答
+            查看全部{{this.$route.query.answersCount}}个回答
             <mu-icon right value="keyboard_arrow_right"></mu-icon>
           </mu-button>
         </mu-flex>
       </mu-flex>
     </mu-paper>
     <mu-paper class="answer-content" :z-depth="1">
-      <mu-list textline="two-line">
+      <mu-list textline="two-line" @click="toProfile(answers[swiperIndex].answerer)">
         <mu-list-item avatar :ripple="false" button>
           <mu-list-item-action>
             <mu-avatar>
-              <img src="../assets/image/avatar.jpeg">
+              <img :src="answers[swiperIndex].avatar || default_avatar">
             </mu-avatar>
           </mu-list-item-action>
           <mu-list-item-content>
             <mu-list-item-title>{{answers[swiperIndex].answerer}}</mu-list-item-title>
             <mu-list-item-sub-title>
-              深藏不露是一种卓越的才能
+              {{answers[swiperIndex].userDescribe}}
             </mu-list-item-sub-title>
           </mu-list-item-content>
           <mu-list-item-action>
             <mu-button color="#e6e6e6" textColor="rgba(0,0,0,.3)" small v-if="userInfo.user_datas[0].account == answers[swiperIndex].answerer">
               <mu-icon value="perm_identity"></mu-icon>&nbsp;&nbsp;我
             </mu-button>
-            <mu-button color="primary" small @click="setFollow" v-else-if="!isFollow">
+            <mu-button color="primary" small @click.stop="setFollow" v-else-if="!isFollow">
               <mu-icon value="add"></mu-icon>关注
             </mu-button>
-            <mu-button color="#e6e6e6" textColor="rgba(0,0,0,.3)" small @click="unFollow" v-else>
+            <mu-button color="#e6e6e6" textColor="rgba(0,0,0,.3)" small @click.stop="unFollow" v-else>
               <mu-icon value="check"></mu-icon>已关注
             </mu-button>
           </mu-list-item-action>
@@ -68,35 +68,41 @@
         <mu-divider></mu-divider>
       </mu-list>
       <swiper class="answer-swiper" :options="swiperOption" ref="mySwiper">
-        <!-- slides -->
         <swiper-slide v-for="(answer,i) of answers" :key="i" v-html="answers[i].contentData">
         </swiper-slide>
       </swiper>
     </mu-paper>
+    <br>
+    <br>
+    <br>
+    <br>
     <mu-paper class="answer-foot">
       <div>
         <mu-button flat @click="endorse(1)" v-if="!isEndorse">
-          <mu-icon left value="thumb_up" color="rgba(0,0,0,.54)"></mu-icon>
+          <mu-icon class="endorse-ico" left value="arrow_drop_up" color="rgba(0,0,0,.54)"></mu-icon>
           赞同 {{allEndorse}}
         </mu-button>
         <mu-button flat @click="endorse(0)" v-else>
-          <mu-icon left value="thumb_up" color="primary"></mu-icon>
+          <mu-icon class="endorse-ico" left value="arrow_drop_up" color="primary"></mu-icon>
           已赞同 {{allEndorse}}
         </mu-button>
         <mu-button icon @click="endorse(2)" v-if="!isNoEndorse">
-          <mu-icon value="thumb_down" color="rgba(0,0,0,.54)"></mu-icon>
+          <mu-icon class="endorse-ico" value="arrow_drop_down" color="rgba(0,0,0,.54)"></mu-icon>
         </mu-button>
         <mu-button icon @click="endorse(3)" v-else>
-          <mu-icon value="thumb_down" color="primary"></mu-icon>
+          <mu-icon class="endorse-ico" value="arrow_drop_down" color="primary"></mu-icon>
         </mu-button>
       </div>
       <div>
-        <mu-button icon @click="openBotttomSheet">
+        <mu-button icon @click="openBotttomSheet" v-if="!isCollected">
           <mu-icon value="grade" color="rgba(0,0,0,.54)"></mu-icon>
         </mu-button>
-        <mu-button icon>
-          <mu-icon value="chat_bubble" color="rgba(0,0,0,.54)"></mu-icon>
+        <mu-button icon @click="openBotttomSheet" v-else>
+          <mu-icon value="grade" color="primary"></mu-icon>
         </mu-button>
+        <!-- <mu-button icon>
+          <mu-icon value="chat_bubble" color="rgba(0,0,0,.54)"></mu-icon>
+        </mu-button> -->
       </div>
     </mu-paper>
     <mu-container>
@@ -139,8 +145,9 @@
 <script>
 import 'swiper/dist/css/swiper.css'
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
-import { setEndorseGet, getFollowUserGet, setFollowUserGet, unFollowUserGet, getEndorseAnswerGet, addCollectionGet, addCollectionListGet, getCollectionListGet } from '../api/api.js'
+import { setEndorseGet, getFollowUserGet, setFollowUserGet, unFollowUserGet, getEndorseAnswerGet, addCollectionGet, addCollectionListGet, getCollectionListGet, getAnswerListGet, getUsersProfileGet } from '../api/api.js'
 import { mapState } from 'vuex'
+import { globalBus } from '@/util/globalBus'
 
 export default {
   components: {
@@ -151,19 +158,24 @@ export default {
     let that = this
     return {
       swiperOption: {
-        initialSlide: this.$route.params.tapAnswer,
+        initialSlide: 0,
         autoHeight: true,
         on: {
           slideChangeTransitionStart: function () {
-            // this.imgIndex = this.realIndex + 1
+            this.imgIndex = this.realIndex + 1
             that.swiperIndex = this.realIndex
             that.getEndorseAnswer()
             that.isFollow = that.questionIdArr.includes(that.answers[this.realIndex].answerer)
+            for (const i of that.collectionList) {
+              that.isCollected = i.collectionContent.includes(that.answers[this.realIndex]._id)
+            }
           }
         }
       },
-      answers: [],
-      swiperIndex: this.$route.params.tapAnswer,
+      answers: [{
+        answerer: null
+      }],
+      swiperIndex: 0,
       allEndorse: 0,
       isEndorse: false,
       isNoEndorse: false,
@@ -177,29 +189,27 @@ export default {
       },
       openCreateCollection: false,
       collectionTitle: '',
-      collectionList: []
+      collectionList: [],
+      isCollected: false,
+      default_avatar: '/static/img/default_avatar.jpeg',
+      accounts: []
     }
   },
-  // computed: {
-  //   swiper () {
-  //     return this.$refs.mySwiper.swiper
-  //   }
-  // },
   created () {
-    this.answers = this.$route.params.answers
-    console.log(this.answers)
-    console.log(this.$route.params.tapAnswer)
-    this.getEndorseAnswer()
-    this.getFollow()
-    // console.log('this is current swiper instance object', this.swiper)
-    // this.swiper.slideTo(3, 1000, false)
+    this.getAnswerList(this.$route.query.sortWay)
+    // this.answers = this.$route.params.answers
+    // console.log(this.answers)
+    // console.log(this.$route.params.tapAnswer)
+    // this.getEndorseAnswer()
+    // this.getFollow()
+    // this.getCollectionList()
   },
   methods: {
     routerBack () {
       this.$router.go(-1)
     },
     toAllAnswers () {
-      this.$router.push({ name: 'Detail', query: { questionId: this.$route.params.questionId } })
+      this.$router.push({ name: 'Detail', query: { questionId: this.$route.query.questionId } })
     },
     getEndorseAnswer () {
       getEndorseAnswerGet({
@@ -219,43 +229,54 @@ export default {
       })
     },
     endorse (status) {
-      let params = {
-        answerId: this.answers[this.swiperIndex]._id,
-        endorser: this.userInfo.user_datas[0].account,
-        status
+      if (this.userInfo.isLogined) {
+        let params = {
+          answerId: this.answers[this.swiperIndex]._id,
+          endorser: this.userInfo.user_datas[0].account,
+          status
+        }
+        setEndorseGet(params).then(res => {
+          console.log(res)
+          this.getEndorseAnswer()
+        }).catch(err => {
+          console.log(err)
+        })
+      } else {
+        this.$toast.error('请先登录')
+        globalBus.$emit('openLogin')
       }
-      setEndorseGet(params).then(res => {
-        console.log(res)
-        this.getEndorseAnswer()
-      }).catch(err => {
-        console.log(err)
-      })
     },
     getFollow () {
       getFollowUserGet({
         follower: this.userInfo.user_datas[0].account,
         questionId: this.$route.params.questionId
       }).then(res => {
-        console.log(res)
-        this.questionIdArr = res.data.doc.userId
-        this.isFollow = this.questionIdArr.includes(this.answers[this.swiperIndex].answerer)
+        if (res.data) {
+          this.questionIdArr = res.data.doc.userId
+          this.isFollow = this.questionIdArr.includes(this.answers[this.swiperIndex].answerer)
+        }
       }).catch(err => {
         console.log(err)
       })
     },
     setFollow () {
-      let param = {
-        follower: this.userInfo.user_datas[0].account,
-        userId: this.answers[this.swiperIndex].answerer
-      }
-      setFollowUserGet(param).then(res => {
-        if (res) {
-          this.getFollow()
-          this.$toast.success('关注成功')
+      if (this.userInfo.isLogined) {
+        let param = {
+          follower: this.userInfo.user_datas[0].account,
+          userId: this.answers[this.swiperIndex].answerer
         }
-      }).catch(err => {
-        console.log(err)
-      })
+        setFollowUserGet(param).then(res => {
+          if (res.data) {
+            this.getFollow()
+            this.$toast.success('关注成功')
+          }
+        }).catch(err => {
+          console.log(err)
+        })
+      } else {
+        this.$toast.error('请先登录')
+        globalBus.$emit('openLogin')
+      }
     },
     unFollow () {
       let param = {
@@ -263,7 +284,7 @@ export default {
         userId: this.answers[this.swiperIndex].answerer
       }
       unFollowUserGet(param).then(res => {
-        if (res) {
+        if (res.data) {
           this.getFollow()
           this.$toast.success('取消关注成功')
         }
@@ -275,8 +296,13 @@ export default {
       this.openCollection = false
     },
     openBotttomSheet () {
-      this.getCollectionList()
-      this.openCollection = true
+      if (this.userInfo.isLogined) {
+        this.getCollectionList()
+        this.openCollection = true
+      } else {
+        this.$toast.error('请先登录')
+        globalBus.$emit('openLogin')
+      }
     },
     handleCheckAll () {
 
@@ -289,9 +315,13 @@ export default {
         collecter: this.userInfo.user_datas[0].account,
         collectionTitle: this.collectionTitle
       }).then(res => {
-        this.$toast.success('添加收藏夹成功')
-        this.getCollectionList()
-        this.radio.value1 = this.collectionTitle
+        if (res.data === 'collected') {
+          this.$toast.error('已存在的收藏夹')
+        } else if (res.data) {
+          this.$toast.success('添加收藏夹成功')
+          this.getCollectionList()
+          this.radio.value1 = this.collectionTitle
+        }  
       }).catch(err => {
         console.log(err)
         this.$toast.error('添加收藏夹失败')
@@ -304,21 +334,82 @@ export default {
         collectionTitle: this.radio.value1,
         answerId: this.answers[this.swiperIndex]._id
       }).then(res => {
-        if (res) {
-          this.$toast.success('添加收藏成功')
+        console.log(res)
+        if (res.data === 'collected') {
+          this.$toast.error('内容已存在该收藏夹')
+        } else if (res.data) {
+          this.$toast.success('添加到收藏夹成功')
+          this.getCollectionList()
           this.openCollection = false
         }
       }).catch(err => {
         console.log(err)
-        this.$toast.error('添加收藏失败')
+        this.$toast.error('添加到收藏失败')
       })
     },
     getCollectionList () {
       getCollectionListGet({
         collecter: this.userInfo.user_datas[0].account
       }).then(res => {
-        this.collectionList = res.data.collections
-        console.log(this.collectionList)
+        if (res.data) {
+          this.collectionList = res.data.collections
+          // this.isCollected = res.data.collectionContent.includes(this.answers[this.swiperIndex]._id)
+          for (const i of this.collectionList) {
+            this.isCollected = i.collectionContent.includes(this.answers[this.swiperIndex]._id)
+          }
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    getUsersProfile () {
+      console.log({
+        accounts: this.accounts
+      })
+      getUsersProfileGet({
+        accounts: this.accounts
+      }).then(res => {
+        console.log(res.data)
+        let temp = this.answers.concat()
+        for (const i of temp) {
+          for (const j of res.data) {
+            console.log(i.answerer, j.accountName)
+            if (i.answerer === j.accountName) {
+              i['avatar'] = j.userAvatar
+              i['userDescribe'] = j.userDescribe
+            }
+          }
+        }
+        this.answers = temp.concat()
+        console.log(this.answers)
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    toProfile (user) {
+      this.$router.push({ name: 'Profile', query: { user } })
+    },
+    getAnswerList (sortWay) {
+      // this.sortWay = sortWay || '按质量排序'
+      let param = {
+        questionId: this.$route.query.questionId,
+        sortWay
+      }
+      getAnswerListGet(param).then(res => {
+        console.log(res, '厉害了我的歌')
+        // this.answers = res.data
+        let hh = res.data.filter(item => item._id === this.$route.query.answerId)
+        let xx = res.data.filter(item => item._id !== this.$route.query.answerId)
+        let arr = [...hh, ...xx]
+        this.answers = arr.concat()
+        for (const i of this.answers) {
+          this.accounts.push(i.answerer)
+        }
+        this.getEndorseAnswer()
+        this.getFollow()
+        this.getCollectionList()
+        this.getUsersProfile()
+        // console.log(this.answers, this.answers[this.swiperIndex], '我去')
       }).catch(err => {
         console.log(err)
       })
@@ -354,6 +445,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  z-index: 999;
+  border-top: 1px solid #dedede;
 }
 .answer-swiper div >>> .answer-info{
   font-size: 12px;
@@ -368,5 +461,12 @@ export default {
 }
 .collection-save{
   padding: 16px 21px;
+}
+.answer-swiper>>>img{
+  max-width: 100% !important;
+}
+.endorse-ico{
+  font-size: 38px;
+  margin-right: 0;
 }
 </style>

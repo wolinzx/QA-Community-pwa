@@ -4,3 +4,4 @@
 /static/
 /*.js
 /test/unit/coverage/
+/fileserver

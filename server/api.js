@@ -20,7 +20,21 @@ router.get('/api/loginState', (req, res) => {
       account
     }, (err, docs) => {
       if (!err) {
-        res.send(docs)
+        if (docs.length !== 0) {
+          models.Account.findOne({
+            accountName: account
+          }, (err, data) => {
+            if (!err) {
+              req.session._id = docs[0]._id
+              docs.push(data)
+              res.send(docs)
+            } else {
+              res.send(false)
+            }
+          })
+        } else {
+          res.send(false)
+        }
       } else {
         res.send(false)
       }
@@ -48,15 +62,17 @@ router.post('/api/login', (req, res) => {
   }, (err, docs) => {
     if (!err) {
       if (docs.length !== 0) {
-        // let user = {
-        //   account: docs[0].account,
-        //   avatar: docs[0].avatar
-        // }
-        // console.log(docs[0]._id);
-        req.session._id = docs[0]._id
-        console.log('in')
-        // console.log(docs[0].avatar);
-        res.send(docs)
+        models.Account.findOne({
+          accountName: req.body.account
+        }, (err, data) => {
+          if (!err) {
+            req.session._id = docs[0]._id
+            docs.push(data)
+            res.send(docs)
+          } else {
+            res.send(false)
+          }
+        })
       } else {
         res.send(false)
       }
@@ -329,13 +345,14 @@ router.get('/api/setEndorseGet', (req, res) => {
 router.get('/api/setFollowGet', (req, res) => {
   models.FollowQuestion.update(
     { follower: req.query.follower },
-    { $push: { questionId: req.query.questionId } },
+    { $push: { questions: { questionId: req.query.questionId, followDate: Date.now() } } },
     { upsert: true }
   ).exec((err, data) => {
     if (!err) {
       models.FollowQuestion.count({
-        questionId: req.query.questionId
+        'questions.questionId': req.query.questionId
       }, (err, count) => {
+        console.log(count, 'dsjfksdjklfj')
         if (!err) {
           models.Question.update(
             { _id: req.query.questionId },
@@ -360,15 +377,28 @@ router.get('/api/setFollowGet', (req, res) => {
   })
 })
 
+router.get('/api/ceshi', (req, res) => {
+  models.FollowQuestion.count({
+    'questions.questionId': '5c5fe6ba7f119b39200efcdd'
+  }, (err, count) => {
+    if (!err) {
+      console.log(count)
+      res.send(true)
+    } else {
+      res.send(false)
+    }
+  })
+})
+
 router.get('/api/unFollowGet', (req, res) => {
   models.FollowQuestion.update(
     { follower: req.query.follower },
-    { $pull: { questionId: req.query.questionId } },
+    { $pull: { questions: { questionId: req.query.questionId } } },
     { upsert: true }
   ).exec((err, data) => {
     if (!err) {
       models.FollowQuestion.count({
-        questionId: req.query.questionId
+        'questions.questionId': req.query.questionId
       }, (err, count) => {
         if (!err) {
           models.Question.update(
@@ -397,9 +427,10 @@ router.get('/api/getFollowGet', (req, res) => {
   models.FollowQuestion.findOne({
     follower: req.query.follower
   }, (err, doc) => {
-    if (doc) {
+    if (!err) {
+      console.log('尼玛', doc)
       models.FollowQuestion.count({
-        questionId: req.query.questionId
+        'questions.questionId': req.query.questionId
       }, (err, data) => {
         if (!err) {
           let obj = {
@@ -473,6 +504,18 @@ router.get('/api/getFollowUserGet', (req, res) => {
   })
 })
 
+router.get('/api/getFollowUserGet2', (req, res) => {
+  models.FollowUser.findOne({
+    follower: req.query.follower
+  }, (err, doc) => {
+    if (!err) {
+      res.send(doc)
+    } else {
+      res.send(false)
+    }
+  })
+})
+
 router.get('/api/getFollowQuestionGet', (req, res) => {
   models.FollowQuestion.findOne({
     follower: req.query.follower
@@ -480,8 +523,12 @@ router.get('/api/getFollowQuestionGet', (req, res) => {
     console.log('zhishi ', data)
     if (!err) {
       if (data) {
+        let arr = []
+        for (const question of data.questions) {
+          arr.push(question.questionId)
+        }
         models.Question.find({
-          _id: data.questionId
+          _id: arr
         }, (err, data) => {
           if (err) {
             res.send(err)
@@ -538,57 +585,29 @@ router.get('/api/isAnsweredGet', (req, res) => {
 
 // 添加收藏
 router.get('/api/addCollectionGet', (req, res) => {
-  models.Collections.updateMany(
-    { collecter: req.query.collecter, 'collections.collectionTitle': req.query.collectionTitle },
-    { $push: { 'collections.$.collectionContent': req.query.answerId } },
-    { upsert: true }
-  ).exec((err, data) => {
+  models.Collections.findOne({
+    collecter: req.query.collecter,
+    'collections.collectionContent': req.query.answerId
+  }, (err, doc) => {
     if (!err) {
-      res.send(data)
-    } else {
-      console.log(err)
-      res.send(false)
+      if (doc) {
+        res.send('collected')
+      } else {
+        models.Collections.updateMany(
+          { collecter: req.query.collecter, 'collections.collectionTitle': req.query.collectionTitle },
+          { $push: { 'collections.$.collectionContent': req.query.answerId } },
+          { upsert: true }
+        ).exec((err, data) => {
+          if (!err) {
+            res.send(data)
+          } else {
+            console.log(err)
+            res.send(false)
+          }
+        })
+      } 
     }
   })
-  // 删除收藏
-  // models.Collections.updateOne(
-  //   { collecter: '333', 'collections.collectionTitle': 'fdfd' },
-  //   { $pull: { 'collections.$.collectionContent': 'fdfdfd222' } },
-  //   { upsert: true }
-  // ).exec((err, data) => {
-  //   if (!err) {
-  //     res.send(true)
-  //   } else {
-  //     console.log(err)
-  //     res.send(false)
-  //   }
-  // })
-  // 新键收藏目录
-  // models.Collections.updateOne(
-  //   { collecter: '333' },
-  //   { $push: { 'collections': { collectionTitle: '5555' } } },
-  //   { upsert: true }
-  // ).exec((err, data) => {
-  //   if (!err) {
-  //     res.send(true)
-  //   } else {
-  //     console.log(err)
-  //     res.send(false)
-  //   }
-  // })
-  // 删除收藏目录
-  // models.Collections.updateOne(
-  //   { collecter: '333' },
-  //   { $push: { 'collections': { collectionTitle: '5555' } } },
-  //   { upsert: true }
-  // ).exec((err, data) => {
-  //   if (!err) {
-  //     res.send(true)
-  //   } else {
-  //     console.log(err)
-  //     res.send(false)
-  //   }
-  // })
 })
 
 router.get('/api/deleteCollectionGet', (req, res) => {
@@ -622,16 +641,27 @@ router.get('/api/deleteCollectionListGet', (req, res) => {
 })
 // 新建收藏目录
 router.get('/api/addCollectionListGet', (req, res) => {
-  models.Collections.updateOne(
-    { collecter: req.query.collecter },
-    { $push: { 'collections': { collectionTitle: req.query.collectionTitle } } },
-    { upsert: true }
-  ).exec((err, data) => {
+  models.Collections.findOne({
+    collecter: req.query.collecter,
+    'collections.collectionTitle': req.query.collectionTitle
+  }, (err, doc) => {
     if (!err) {
-      res.send(data)
-    } else {
-      console.log(err)
-      res.send(err)
+      if (doc) {
+        res.send('collected')
+      } else {
+        models.Collections.updateOne(
+          { collecter: req.query.collecter },
+          { $push: { 'collections': { collectionTitle: req.query.collectionTitle } } },
+          { upsert: true }
+        ).exec((err, data) => {
+          if (!err) {
+            res.send(data)
+          } else {
+            console.log(err)
+            res.send(err)
+          }
+        })
+      } 
     }
   })
 })
@@ -812,6 +842,98 @@ router.get('/api/getTopicDetailGet', (req, res) => {
           res.send(false)
         }
       })
+    } else {
+      res.send(false)
+    }
+  })
+})
+
+// 获取规定时间后的回答
+router.get('/api/getTimeAnswersGet', (req, res) => {
+  models.FollowQuestion.findOne({
+    follower: req.query.follower
+  }, (err, data) => {
+    if (!err) {
+      if (data) {
+        getFind(data).then(findData => {
+          res.send(findData)
+        }).catch(err => {
+          res.send(err)
+        })
+      } else {
+        res.send(false)
+      }
+    }
+  })
+})
+
+function asyncFind (datas) {
+  return new Promise(function (resolve, reject) {
+    models.Answer.find({
+      $and: [{ questionId: datas.questionId }, { answerDate: { '$gte': datas.followDate } }]
+    }).exec((err, data) => {
+      if (!err) {
+        models.Question.findOne({
+          _id: datas.questionId
+        }, { title: 1, answers: 1 }, (err, doc) => {
+          if (!err) {
+            let o = {}
+            o['question'] = doc
+            o['newAnswers'] = data
+            resolve(o)
+          }
+        })
+      } else {
+        reject(err)
+      }
+    })
+  })
+}
+async function getFind (data) {
+  let a = []
+  for (let i = 0; i < data.questions.length; i++) {
+    const ret = await asyncFind(data.questions[i])
+    a.push(ret)
+  }
+  return a
+}
+
+// 获取用户回答与提问列表
+router.get('/api/getQandAListGet', (req, res) => {
+  models.Question.find({
+    questioner: req.query.account
+  }, (err, data1) => {
+    if (!err) {
+      if (data1) {
+        models.Answer.find({
+          answerer: req.query.account
+        }).populate({ path: 'questionId', select: 'title answers' }).exec((err, data2) => {
+          if (!err) {
+            if (data2) {
+              let obj = {}
+              obj['questions'] = data1
+              obj['answers'] = data2
+              res.send(obj)
+            } else {
+              res.send(false)
+            }
+          }
+        })
+      } else {
+        res.send(false)
+      }
+    }
+  })
+})
+
+// 获取某些用户资料
+router.get('/api/getUsersProfileGet', (req, res) => {
+  console.log(req.query.accounts)
+  models.Account.find({
+    accountName: req.query.accounts
+  }, { accountName: 1, userAvatar: 1, userDescribe: 1 }, (err, data) => {
+    if (!err) {
+      res.send(data)
     } else {
       res.send(false)
     }

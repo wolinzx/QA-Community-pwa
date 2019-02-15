@@ -11,7 +11,7 @@
         </mu-button>
       </mu-menu> -->
     </mu-appbar>
-    <mu-tabs class="tabs" :value.sync="active" indicator-color="white" full-width>
+    <mu-tabs class="tabs" :value.sync="active" indicator-color="white" full-width style="position: sticky; top: 56px;">
       <mu-tab>问题</mu-tab>
       <mu-tab>话题</mu-tab>
       <mu-tab>用户</mu-tab>
@@ -28,6 +28,13 @@
           <mu-divider></mu-divider>
         </div>
       </mu-list>
+      <mu-flex class="flex-wrapper" justify-content="center" direction="column" align-items="center" style="width:100%; height: 20rem;" v-if="followQuestions === undefined || followQuestions.length === 0">
+        <mu-flex class="flex-wrapper" justify-content="center" direction="column" align-items="center">
+          <mu-icon value="storage" size="150" color="#ececec"></mu-icon>
+          <span style="color: #b0b0b0">还没有内容</span>
+        </mu-flex>
+      </mu-flex>
+      <span class="nomore" v-else>没有更多内容</span>
     </div>
     <div class="follow-topic" v-if="active === 1">
       <mu-list textline="two-line">
@@ -45,6 +52,13 @@
           <mu-divider></mu-divider>
         </div>
       </mu-list>
+      <mu-flex class="flex-wrapper" justify-content="center" direction="column" align-items="center" style="width:100%; height: 20rem;" v-if="followTopics === undefined || followTopics.length === 0">
+        <mu-flex class="flex-wrapper" justify-content="center" direction="column" align-items="center">
+          <mu-icon value="storage" size="150" color="#ececec"></mu-icon>
+          <span style="color: #b0b0b0">还没有内容</span>
+        </mu-flex>
+      </mu-flex>
+      <span class="nomore" v-else>没有更多内容</span>
     </div>
     <div class="demo-text" v-if="active === 2">
       <mu-list textline="two-line">
@@ -75,6 +89,13 @@
         <mu-button slot="actions" flat color="primary" @click="openAlert = false">放弃</mu-button>
         <mu-button slot="actions" flat color="primary" @click="unFollow(unFollower)">取消关注</mu-button>
       </mu-dialog>
+      <mu-flex class="flex-wrapper" justify-content="center" direction="column" align-items="center" style="width:100%; height: 20rem;" v-if="followUsers === undefined || followUsers.length === 0">
+        <mu-flex class="flex-wrapper" justify-content="center" direction="column" align-items="center">
+          <mu-icon value="storage" size="150" color="#ececec"></mu-icon>
+          <span style="color: #b0b0b0">还没有内容</span>
+        </mu-flex>
+      </mu-flex>
+      <span class="nomore" v-else>没有更多内容</span>
     </div>
   </div>
 </template>
@@ -130,21 +151,24 @@ export default {
     }
   },
   created () {
-    getFollowQuestionGet({
-      follower: this.userInfo.user_datas[0].account
-    }).then(res => {
-      this.followQuestions = res.data
-    }).catch(err => {
-      console.log(err)
-    })
-    getFollowTopicGet({
-      follower: this.userInfo.user_datas[0].account
-    }).then(res => {
-      this.followTopics = res.data.topics
-    }).catch(err => {
-      console.log(err)
-    })
-    this.getFollowUsers()
+    if (this.userInfo.isLogined) {
+      getFollowQuestionGet({
+        follower: this.userInfo.user_datas[0].account
+      }).then(res => {
+        console.log('关注问题', res.data)
+        this.followQuestions = res.data
+      }).catch(err => {
+        console.log(err)
+      })
+      getFollowTopicGet({
+        follower: this.userInfo.user_datas[0].account
+      }).then(res => {
+        this.followTopics = res.data.topics
+      }).catch(err => {
+        console.log(err)
+      })
+      this.getFollowUsers()
+    }
   },
   computed: {
     ...mapState(['userInfo'])
@@ -161,5 +185,11 @@ export default {
   background-color: #e6e6e6;
   color: rgba(0,0,0,.3);
   box-shadow: none;
+}
+.nomore{
+  display: block;
+  text-align: center;
+  margin: 20px;
+  color: #aaaaaa;
 }
 </style>

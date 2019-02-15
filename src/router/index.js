@@ -18,8 +18,9 @@ import Detail from '@/page/Detail'
 import Answer from '@/page/Answer'
 import Topic from '@/page/topic/Topic'
 import TopicDetail from '@/page/topic/TopicDetail'
+import About from '@/page/About'
 // const Home = () => import('@/page/home/Home')
-// const Message = () => import('@/page/message/Message')
+// const Message = () => import('@/page/message/Message')About
 
 Vue.use(Router)
 
@@ -81,6 +82,11 @@ export default new Router({
       path: '/Follow',
       name: 'Follow',
       component: Follow
+    },
+    {
+      path: '/About',
+      name: 'About',
+      component: About
     },
     {
       path: '/Detail',

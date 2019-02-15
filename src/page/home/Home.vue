@@ -41,6 +41,13 @@
                 </mu-card-actions>
               </mu-card>
             </div>
+            <mu-flex class="flex-wrapper" justify-content="center" direction="column" align-items="center" style="width:100%; height: 20rem;" v-if="answerList.length === 0">
+              <mu-flex class="flex-wrapper" justify-content="center" direction="column" align-items="center">
+                <mu-icon value="storage" size="150" color="#ececec"></mu-icon>
+                <span style="color: #b0b0b0">关注更多用户以获取信息</span>
+              </mu-flex>
+            </mu-flex>
+            <span class="nomore" v-else>无更多内容</span>
           </mu-load-more>
         </div>
       </div>
@@ -71,6 +78,13 @@
                 </mu-card-actions>
               </mu-card>
             </div>
+            <mu-flex class="flex-wrapper" justify-content="center" direction="column" align-items="center" style="width:100%; height: 20rem;" v-if="recommendlist.length === 0">
+              <mu-flex class="flex-wrapper" justify-content="center" direction="column" align-items="center">
+                <mu-icon value="storage" size="150" color="#ececec"></mu-icon>
+                <span style="color: #b0b0b0">关注更多用话题以获取信息</span>
+              </mu-flex>
+            </mu-flex>
+            <span class="nomore" v-else>无更多内容</span>
           </mu-load-more>
         </div>
       </div>
@@ -84,17 +98,18 @@
                 <p>{{i + 1}}</p>
                 <div>
                   <h3>{{hot.title}}</h3>
-                  <span>{{hot.computedHotValue}} 热度</span>
+                  <span>{{hot.computedHotValue}} 万热度</span>
                 </div>
               </div>
             </template>
+            <span class="nomore">无更多内容</span>
           </mu-load-more>
         </div>
       </div>
     </div>
     <div class="edit-action">
       <mu-scale-transition>
-        <mu-button fab color="premary" v-show="showEdit" @click="openQuiz = true">
+        <mu-button fab color="premary" v-show="showEdit" @click="quiz">
           <mu-icon value="edit"></mu-icon>
         </mu-button>
       </mu-scale-transition>
@@ -146,6 +161,7 @@ import { quillEditor } from 'vue-quill-editor'
 import * as localStorage from '../../util/localStorage'
 import dateDiff from '../../util/dateDiff.js'
 import contentFilter from '../../util/contentFilter.js'
+import { globalBus } from '@/util/globalBus'
 // import ImageResize from 'quill-image-resize-module'
 // Quill.register('modules/imageResize', ImageResize)
 import { commitQuestionGet, getQuestionListGet, getTopicGet, getFollowUsersGet, getFollowListGet, getFollwTopicListGet } from '../../api/api.js'
@@ -261,13 +277,10 @@ export default {
       this.$router.push({ name: 'Detail', query: { questionId: id } })
     },
     toAnswer (answer) {
-      let answerArr = [answer]
-      console.log(answer, 'sdfdsf')
       this.$router.push({
         name: 'Answer',
-        params: {
-          answers: answerArr,
-          tapAnswer: 0,
+        query: {
+          answerId: answer._id,
           questionTitle: answer.questionId.title,
           questionId: answer.questionId._id,
           answersCount: answer.questionId.answers
@@ -298,8 +311,10 @@ export default {
       getFollwTopicListGet({
         follower: this.userInfo.user_datas[0].account
       }).then(res => {
-        isFresh ? this.recommendlist = res.data.concat() : this.recommendlist = this.recommendlist.concat(res.data)
-        this.loading2 = false
+        if (res.data) {
+          isFresh ? this.recommendlist = res.data.concat() : this.recommendlist = this.recommendlist.concat(res.data)
+          this.loading2 = false
+        }
       })
     },
     openSelectDialog () {
@@ -317,29 +332,31 @@ export default {
         follower: this.userInfo.user_datas[0].account
       }).then(res => {
         this.followUsers = res.data
-        console.log(this.followUsers, 'fsdfsdfds')
-        let arr = []
-        for (const follows of this.followUsers) {
-          arr.push(follows.accountName)
-        }
-        console.log('arr', arr)
-        getFollowListGet({
-          answerer: arr
-        }).then(res => {
-          this.answerList = res.data
-          console.log(res.data)
-          console.log('fsdfsd', this.answerList)
-          for (const answer of this.answerList) {
-            let answerDate = answer.answerDate
-            answer['computedDate'] = dateDiff(answerDate).diff
-            answer['sec'] = dateDiff(answerDate).sec
+        if (res.data) {
+          console.log(this.followUsers, 'fsdfsdfds')
+          let arr = []
+          for (const follows of this.followUsers) {
+            arr.push(follows.accountName)
           }
-          this.answerList.sort((a, b) => {
-            return a.sec - b.sec
+          console.log('arr', arr)
+          getFollowListGet({
+            answerer: arr
+          }).then(res => {
+            this.answerList = res.data
+            console.log(res.data)
+            console.log('fsdfsd', this.answerList)
+            for (const answer of this.answerList) {
+              let answerDate = answer.answerDate
+              answer['computedDate'] = dateDiff(answerDate).diff
+              answer['sec'] = dateDiff(answerDate).sec
+            }
+            this.answerList.sort((a, b) => {
+              return a.sec - b.sec
+            })
+          }).catch(err => {
+            console.log(err)
           })
-        }).catch(err => {
-          console.log(err)
-        })
+        }
       }).catch(err => {
         console.log(err)
       })
@@ -359,19 +376,27 @@ export default {
         })
         this.loading3 = false
       })
+    },
+    quiz () {
+      if (this.userInfo.isLogined) {
+        this.openQuiz = true
+      } else {
+        globalBus.$emit('openLogin')
+      }
     }
   },
   mounted () {
     this.$refs.container1.addEventListener('scroll', this.handleScroll)
     this.$refs.container2.addEventListener('scroll', this.handleScroll)
     this.$refs.container3.addEventListener('scroll', this.handleScroll)
-    // 获取关注
-    this.getFollowUsers()
-    // 获取提问列表
-    this.getRecommendlist(10, 1, true)
+    if (this.userInfo.isLogined) {
+      // 获取关注
+      this.getFollowUsers()
+      // 获取提问列表
+      this.getRecommendlist(10, 1, true)
+    }
     // 获取热门列表
     this.getHotList(10, 1, true)
-  
   },
   components: {
     quillEditor
@@ -463,5 +488,11 @@ export default {
 }
 .question-edit >>> .ql-toolbar.ql-snow + .ql-container.ql-snow{
   border: none;
+}
+.nomore{
+  display: block;
+  text-align: center;
+  margin: 20px;
+  color: #aaaaaa;
 }
 </style>

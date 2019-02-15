@@ -6,7 +6,7 @@
       </mu-button>
         浏览历史
       <mu-menu slot="right" cover placement="bottom-end">
-        <mu-button icon @click="deleteAllHistory">
+        <mu-button icon @click="openAlert = true">
           <mu-icon value="delete"></mu-icon>
         </mu-button>
       </mu-menu>
@@ -30,6 +30,17 @@
         </mu-list-item-action>
       </mu-list-item>
     </mu-list>
+    <mu-dialog title="删除所有历史记录？" width="600" max-width="80%" :esc-press-close="false" :overlay-close="false" :open.sync="openAlert">
+      <mu-button slot="actions" flat color="primary" @click="openAlert = false">否</mu-button>
+      <mu-button slot="actions" flat color="primary" @click="deleteAllHistory">是</mu-button>
+    </mu-dialog>
+    <mu-flex class="flex-wrapper" justify-content="center" direction="column" align-items="center" style="width:100%; height: 20rem;" v-if="historyList.length === 0">
+      <mu-flex class="flex-wrapper" justify-content="center" direction="column" align-items="center">
+        <mu-icon value="storage" size="150" color="#ececec"></mu-icon>
+        <span style="color: #b0b0b0">还没有内容</span>
+      </mu-flex>
+    </mu-flex>
+    <span class="nomore" v-else>无更多内容</span>
   </div>
 </template>
 
@@ -40,7 +51,8 @@ export default {
   data () {
     return {
       historyList: [],
-      allHistoryList: {}
+      allHistoryList: {},
+      openAlert: false
     }
   },
   methods: {
@@ -69,6 +81,7 @@ export default {
       this.allHistoryList[user] = []
       localStorage.userHistory.set(this.allHistoryList)
       this.getHistoryList()
+      this.openAlert = false
     },
     toDetail (id) {
       this.$router.push({ name: 'Detail', query: { questionId: id } })
@@ -91,5 +104,10 @@ export default {
 </script>
 
 <style scoped>
-
+.nomore{
+  display: block;
+  text-align: center;
+  margin: 20px;
+  color: #aaaaaa;
+}
 </style>

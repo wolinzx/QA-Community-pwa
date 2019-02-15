@@ -4,7 +4,7 @@ import * as localStorage from '../../util/localStorage'
 
 const state = {
   isLogined: false, // 登陆状态
-  user_datas: localStorage.userInfo.get() || [ { avatar: '' } ]
+  user_datas: localStorage.userInfo.get() || [ { avatar: '' }, { userAvatar: '' } ]
 }
 
 const mutations = {

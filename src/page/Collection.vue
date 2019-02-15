@@ -31,18 +31,22 @@
               <mu-icon value="more_vert"></mu-icon>
             </mu-button>
             <mu-list slot="content">
-              <mu-list-item button @click="openEdit = true">
+              <!-- <mu-list-item button @click="openEdit = true">
                 <mu-list-item-content>
                   <mu-list-item-title>编辑收藏夹</mu-list-item-title>
                 </mu-list-item-content>
-              </mu-list-item>
-              <mu-list-item button @click="deleteCollection">
+              </mu-list-item> -->
+              <mu-list-item button @click="openAlert = true">
                 <mu-list-item-content>
                   <mu-list-item-title>删除收藏夹</mu-list-item-title>
                 </mu-list-item-content>
               </mu-list-item>
             </mu-list>
           </mu-menu>
+          <mu-dialog title="确认删除该收藏夹？" width="600" max-width="80%" :esc-press-close="false" :overlay-close="false" :open.sync="openAlert">
+            <mu-button slot="actions" flat color="primary" @click="openAlert = false">否</mu-button>
+            <mu-button slot="actions" flat color="primary" @click="deleteCollection">是</mu-button>
+          </mu-dialog>
         </mu-appbar>
         <mu-card style="width: 100%; margin: 10px auto;" v-for="(answer,i) of answerList" :key="i">
           <mu-card-header :title="answer.answerer" @click="toAnswer(answer)">
@@ -56,7 +60,7 @@
           </mu-card-text>
           <mu-card-actions class="list-buttom">
             <span>{{answer.endorseCount}} 赞同 · 66 评论</span>
-            <mu-menu cover placement="bottom-end">
+            <mu-menu cover placement="bottom-end" :open="openSinDelete">
               <mu-button icon color="rgba(0,0,0,.57)">
                 <mu-icon value="more_vert"></mu-icon>
               </mu-button>
@@ -70,6 +74,12 @@
         </mu-card>
       </mu-dialog>
     </mu-container>
+    <mu-flex class="flex-wrapper" justify-content="center" direction="column" align-items="center" style="width:100%; height: 20rem;" v-if="collectionList === undefined || collectionList.length === 0">
+      <mu-flex class="flex-wrapper" justify-content="center" direction="column" align-items="center">
+        <mu-icon value="storage" size="150" color="#ececec"></mu-icon>
+        <span style="color: #b0b0b0">去收藏回答吧</span>
+      </mu-flex>
+    </mu-flex>
   </div>
 </template>
 
@@ -84,7 +94,9 @@ export default {
       openFullscreen: false,
       answerList: [],
       collectionTitle: '',
-      collectionIndex: 0
+      collectionIndex: 0,
+      openSinDelete: false,
+      openAlert: false
     }
   },
   methods: {
@@ -112,13 +124,13 @@ export default {
       this.openFullscreen = true
     },
     toAnswer (answer) {
-      let answerArr = [answer]
-      console.log(answer)
+      // let answerArr = [answer]
+      // console.log(answer)
       this.$router.push({
         name: 'Answer',
-        params: {
-          answers: answerArr,
-          tapAnswer: 0,
+        query: {
+          answerId: answer._id,
+          // sortWay: this.sortWay,
           questionTitle: answer.questionId.title,
           questionId: answer.questionId._id,
           answersCount: answer.questionId.answers
@@ -134,6 +146,7 @@ export default {
         this.getCollectionList().then(res => {
           console.log(this.collectionList[this.collectionIndex].collectionContent)
           this.getQaList(this.collectionList[this.collectionIndex].collectionContent)
+          this.openSinDelete = false
         })
       }).catch(err => {
         console.log(err)

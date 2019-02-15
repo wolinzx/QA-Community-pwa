@@ -4,12 +4,12 @@
       <mu-button icon slot="left" @click="routerBack">
         <mu-icon value="arrow_back"></mu-icon>
       </mu-button>
-      我的
+      {{this.$route.query.user}}
       <mu-menu slot="right" cover placement="bottom-end">
         <mu-button icon>
           <mu-icon value="more_vert"></mu-icon>
         </mu-button>
-        <mu-list slot="content">
+        <mu-list slot="content" v-if="this.$route.query.user === this.userInfo.user_datas[0].account">
           <mu-list-item button @click="openEdit = true">
             <mu-list-item-content>
               <mu-list-item-title>编辑个人资料</mu-list-item-title>
@@ -29,7 +29,7 @@
       </mu-appbar>
       <mu-container>
         <mu-avatar class="edit-avatar" :size="70" @click="openMenu = true">
-          <img :src="userInfo.user_datas[0].avatar">
+          <img :src="form.avatar || this.default_avatar" alt="">
           <mu-icon class="camera-alt" value="camera_alt" color="primary"></mu-icon>
           <mu-bottom-sheet :open.sync="openMenu">
             <mu-list @item-click="openMenu = false">
@@ -75,83 +75,70 @@
       <img src="../../assets/image/flat-back.png" alt="">
     </div>
     <mu-avatar :size="80" class="mine-avatar">
-      <img :src="userInfo.user_datas[0].avatar">
+      <img :src="form.avatar || this.default_avatar" alt="">
     </mu-avatar>
     <div class="mine-content">
-      <h3>{{userInfo.user_datas[0].account}}</h3>
-      <span>计科，web前端方向</span>
+      <h3>{{this.$route.query.user}}</h3>
+      <span>{{form.userDescribe}}</span>
       <div class="follow">
-        <span>粉丝 0</span>
-        <span>关注 1</span>
+        <span>回答 {{answers.length}}</span>&nbsp;
+        <span>提问 {{questions.length}}</span>
+      </div>
+      <div class="follow-button" v-if="this.$route.query.user !== this.userInfo.user_datas[0].account">
+        <mu-button small color="primary" v-if="!isFollow" @click="setFollow"><mu-icon value="add"></mu-icon>关注</mu-button>
+        <mu-button small color="gray" @click="unFollow" v-else>已关注</mu-button>
       </div>
     </div>
     <mu-tabs class="mine-tabs" :value.sync="active2" inverse color="primary" text-color="primary"  indicator-color="primary" full-width>
-      <mu-tab>动态</mu-tab>
       <mu-tab>回答</mu-tab>
-      <mu-tab>想法</mu-tab>
+      <mu-tab>提问</mu-tab>
     </mu-tabs>
     <div class="demo-text" v-if="active2 === 0">
-      <mu-card style="width: 100%; margin: 10px auto;">
-        <mu-card-header title="奔跑的兔子" sub-title="赞同了回答·1天前">
-          <mu-avatar slot="avatar">
-            <img src="../../assets/logo.png">
-          </mu-avatar>
-        </mu-card-header>
-        <mu-card-title title="为什么很多职位都要招[应届毕业生]？"></mu-card-title>
+      <mu-card style="width: 100%; margin: 10px auto;" v-for="(answer, i) of answers" :key="i" @click="toAnswer(answer)">
+        <mu-card-title :title="answer.questionId.title"></mu-card-title>
         <mu-card-text>
-          奔跑的兔子: 好骗（相信加班能提升自我价值升职加薪）
-          干的多（肯加班）要的少（肯无偿加班）
+          {{answer.contentData | contentFilter}}
         </mu-card-text>
         <mu-card-actions class="list-buttom">
-          <span>219 赞同 · 66 评论</span>
+          <span>{{answer.computedDate}}</span>
         </mu-card-actions>
       </mu-card>
+      <mu-flex class="flex-wrapper" justify-content="center" direction="column" align-items="center" style="width:100%; height: 10rem;" v-if="answers.length === 0">
+        <mu-flex class="flex-wrapper" justify-content="center" direction="column" align-items="center">
+          <mu-icon value="storage" size="150" color="#ececec"></mu-icon>
+          <span style="color: #b0b0b0">还没有内容</span>
+        </mu-flex>
+      </mu-flex>
+      <span class="nomore" v-else>没有更多内容</span>
     </div>
     <div class="demo-text" v-if="active2 === 1">
-      <mu-card style="width: 100%; margin: 10px auto;">
-        <mu-card-title title="为什么很多职位都要招[应届毕业生]？"></mu-card-title>
+      <mu-card style="width: 100%; margin: 10px auto;" v-for="(question, i) of questions" :key="i" @click="toDetail(question._id, question.title)">
+        <mu-card-title :title="question.title"></mu-card-title>
         <mu-card-text>
-          奔跑的兔子: 好骗（相信加班能提升自我价值升职加薪）
-          干的多（肯加班）要的少（肯无偿加班）
+          {{question.contentData | contentFilter}}
         </mu-card-text>
         <mu-card-actions class="list-buttom">
-          <span>1天前</span>
+          <span>{{question.answers}} 回答 · {{question.follows}} 关注</span>
         </mu-card-actions>
       </mu-card>
-    </div>
-    <div class="demo-text" v-if="active2 === 2">
-      <mu-card style="width: 100%; margin: 10px auto;">
-        <mu-card-header title="奔跑的兔子" sub-title="1天前">
-          <mu-avatar slot="avatar">
-            <img src="../../assets/logo.png">
-          </mu-avatar>
-        </mu-card-header>
-        <mu-card-text>
-          奔跑的兔子: 好骗（相信加班能提升自我价值升职加薪）
-          干的多（肯加班）要的少（肯无偿加班）
-        </mu-card-text>
-        <mu-card-actions>
-          <mu-button flat>
-            <mu-icon left value="call_missed"></mu-icon>
-            转发
-          </mu-button>
-          <mu-button flat>
-            <mu-icon left value="chat_bubble_outline"></mu-icon>
-            评论
-          </mu-button>
-          <mu-button flat>
-            <mu-icon left value="exposure_plus_1"></mu-icon>
-            点赞
-          </mu-button>
-        </mu-card-actions>
-      </mu-card>
+      <mu-flex class="flex-wrapper" justify-content="center" direction="column" align-items="center" style="width:100%; height: 10rem;" v-if="questions.length === 0">
+        <mu-flex class="flex-wrapper" justify-content="center" direction="column" align-items="center">
+          <mu-icon value="storage" size="150" color="#ececec"></mu-icon>
+          <span style="color: #b0b0b0">还没有内容</span>
+        </mu-flex>
+      </mu-flex>
+      <span class="nomore" v-else>没有更多内容</span>
     </div>
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex'
-import { accountProfileGet, setProfileGet } from '../../api/api.js'
+import { accountProfileGet, setProfileGet, getQandAListGet, getFollowUserGet2, setFollowUserGet, unFollowUserGet } from '../../api/api.js'
+import contentFilter from '../../util/contentFilter.js'
+import dateDiff from '../../util/dateDiff.js'
+import * as localStorage from '../../util/localStorage'
+import { globalBus } from '@/util/globalBus'
 export default {
   data () {
     return {
@@ -165,7 +152,11 @@ export default {
         userIndustry: '',
         userBirth: ''
       },
-      loading2: false
+      loading2: false,
+      default_avatar: '/static/img/default_avatar.jpeg',
+      answers: [],
+      questions: [],
+      isFollow: false
     }
   },
   methods: {
@@ -190,7 +181,7 @@ export default {
             this.showAvatarMenu = false
             this.$toast.success('上传成功')
             setTimeout(() => {
-              window.location.reload()
+              // window.location.reload()
             }, 1500)
           }
         })
@@ -211,21 +202,115 @@ export default {
         })
         this.loading2 = false
       }, 1000)
+    },
+    getFollow () {
+      getFollowUserGet2({
+        follower: this.userInfo.user_datas[0].account
+      }).then(res => {
+        if (res.data) {
+          console.log(res)
+          this.isFollow = res.data.userId.includes(this.$route.query.user)
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    setFollow () {
+      if (this.userInfo.isLogined) {
+        let param = {
+          follower: this.userInfo.user_datas[0].account,
+          userId: this.$route.query.user
+        }
+        setFollowUserGet(param).then(res => {
+          if (res) {
+            this.getFollow()
+            this.$toast.success('关注成功')
+          }
+        }).catch(err => {
+          console.log(err)
+        })
+      } else {
+        this.$toast.error('请先登录')
+        globalBus.$emit('openLogin')
+      }
+    },
+    unFollow () {
+      let param = {
+        follower: this.userInfo.user_datas[0].account,
+        userId: this.$route.query.user
+      }
+      unFollowUserGet(param).then(res => {
+        if (res) {
+          this.getFollow()
+          this.$toast.success('取消关注成功')
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    toAnswer (answer) {
+      this.$router.push({
+        name: 'Answer',
+        query: {
+          answerId: answer._id,
+          questionTitle: answer.questionId.title,
+          questionId: answer.questionId._id,
+          answersCount: answer.questionId.answers
+        }
+      })
+    },
+    toDetail (id, title) {
+      let user = this.userInfo.user_datas[0].account
+      console.log()
+      let hhh = localStorage.userHistory.get() || {}
+      if (!localStorage.userHistory.get()[user]) {
+        hhh[user] = []
+      }
+      let fff = hhh[user].filter(item => item.questionId !== id)
+      fff.push({ questionTitle: title, questionId: id, hDate: Date.now() })
+      console.log(1, hhh)
+      hhh[user] = fff
+      console.log(2, hhh)
+      localStorage.userHistory.set(hhh)
+      this.$router.push({ name: 'Detail', query: { questionId: id } })
     }
   },
   computed: {
     ...mapState(['userInfo'])
   },
   mounted () {
+    if (this.$route.query.user !== this.userInfo.user_datas[0].account) {
+      this.getFollow()
+    }
     console.log(this.userInfo.user_datas[0].account)
     let param = {
-      account: this.userInfo.user_datas[0].account
+      account: this.$route.query.user
     }
     accountProfileGet(param).then(res => {
       this.form = Object.assign({}, res.data)
     }).catch(err => {
       console.log(err)
     })
+    getQandAListGet({
+      account: this.$route.query.user
+    }).then(res => {
+      console.log(res)
+      this.answers = res.data.answers
+      this.questions = res.data.questions
+      for (const answer of this.answers) {
+        let answerDate = answer.answerDate
+        answer['computedDate'] = dateDiff(answerDate).diff
+        answer['sec'] = dateDiff(answerDate).sec
+      }
+      this.answers.sort((a, b) => {
+        return a.sec - b.sec
+      })
+    }).catch(err => {
+      console.log(err)
+    })
+  },
+  filters: {
+    contentFilter
   }
 }
 </script>
@@ -246,6 +331,7 @@ export default {
 }
 .mine-content{
   padding: 2.4rem 1rem 0;
+  position: relative;
 }
 .mine-content h3{
   font-size: 1rem;
@@ -257,6 +343,8 @@ export default {
 .mine-tabs{
   /* border-bottom: 1px solid rgba(0,0,0,.12); */
   box-shadow: 0 2px 1px -1px rgba(0,0,0,.2);
+  position: sticky;
+  top: 56px;
 }
 .mu-card-title-container,
 .mu-card-text,
@@ -304,5 +392,16 @@ export default {
   height: 100%;
   width: 100%;
   opacity: 0;
+}
+.nomore{
+  display: block;
+  text-align: center;
+  margin: 20px;
+  color: #aaaaaa;
+}
+.follow-button{
+  position: absolute;
+  bottom: 0;
+  right: 20px;
 }
 </style>

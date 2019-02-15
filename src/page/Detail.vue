@@ -2,7 +2,7 @@
   <div class="detail">
     <mu-appbar style="width: 100%;" color="primary">
       <mu-button icon slot="left" @click="routerBack">
-        <mu-icon value="home"></mu-icon>
+        <mu-icon value="arrow_back"></mu-icon>
       </mu-button>
         提问详情
       <mu-menu slot="right" cover placement="bottom-end">
@@ -19,12 +19,12 @@
       </mu-menu>
     </mu-appbar>
     <mu-card style="width: 100%; margin: 0 auto;">
-      <mu-chip color="#f2f2f2" text-color="#bfbfbf" v-for="(topic, i) of questionDetail.topics" :key="i">
+      <mu-chip color="#f2f2f2" text-color="#bfbfbf" v-for="(topic, i) of questionDetail.topics" :key="i" @click="toTopicDetail(topic)">
         {{topic}}
       </mu-chip>
       <mu-card-title :title="questionDetail.title"></mu-card-title>
       <mu-card-text :class="{'detail-content': showMore}" @click="showMore = true">
-        <div v-html="questionDetail.contentData"></div>
+        <div class="question-content" v-html="questionDetail.contentData"></div>
       </mu-card-text>
       <mu-card-actions class="detail-action">
         <span>{{followCount}} 人关注</span>
@@ -41,7 +41,7 @@
     <mu-list>
       <mu-sub-header class="detail-answer-bar">
         <span>{{answers.length}} 个回答</span>
-        <mu-menu slot="right" cover placement="bottom-end">
+        <mu-menu slot="right" cover placement="bottom-end" v-if="answers.length !== 0" :open.sync="openSort">
           {{sortWay}}
           <mu-button icon>
             <mu-icon value="expand_more"></mu-icon>
@@ -64,20 +64,27 @@
       </mu-sub-header>
     </mu-list>
     <div>
-      <mu-card style="width: 100%; margin: 0 auto 10px;" v-for="(answer,index) of answers" :key="index">
+      <mu-card style="width: 100%; margin: 0 auto 10px;" v-for="(answer,index) of answers" :key="index" @click="toAnswer(index)">
         <mu-card-header :title="answer.answerer">
           <mu-avatar slot="avatar" :size="20">
-            <img src="../assets/image/avatar.jpeg">
+            <img :src="answer.avatar || default_avatar">
           </mu-avatar>
         </mu-card-header>
-        <mu-card-text @click="toAnswer(index)">
+        <mu-card-text>
           {{answer.contentData | contentFilter}}
         </mu-card-text>
         <mu-card-actions>
-          <span>{{ answer.endorseCount }} 赞同 · 40 评论 · {{answer.computedDate}}</span>
+          <span>{{ answer.endorseCount }} 赞同 · {{answer.computedDate}}</span>
         </mu-card-actions>
       </mu-card>
     </div>
+    <mu-flex class="flex-wrapper" justify-content="center" direction="column" align-items="center" style="width:100%; height: 10rem;" v-if="answers.length === 0">
+      <mu-flex class="flex-wrapper" justify-content="center" direction="column" align-items="center">
+        <mu-icon value="storage" size="150" color="#ececec"></mu-icon>
+        <span style="color: #b0b0b0">快成为第一个回答者吧</span>
+      </mu-flex>
+    </mu-flex>
+    <span class="nomore" v-else>无更多内容</span>
     <mu-dialog width="360" transition="slide-bottom" fullscreen :open.sync="openAnswer">
       <mu-appbar color="primary" :title="questionTitle">
         <mu-button slot="left" icon @click="openAnswer = false">
@@ -101,7 +108,7 @@
 </template>
 
 <script>
-import { getQuestionGet, commitAnswerGet, getAnswerListGet, setFollowGet, unFollowGet, getFollowGet, isAnsweredGet } from '../api/api.js'
+import { getQuestionGet, commitAnswerGet, getAnswerListGet, setFollowGet, unFollowGet, getFollowGet, isAnsweredGet, getUsersProfileGet } from '../api/api.js'
 import { mapState } from 'vuex'
 import * as localStorage from '../util/localStorage'
 import dateDiff from '../util/dateDiff.js'
@@ -110,6 +117,7 @@ import { quillEditor } from 'vue-quill-editor'
 import 'quill/dist/quill.core.css'
 import 'quill/dist/quill.snow.css'
 import 'quill/dist/quill.bubble.css'
+import { globalBus } from '@/util/globalBus'
 export default {
   data () {
     return {
@@ -141,12 +149,18 @@ export default {
       routerFrom: '',
       endorseList: [],
       followCount: 0,
-      isFollow: false
+      isFollow: false,
+      accounts: [],
+      default_avatar: '/static/img/default_avatar.jpeg',
+      openSort: false
     }
   },
   methods: {
     routerBack () {
-      this.$router.push({ name: 'Home' })
+      this.$router.go(-1)
+    },
+    toTopicDetail (topicName) {
+      this.$router.push({ name: 'TopicDetail', query: { topicName } })
     },
     toAnswer (index) {
       let user = this.userInfo.user_datas[0].account
@@ -155,8 +169,6 @@ export default {
       if (!localStorage.userHistory.get()[user]) {
         hhh[user] = []
       }
-      // let storageH = localStorage.userHistory.get()[user]
-      // hhh[user] = storageH ? storageH.concat() : []
       let fff = hhh[user].filter(item => item.questionId !== this.$route.query.questionId)
       fff.push({ questionTitle: this.questionTitle, questionId: this.$route.query.questionId, hDate: Date.now() })
       console.log(1, hhh)
@@ -165,12 +177,11 @@ export default {
       localStorage.userHistory.set(hhh)
       this.$router.push({
         name: 'Answer',
-        params: {
-          answers: this.answers,
-          tapAnswer: index,
+        query: {
+          answerId: this.answers[index]._id,
+          sortWay: this.sortWay,
           questionTitle: this.questionTitle,
           questionId: this.$route.query.questionId,
-          sortWay: this.sortWay,
           answersCount: this.questionDetail.answers
         }
       })
@@ -184,9 +195,11 @@ export default {
       getAnswerListGet(param).then(res => {
         this.answers = res.data.concat()
         this.insertTime(this.answers)
-        // this.qualitySort()
-
-        console.log(this.answers)
+        for (const i of this.answers) {
+          this.accounts.push(i.answerer)
+        }
+        this.getUsersProfile()
+        this.openSort = false
       }).catch(err => {
         console.log(err)
       })
@@ -218,31 +231,45 @@ export default {
       })
     },
     getFollow () {
+      console.log({
+        follower: this.userInfo.user_datas[0].account,
+        questionId: this.$route.query.questionId
+      })
       getFollowGet({
         follower: this.userInfo.user_datas[0].account,
         questionId: this.$route.query.questionId
       }).then(res => {
         console.log(res)
-        let questionIdArr = res.data.doc.questionId
-        this.isFollow = questionIdArr.includes(this.$route.query.questionId)
+        if (res.data.doc) {
+          let questionIdArr = []
+          for (const question of res.data.doc.questions) {
+            questionIdArr.push(question.questionId)
+          }
+          this.isFollow = questionIdArr.includes(this.$route.query.questionId)
+        }
         this.followCount = res.data.followCount
       }).catch(err => {
         console.log(err)
       })
     },
     setFollow () {
-      let param = {
-        follower: this.userInfo.user_datas[0].account,
-        questionId: this.$route.query.questionId
-      }
-      setFollowGet(param).then(res => {
-        if (res) {
-          this.getFollow()
-          this.$toast.success('关注成功')
+      if (this.userInfo.isLogined) {
+        let param = {
+          follower: this.userInfo.user_datas[0].account,
+          questionId: this.$route.query.questionId
         }
-      }).catch(err => {
-        console.log(err)
-      })
+        setFollowGet(param).then(res => {
+          if (res) {
+            this.getFollow()
+            this.$toast.success('关注成功')
+          }
+        }).catch(err => {
+          console.log(err)
+        })
+      } else {
+        this.$toast.error('请先登录')
+        globalBus.$emit('openLogin')
+      }
     },
     unFollow () {
       let param = {
@@ -259,15 +286,43 @@ export default {
       })
     },
     isAnswered () {
-      isAnsweredGet({
-        questionId: this.$route.query.questionId,
-        answerer: this.userInfo.user_datas[0].account
+      if (this.userInfo.isLogined) {
+        isAnsweredGet({
+          questionId: this.$route.query.questionId,
+          answerer: this.userInfo.user_datas[0].account
+        }).then(res => {
+          if (!res.data) {
+            this.openAnswer = true
+          } else {
+            this.$toast.error('已经回答过该问题')
+          }
+        })
+      } else {
+        this.$toast.error('请先登录')
+        globalBus.$emit('openLogin')
+      }  
+    },
+    getUsersProfile () {
+      console.log({
+        accounts: this.accounts
+      })
+      getUsersProfileGet({
+        accounts: this.accounts
       }).then(res => {
-        if (!res.data) {
-          this.openAnswer = true
-        } else {
-          this.$toast.error('已经回答过该问题')
+        console.log(res.data)
+        let temp = this.answers.concat()
+        for (const i of temp) {
+          for (const j of res.data) {
+            console.log(i.answerer, j.accountName)
+            if (i.answerer === j.accountName) {
+              i['avatar'] = j.userAvatar
+            }
+          }
         }
+        this.answers = temp.concat()
+        console.log(this.answers)
+      }).catch(err => {
+        console.log(err)
       })
     }
     // qualitySort () {
@@ -370,5 +425,14 @@ export default {
 }
 .mu-chip{
   margin-right: 8px;
+}
+.question-content>>>img{
+  max-width: 100% !important;
+}
+.nomore{
+  display: block;
+  text-align: center;
+  margin: 20px;
+  color: #aaaaaa;
 }
 </style>

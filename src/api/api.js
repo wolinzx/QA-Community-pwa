@@ -71,3 +71,11 @@ export const getFollwTopicListGet = params => { return axios.get(`/api/getFollwT
 export const getTopicDetailGet = params => { return axios.get(`/api/getTopicDetailGet`, { params: params }) }
 
 export const unFollowTopicGet = params => { return axios.get(`/api/unFollowTopicGet`, { params: params }) }
+
+export const getTimeAnswersGet = params => { return axios.get(`/api/getTimeAnswersGet`, { params: params }) }
+
+export const getQandAListGet = params => { return axios.get(`/api/getQandAListGet`, { params: params }) }
+
+export const getFollowUserGet2 = params => { return axios.get(`/api/getFollowUserGet2`, { params: params }) }
+
+export const getUsersProfileGet = params => { return axios.get(`/api/getUsersProfileGet`, { params: params }) }

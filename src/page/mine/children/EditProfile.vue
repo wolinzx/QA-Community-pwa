@@ -22,7 +22,7 @@
         <h4 class="menu-title">更换头像</h4>
         <span class="upload-button">
           <span>从相册选择</span>
-          <input name="file" type="file" accept="image/png,image/gif,image/jpeg" @change="upLoadAvatar" />
+          <input name="file" type="file" accept="image/png,image/jpg" @change="upLoadAvatar" />
         </span>
         <span @click="showLargeImage = true">查看大图</span>
       </div>
@@ -31,9 +31,8 @@
     </div>
     <MessageBox ref="messageBox"></MessageBox>
     <div class="img-container" v-show="showLargeImage" @click="showLargeImage = false">
-      <img :src="userInfo.user_datas[0].avatar" alt="">
+      <img :src="userInfo.user_datas[0].avatar || this.default_avatar" alt="">
     </div>
-    <input name="file" type="file" accept="image/png,image/gif,image/jpeg" @change="upLoadAvatar" />
   </div>
 </template>
 
@@ -50,7 +49,8 @@ export default {
     return {
       title: '修改个人资料',
       showAvatarMenu: false,
-      showLargeImage: false
+      showLargeImage: false,
+      default_avatar: '/static/img/default_avatar.jpeg'
     }
   },
   components: {

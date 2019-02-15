@@ -6,6 +6,8 @@
         <mu-chip :color="initChips[Math.floor(Math.random()*7)]" v-for="(topic, i) of followTopics" :key="i"  @click="toTopicDetail(topic)">
           {{topic}}
         </mu-chip>
+        <span class="nomore" v-if="!userInfo.isLogined">登陆更精彩</span>
+        <span class="nomore" v-else-if="followTopics === undefined || followTopics.length === 0">去关注话题吧</span>
       </div>
     </mu-list>
     <mu-list textline="three-line">
@@ -44,6 +46,8 @@
       <mu-button slot="actions" flat color="primary" @click="openAlert = false">放弃</mu-button>
       <mu-button slot="actions" flat color="primary" @click="unFollow(unFollower)">取消关注</mu-button>
     </mu-dialog> -->
+    <span class="nomore">无更多内容</span>
+    <div class="sit"></div>
   </div>
 </template>
 
@@ -83,29 +87,30 @@ export default {
       }
       let list = res.data
       // this.topicList = res.data
-      getFollowTopicGet({
-        follower: this.userInfo.user_datas[0].account
-      }).then(res => {
-        this.topicList = list.filter((item) => {
-          for (const topic of res.data.topics) {
-            if (item.topicName === topic) {
-              return false
-            }
+      if (this.userInfo.isLogined) {
+        getFollowTopicGet({
+          follower: this.userInfo.user_datas[0].account
+        }).then(res => {
+          console.log(res)
+          if (res.data) {
+            this.topicList = list.filter((item) => {
+              for (const topic of res.data.topics) {
+                if (item.topicName === topic) {
+                  return false
+                }
+              }
+              return true
+            })
+            this.followTopics = res.data.topics
+          } else {
+            this.topicList = list
           }
-          return true
+        }).catch(err => {
+          console.log(err)
         })
-        // this.followTopics = this.topicList.filter((item) => {
-        //   for (const topic of res.data.topics) {
-        //     if (item.topicName !== topic) {
-        //       return false
-        //     }
-        //   }
-        //   return true
-        // })
-        this.followTopics = res.data.topics
-      }).catch(err => {
-        console.log(err)
-      })
+      } else {
+        this.topicList = list
+      }
     }).catch(err => {
       console.log(err)
     })
@@ -133,4 +138,15 @@ export default {
 .mu-avatar img{
   border-radius: 10%;
 } */
+
+.nomore{
+  display: block;
+  text-align: center;
+  margin: 20px;
+  color: #aaaaaa;
+}
+.sit{
+  width: 100%;
+  height: 56px;
+}
 </style>

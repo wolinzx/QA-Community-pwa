@@ -5,7 +5,7 @@
         <mu-icon value="menu"></mu-icon>
       </mu-button>
       <mu-avatar size="30" slot="left" @click="open = !open">
-        <img :src="userInfo.user_datas[0].avatar || this.default_avatar" alt="">
+        <img :src="userInfo.user_datas[1].userAvatar || this.default_avatar" alt="">
       </mu-avatar>
       <!-- <div v-if="this.routeFirstPath !== 'Home'" class="appbar-title">
         {{this.routerName[this.routeFirstPath]}}
@@ -25,18 +25,20 @@
       <router-view class="child-view" v-if="!$route.meta.keepAlive"></router-view>
     <!-- </transition> -->
     <mu-drawer :open.sync="open" :docked="docked" :right="position === 'right'">
-      <mu-container class="login-block">
-        <div class="user-base"  @click="!userInfo.isLogined ? openFullscreenDialog() : openProfile()">
-          <!-- <div class="user-avatar">
-            <img :src="userInfo.user_datas[0].avatar || this.default_avatar" alt="">
-          </div> -->
-          <mu-avatar size="55">
-            <img :src="userInfo.user_datas[0].avatar || this.default_avatar" alt="">
-          </mu-avatar>
-          <h3>{{ userInfo.user_datas[0].account || '点击头像登陆' }}</h3>
-        </div>
-        <div class="back-img"></div>
-      </mu-container>
+      <mu-appbar style="width: 100%;" color="primary" class="block-bar">
+        <mu-container class="login-block">
+          <div class="user-base"  @click="!userInfo.isLogined ? openFullscreenDialog() : openProfile()">
+            <!-- <div class="user-avatar">
+              <img :src="userInfo.user_datas[0].avatar || this.default_avatar" alt="">
+            </div> -->
+            <mu-avatar size="55" class="bar-avatar">
+              <img :src="userInfo.user_datas[1].userAvatar || this.default_avatar" alt="">
+            </mu-avatar>
+            <h3>{{ userInfo.user_datas[0].account || '点击头像登陆' }}</h3>
+          </div>
+          <div class="back-img"></div>
+        </mu-container>
+      </mu-appbar>
       <div class="user-bar" v-if="userInfo.isLogined">
         <mu-button flat>
           <p>0</p>
@@ -65,13 +67,13 @@
           </mu-list-item-action>
           <mu-list-item-title>浏览历史</mu-list-item-title>
         </mu-list-item>
-        <mu-list-item button :to="{ name:'Collection' }">
+        <mu-list-item button @click="!userInfo.isLogined ? openFullscreenDialog() : toCollection()">
           <mu-list-item-action>
             <mu-icon value="folder_open"></mu-icon>
           </mu-list-item-action>
           <mu-list-item-title>我的收藏</mu-list-item-title>
         </mu-list-item>
-        <mu-list-item button :to="{ name:'Follow' }">
+        <mu-list-item button @click="!userInfo.isLogined ? openFullscreenDialog() : toFollow()">
           <mu-list-item-action>
             <mu-icon value="favorite_border"></mu-icon>
           </mu-list-item-action>
@@ -104,14 +106,28 @@
             <mu-list-item-title>夜间模式</mu-list-item-title>
           </mu-list-item> -->
           <div class="user-bar bar-foot">
-            <mu-button flat>
+            <mu-button flat @click="toAbout">
               <mu-icon value="settings"></mu-icon>
               设置
             </mu-button>
-            <mu-button flat>
+            <!-- <mu-button flat>
               <mu-icon value="color_lens"></mu-icon>
               主题
-            </mu-button>
+            </mu-button> -->
+            <mu-menu placement="top-start" :open.sync="openTheme">
+              <mu-button flat>
+                <mu-icon value="color_lens"></mu-icon>
+                主题
+              </mu-button>
+              <mu-list slot="content" @change="changeTheme">
+                <mu-list-item button v-for="item in themes" :value="item.value" :key="item.value">
+                  <mu-list-item-action>
+                    <mu-icon :color="item.color" value="brightness_1"></mu-icon>
+                  </mu-list-item-action>
+                  <mu-list-item-title>{{item.label}}</mu-list-item-title>
+                </mu-list-item>
+              </mu-list>
+            </mu-menu>
             <mu-button flat  @click="themeSwitch('light')" v-if="this.themeMode === 'dark'">
               <mu-icon value="brightness_1"></mu-icon>
               日间
@@ -216,6 +232,7 @@
 
 <script>
 import { mapState, mapMutations, mapActions } from 'vuex'
+import { globalBus } from '@/util/globalBus'
 import * as api from '@/api/api'
 export default {
   name: 'Index',
@@ -277,7 +294,21 @@ export default {
       openRegistrationForm: false,
       openLogoutDialog: false,
       default_avatar: '/static/img/default_avatar.jpeg',
-      themeMode: 'light'
+      themeMode: 'light',
+      themes: [{
+        label: 'Light',
+        value: 'light',
+        color: 'blue'
+      }, {
+        label: 'Teal',
+        value: 'Teal',
+        color: '#009688'
+      }, {
+        label: 'Carbon',
+        value: 'Carbon',
+        color: '#474a4f'
+      }],
+      openTheme: false
     }
   },
   methods: {
@@ -285,6 +316,12 @@ export default {
     ...mapActions(['GET_USERINFO']),
     login () {
       this.$router.push('/Mine/Login')
+    },
+    toCollection () {
+      this.$router.push({ name: 'Collection' })
+    },
+    toFollow () {
+      this.$router.push({ name: 'Follow' })
     },
     routerChange (val) {
       this.$router.push({ name: val })
@@ -382,15 +419,38 @@ export default {
     },
     openProfile () {
       this.open = false
-      this.$router.push({ name: 'Profile' })
+      this.$router.push({ name: 'Profile', query: { user: this.userInfo.user_datas[0].account } })
     },
     themeSwitch (theme) {
       this.$mu_theme.use(theme)
       this.themeMode = theme
+      localStorage.setItem('theme', theme)
+    },
+    changeTheme (theme) {
+      console.log(theme)
+      this.$mu_theme.use(theme)
+      this.openTheme = false
+      localStorage.setItem('theme', theme)
+      this.themeMode = 'light'
+    },
+    toAbout () {
+      this.open = false
+      this.$router.push({ name: 'About' })
     }
   },
   computed: {
     ...mapState(['userInfo', 'app'])
+  },
+  created () {
+    globalBus.$on('openLogin', () => { 
+      this.openFullscreen = true
+    });
+  },
+  mounted () {
+    this.themeMode = localStorage.getItem('theme')
+    if (this.themeMode !== 'dark') {
+      this.themeMode = 'light'
+    }
   },
   watch: {
     $route (to, from) {
@@ -406,7 +466,7 @@ export default {
   width: 100%;
   position: fixed;
   bottom: 0;
-  box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12);  
+  box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12);
 }
 .login-logo img{
   width: 100%;
@@ -512,26 +572,34 @@ export default {
 .registration-button{
   flex: 1;
 }
+.block-bar{
+  width: 100%;
+  height: 7.4rem;
+}
+.block-bar>div{
+  height: 6.6rem;
+}
+.bar-avatar{
+  vertical-align: bottom;
+}
 .login-block{
   position: relative;
   color: #FFFFFF;
-  background: #2196f3;
-  padding: 0.7rem;
   height: 5.6rem;
 }
 .login-block .back-img{
   position: absolute;
   width: 50%;
   height: 100%;
-  top: 0;
+  top: -18px;
   right: 0;
   background: url('../assets/image/back-img.png') 60% 65% no-repeat;
   background-size: 70%;
 }
 .user-base h3{
   font-weight: normal;
-  font-size: 0.6rem;
-  margin: 0.4rem 0;
+  font-size: 0.8rem;
+  margin: 0;
 }
 .user-bar{
   display: flex;

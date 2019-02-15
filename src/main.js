@@ -22,6 +22,21 @@ Vue.use(MuseUI)
 Vue.use(Toast)
 Vue.use(Loading)
 
+MuseUI.theme.add('Teal', {
+  primary: '#009688',
+  secondary: '#ff4081',
+  success: '#4caf50',
+  warning: '#ffeb3b'
+}, 'light')
+
+MuseUI.theme.add('Carbon', {
+  primary: '#474a4f',
+  secondary: '#ff4081',
+  success: '#4caf50',
+  warning: '#ffeb3b'
+}, 'light')
+MuseUI.theme.use(localStorage.getItem('theme') || 'light')
+
 Vue.prototype.$http = axios
 Vue.prototype.$mu_theme = MuseUI.theme
 Vue.config.productionTip = false

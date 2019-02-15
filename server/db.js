@@ -188,10 +188,10 @@ const followQuestionSchema = mongoose.Schema({
   follower: {
     type: String
   },
-  questionId: {
-    type: Array,
-    default: []
-  }
+  questions: [{
+    questionId: String,
+    followDate: Date
+  }]
 })
 // 用户关注
 const followUserSchema = mongoose.Schema({
