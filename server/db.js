@@ -89,7 +89,11 @@ const questionSchema = mongoose.Schema({
   answersDetail: [{
     answerer: String,
     answerDate: Date
-  }]
+  }],
+  handled: {
+    type: Boolean,
+    default: false
+  }
 })
 // 提问评论
 const questionCommentSchema = mongoose.Schema({
@@ -134,6 +138,10 @@ const answerSchema = mongoose.Schema({
   endorseCount: {
     type: Number,
     default: 0
+  },
+  handled: {
+    type: Boolean,
+    default: false
   }
 })
 // 回答评论
@@ -222,9 +230,33 @@ const collectionsSchema = mongoose.Schema({
 })
 // 话题
 const topicSchema = mongoose.Schema({
-  topicName: String,
+  topicName: {
+    type: String,
+    unique: true
+  },
   topicDescribe: String,
-  topicQList: Array
+  topicQList: Array,
+  addDate: {
+    type: Date
+  }
+})
+// 举报
+const reportSchema = mongoose.Schema({
+  reporter: String,
+  reportQId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Question'
+  },
+  reportAId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Answer'
+  },
+  reportType: String,
+  handled: {
+    type: Boolean,
+    default: false
+  },
+  reportDate: Date
 })
 /**
  * 定义模型Model
@@ -244,7 +276,8 @@ const Models = {
   FollowUser: mongoose.model('FollowUser', followUserSchema),
   FollowTopic: mongoose.model('FollowTopic', followTopicSchema),
   Collections: mongoose.model('Collections', collectionsSchema),
-  Topic: mongoose.model('Topic', topicSchema)
+  Topic: mongoose.model('Topic', topicSchema),
+  Report: mongoose.model('Report', reportSchema)
 }
 
 module.exports = Models

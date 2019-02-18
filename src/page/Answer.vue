@@ -5,24 +5,24 @@
         <mu-icon value="arrow_back"></mu-icon>
       </mu-button>
         回答
-      <mu-menu slot="right" cover placement="bottom-end">
+      <mu-menu slot="right" cover placement="bottom-end" :open.sync="openTheme">
         <mu-button icon>
           <mu-icon value="more_vert"></mu-icon>
         </mu-button>
         <mu-list slot="content">
-          <mu-list-item button>
-            <mu-list-item-content>
-              <mu-list-item-title>没有帮助</mu-list-item-title>
-            </mu-list-item-content>
-          </mu-list-item>
-          <mu-list-item button>
+          <mu-list-item button @click="toReport">
             <mu-list-item-content>
               <mu-list-item-title>举报回答</mu-list-item-title>
             </mu-list-item-content>
           </mu-list-item>
-          <mu-list-item button>
+          <mu-list-item button @click="themeSwitch('dark')" v-if="this.themeMode === 'light'">
             <mu-list-item-content>
               <mu-list-item-title>夜间模式</mu-list-item-title>
+            </mu-list-item-content>
+          </mu-list-item>
+          <mu-list-item button @click="themeSwitch('light')" v-if="this.themeMode === 'dark'">
+            <mu-list-item-content>
+              <mu-list-item-title>日间模式</mu-list-item-title>
             </mu-list-item-content>
           </mu-list-item>
         </mu-list>
@@ -145,8 +145,20 @@
 <script>
 import 'swiper/dist/css/swiper.css'
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
-import { setEndorseGet, getFollowUserGet, setFollowUserGet, unFollowUserGet, getEndorseAnswerGet, addCollectionGet, addCollectionListGet, getCollectionListGet, getAnswerListGet, getUsersProfileGet } from '../api/api.js'
-import { mapState } from 'vuex'
+import {
+  setEndorseGet,
+  getFollowUserGet,
+  setFollowUserGet,
+  unFollowUserGet,
+  getEndorseAnswerGet,
+  addCollectionGet,
+  addCollectionListGet,
+  getCollectionListGet,
+  getAnswerListGet,
+  getUsersProfileGet,
+  getReprotedGet
+} from '../api/api.js'
+import { mapState, mapMutations } from 'vuex'
 import { globalBus } from '@/util/globalBus'
 
 export default {
@@ -192,11 +204,17 @@ export default {
       collectionList: [],
       isCollected: false,
       default_avatar: '/static/img/default_avatar.jpeg',
-      accounts: []
+      accounts: [],
+      themeMode: 'light',
+      openTheme: false
     }
   },
   created () {
     this.getAnswerList(this.$route.query.sortWay)
+    this.themeMode = localStorage.getItem('theme')
+    if (this.themeMode !== 'dark') {
+      this.themeMode = 'light'
+    }
     // this.answers = this.$route.params.answers
     // console.log(this.answers)
     // console.log(this.$route.params.tapAnswer)
@@ -205,11 +223,31 @@ export default {
     // this.getCollectionList()
   },
   methods: {
+    ...mapMutations(['SET_THEME']),
     routerBack () {
       this.$router.go(-1)
     },
     toAllAnswers () {
       this.$router.push({ name: 'Detail', query: { questionId: this.$route.query.questionId } })
+    },
+    toReport () {
+      if (this.userInfo.isLogined) {
+        getReprotedGet({
+          reporter: this.userInfo.user_datas[0].account,
+          reportAId: this.answers[this.swiperIndex]._id
+        }).then(res => {
+          console.log(res.data)
+          if (!res.data.length) {
+            this.$router.push({ name: 'Report', query: { answerId: this.answers[this.swiperIndex]._id } })
+          } else {
+            this.$toast.error('您已举报过该回答')
+          }
+        })
+      } else {
+        this.$toast.error('请先登录')
+        globalBus.$emit('openLogin')
+      }
+      this.openTheme = false
     },
     getEndorseAnswer () {
       getEndorseAnswerGet({
@@ -321,7 +359,7 @@ export default {
           this.$toast.success('添加收藏夹成功')
           this.getCollectionList()
           this.radio.value1 = this.collectionTitle
-        }  
+        }
       }).catch(err => {
         console.log(err)
         this.$toast.error('添加收藏夹失败')
@@ -413,6 +451,13 @@ export default {
       }).catch(err => {
         console.log(err)
       })
+    },
+    themeSwitch (theme) {
+      this.$mu_theme.use(theme)
+      this.themeMode = theme
+      localStorage.setItem('theme', theme)
+      this.SET_THEME(theme)
+      this.openTheme = false
     }
   },
   computed: {

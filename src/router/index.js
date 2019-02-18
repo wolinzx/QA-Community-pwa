@@ -19,6 +19,8 @@ import Answer from '@/page/Answer'
 import Topic from '@/page/topic/Topic'
 import TopicDetail from '@/page/topic/TopicDetail'
 import About from '@/page/About'
+import Search from '@/page/Search'
+import Report from '@/page/Report'
 // const Home = () => import('@/page/home/Home')
 // const Message = () => import('@/page/message/Message')About
 
@@ -87,6 +89,16 @@ export default new Router({
       path: '/About',
       name: 'About',
       component: About
+    },
+    {
+      path: '/Search',
+      name: 'Search',
+      component: Search
+    },
+    {
+      path: '/Report',
+      name: 'Report',
+      component: Report
     },
     {
       path: '/Detail',

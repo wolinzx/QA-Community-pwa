@@ -605,7 +605,7 @@ router.get('/api/addCollectionGet', (req, res) => {
             res.send(false)
           }
         })
-      } 
+      }
     }
   })
 })
@@ -661,7 +661,7 @@ router.get('/api/addCollectionListGet', (req, res) => {
             res.send(err)
           }
         })
-      } 
+      }
     }
   })
 })
@@ -722,22 +722,39 @@ router.get('/api/getFollowQuestionMsgGet', (req, res) => {
 router.get('/api/addTopicGet', (req, res) => {
   models.Topic.update(
     { topicName: req.query.topicName },
-    { $push: { topicQList: req.query.topicQList }, $set: { topicDescribe: req.query.topicDescribe } },
+    { $set: { topicDescribe: req.query.topicDescribe, addDate: Date.now() } },
     { upsert: true }
   ).exec((err, data) => {
+    console.log(data)
     if (!err) {
-      res.send(true)
+      if (data.upserted) {
+        res.send(true)
+      } else {
+        res.send('added')
+      }
+    } else {
+      res.send(false)
     }
   })
 })
 
 // 获取话题列表
 router.get('/api/getTopicGet', (req, res) => {
-  models.Topic.find((err, docs) => {
+  const pagesize = Number(req.query.pageSize)
+  const currentPage = Number(req.query.currentPage)
+  console.log(req.query)
+  models.Topic.count((err, count) => {
     if (!err) {
-      res.send(docs)
-    } else {
-      res.send(false)
+      models.Topic.find().skip(pagesize * (currentPage - 1)).limit(pagesize).exec((err, docs) => {
+        if (!err) {
+          res.json({
+            total: count,
+            docs
+          })
+        } else {
+          res.send(false)
+        }
+      })
     }
   })
 })
@@ -928,13 +945,135 @@ router.get('/api/getQandAListGet', (req, res) => {
 
 // 获取某些用户资料
 router.get('/api/getUsersProfileGet', (req, res) => {
-  console.log(req.query.accounts)
   models.Account.find({
     accountName: req.query.accounts
   }, { accountName: 1, userAvatar: 1, userDescribe: 1 }, (err, data) => {
     if (!err) {
       res.send(data)
     } else {
+      res.send(false)
+    }
+  })
+})
+
+// 搜索模糊查询
+router.get('/api/getSearchGet', (req, res) => {
+  var qs = new RegExp(req.query.search)
+  models.Question.find({
+    title: { '$regex': qs, $options: '$i' }
+  }, (err, question) => {
+    if (!err) {
+      models.Topic.find({
+        topicName: { '$regex': qs, $options: '$i' }
+      }, (err, topic) => {
+        if (!err) {
+          res.json({
+            question,
+            topic
+          })
+        }
+      })
+    }
+  })
+})
+
+// 提交举报
+router.get('/api/commitReprotGet', (req, res) => {
+  let updateData = new models.Report({
+    reporter: req.query.reporter,
+    reportQId: req.query.reportQId,
+    reportAId: req.query.reportAId,
+    reportType: req.query.reportType,
+    reportDate: Date.now()
+  })
+  console.log(updateData)
+  updateData.save((err, data) => {
+    if (!err) {
+      res.send(true)
+    } else {
+      res.send(false)
+    }
+  })
+})
+
+// 获取是否已举报
+router.get('/api/getReprotedGet', (req, res) => {
+  let fake = '000000000000000000000000'
+  let reportQIdFilter = req.query.reportQId || fake
+  let reportAIdFilter = req.query.reportAId || fake
+  models.Report.find({
+    $and: [ { $or: [ { reportQId: reportQIdFilter }, { reportAId: reportAIdFilter } ] }, { reporter: req.query.reporter } ]
+    // $and: [ { 'reports.reportAId': req.query.reportAId }, { reporter: req.query.reporter } ]
+  }, (err, data) => {
+    if (!err) {
+      res.send(data)
+    } else {
+      console.log(err)
+      res.send(false)
+    }
+  })
+})
+
+// **************admin**************
+// 删除话题
+router.get('/api/deleteTopicGet', (req, res) => {
+  console.log({
+    topicName: req.query.topicName
+  })
+  models.Topic.remove({
+    topicName: req.query.topicName
+  }, (err, data) => {
+    if (!err) {
+      res.send(true)
+    } else {
+      res.send(false)
+    }
+  })
+})
+
+// 获取举报信息
+router.get('/api/getReportGet', (req, res) => {
+  const pagesize = Number(req.query.pageSize)
+  const currentPage = Number(req.query.currentPage)
+  models.Report.count((err, count) => {
+    if (!err) {
+      models.Report.find().populate('reportQId reportAId').skip(pagesize * (currentPage - 1)).limit(pagesize).exec((err, docs) => {
+        if (!err) {
+          res.json({
+            total: count,
+            docs
+          })
+        } else {
+          res.send(false)
+        }
+      })
+    }
+  })
+})
+
+// 封禁和解封
+router.get('/api/getHandleReportGet', (req, res) => {
+  let parmas = {
+    reportQId: req.query.reportQId,
+    reportAId: req.query.reportAId,
+    handled: req.query.handle
+  }
+  let dbModle = parmas.reportQId ? 'Question' : 'Answer'
+  let qaId = parmas.reportQId ? 'questionId' : 'answerId'
+  console.log(dbModle, qaId, parmas.reportQId || parmas.reportAId)
+  models[dbModle].update(
+    { [qaId]: parmas.reportQId || parmas.reportAId },
+    { $set: { handled: parmas.handled } }
+  ).exec((err, data) => {
+    if (!err) {
+      console.log(data)
+      if (data.nModified) {
+        res.send(true)
+      } else {
+        res.send(false)
+      }
+    } else {
+      console.log(err)
       res.send(false)
     }
   })

@@ -10,7 +10,7 @@
           <mu-icon value="more_vert"></mu-icon>
         </mu-button>
         <mu-list slot="content">
-          <mu-list-item button @click="openEdit = true">
+          <mu-list-item button @click="toReport">
             <mu-list-item-content>
               <mu-list-item-title>举报</mu-list-item-title>
             </mu-list-item-content>
@@ -108,7 +108,7 @@
 </template>
 
 <script>
-import { getQuestionGet, commitAnswerGet, getAnswerListGet, setFollowGet, unFollowGet, getFollowGet, isAnsweredGet, getUsersProfileGet } from '../api/api.js'
+import { getQuestionGet, commitAnswerGet, getAnswerListGet, setFollowGet, unFollowGet, getFollowGet, isAnsweredGet, getUsersProfileGet, getReprotedGet } from '../api/api.js'
 import { mapState } from 'vuex'
 import * as localStorage from '../util/localStorage'
 import dateDiff from '../util/dateDiff.js'
@@ -158,6 +158,24 @@ export default {
   methods: {
     routerBack () {
       this.$router.go(-1)
+    },
+    toReport () {
+      if (this.userInfo.isLogined) {
+        getReprotedGet({
+          reporter: this.userInfo.user_datas[0].account,
+          reportQId: this.$route.query.questionId
+        }).then(res => {
+          console.log(res.data)
+          if (!res.data.length) {
+            this.$router.push({ name: 'Report', query: { questionId: this.$route.query.questionId } })
+          } else {
+            this.$toast.error('您已举报过该问题')
+          }
+        })
+      } else {
+        this.$toast.error('请先登录')
+        globalBus.$emit('openLogin')
+      }
     },
     toTopicDetail (topicName) {
       this.$router.push({ name: 'TopicDetail', query: { topicName } })
@@ -300,7 +318,7 @@ export default {
       } else {
         this.$toast.error('请先登录')
         globalBus.$emit('openLogin')
-      }  
+      }
     },
     getUsersProfile () {
       console.log({

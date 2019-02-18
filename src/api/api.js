@@ -79,3 +79,9 @@ export const getQandAListGet = params => { return axios.get(`/api/getQandAListGe
 export const getFollowUserGet2 = params => { return axios.get(`/api/getFollowUserGet2`, { params: params }) }
 
 export const getUsersProfileGet = params => { return axios.get(`/api/getUsersProfileGet`, { params: params }) }
+
+export const getSearchGet = params => { return axios.get(`/api/getSearchGet`, { params: params }) }
+
+export const commitReprotGet = params => { return axios.get(`/api/commitReprotGet`, { params: params }) }
+
+export const getReprotedGet = params => { return axios.get(`/api/getReprotedGet`, { params: params }) }

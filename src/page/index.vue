@@ -13,10 +13,21 @@
       <div class="appbar-title">
         {{this.routerName[this.routeFirstPath]}}
       </div>
-      <mu-button icon slot="right">
+      <mu-button icon slot="right" @click="searchPaper = true">
         <mu-icon value="search"></mu-icon>
       </mu-button>
     </mu-appbar>
+    <mu-slide-top-transition>
+      <mu-paper class="search-paper" :z-depth="2" v-show="searchPaper">
+        <mu-text-field v-model="searchContent" placeholder="输入搜索内容"></mu-text-field>
+        <mu-button icon color="primary" v-if="!!searchContent" @click="toSearch">
+          <mu-icon value="search"></mu-icon>
+        </mu-button>
+        <mu-button icon color="primary" v-else @click="searchPaper = false">
+          <mu-icon value="clear"></mu-icon>
+        </mu-button>
+      </mu-paper>
+    </mu-slide-top-transition>
     <!-- <transition :name="transitionName"> -->
       <!-- <router-view class="child-view"></router-view> -->
       <keep-alive>
@@ -128,11 +139,11 @@
                 </mu-list-item>
               </mu-list>
             </mu-menu>
-            <mu-button flat  @click="themeSwitch('light')" v-if="this.themeMode === 'dark'">
+            <mu-button flat  @click="themeSwitch('light')" v-if="hhh === 'dark'">
               <mu-icon value="brightness_1"></mu-icon>
               日间
             </mu-button>
-            <mu-button flat  @click="themeSwitch('dark')" v-if="this.themeMode === 'light'">
+            <mu-button flat  @click="themeSwitch('dark')" v-else>
               <mu-icon value="brightness_2"></mu-icon>
               夜间
             </mu-button>
@@ -231,7 +242,7 @@
 </template>
 
 <script>
-import { mapState, mapMutations, mapActions } from 'vuex'
+import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { globalBus } from '@/util/globalBus'
 import * as api from '@/api/api'
 export default {
@@ -245,6 +256,8 @@ export default {
       { validate: (val) => val.length >= 3 && val.length <= 10, message: '密码长度大于3小于10' }
     ]
     return {
+      searchPaper: false,
+      searchContent: '',
       routerName: {
         Home: '首页',
         Message: '通知',
@@ -312,7 +325,7 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(['SET_USERINFO', 'CLEAR_USERINFO']),
+    ...mapMutations(['SET_USERINFO', 'CLEAR_USERINFO', 'SET_THEME']),
     ...mapActions(['GET_USERINFO']),
     login () {
       this.$router.push('/Mine/Login')
@@ -425,29 +438,41 @@ export default {
       this.$mu_theme.use(theme)
       this.themeMode = theme
       localStorage.setItem('theme', theme)
+      this.SET_THEME(theme)
     },
     changeTheme (theme) {
       console.log(theme)
       this.$mu_theme.use(theme)
       this.openTheme = false
       localStorage.setItem('theme', theme)
+      this.SET_THEME(theme)
       this.themeMode = 'light'
     },
     toAbout () {
       this.open = false
       this.$router.push({ name: 'About' })
+    },
+    toSearch () {
+      this.searchPaper = false
+      this.$router.push({ name: 'Search', query: { search: this.searchContent } })
     }
   },
   computed: {
-    ...mapState(['userInfo', 'app'])
+    ...mapState(['userInfo', 'app']),
+    ...mapGetters(['GET_THEME']),
+    hhh: function () {
+      return this.GET_THEME
+    }
   },
   created () {
-    globalBus.$on('openLogin', () => { 
+    globalBus.$on('openLogin', () => {
       this.openFullscreen = true
-    });
+    })
   },
   mounted () {
     this.themeMode = localStorage.getItem('theme')
+    this.SET_THEME(this.themeMode)
+    console.log(this.GET_THEME)
     if (this.themeMode !== 'dark') {
       this.themeMode = 'light'
     }
@@ -457,6 +482,11 @@ export default {
       this.routeFirstPath = this.$route.matched[0].path.substring(1)
       this.routeMainPath = this.$route.meta.class === 'main'
     }
+    // GET_THEME: (val) => {
+    //   console.log(val)
+    //   this.themeMode = val
+    //   console.log(this.themeMode)
+    // }
   }
 }
 </script>
@@ -641,5 +671,25 @@ export default {
 }
 .menu-left{
   margin-left: -26px;
+}
+.search-paper{
+  position: absolute;
+  top: 0.5rem;
+  left: 50%;
+  z-index: 9999;
+  width: 17rem;
+  margin-left: -8.5rem;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+.search-paper .mu-input{
+  margin-bottom: 0;
+  padding-bottom: 0;
+  padding-top: 6px;
+}
+.search-paper>>>.mu-input-content{
+  margin-left: 8px;
 }
 </style>
