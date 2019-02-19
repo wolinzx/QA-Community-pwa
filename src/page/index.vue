@@ -45,12 +45,15 @@
             <mu-avatar size="55" class="bar-avatar">
               <img :src="userInfo.user_datas[1].userAvatar || this.default_avatar" alt="">
             </mu-avatar>
-            <h3>{{ userInfo.user_datas[0].account || '点击头像登陆' }}</h3>
+            <div class="user-info-1">
+              <span>{{ userInfo.user_datas[0].account || '点击头像登陆' }}</span> <br>
+              <span style="font-size: 0.6rem; color: #ececec;">{{userInfo.user_datas[1].userDescribe}}</span>
+            </div>
           </div>
           <div class="back-img"></div>
         </mu-container>
       </mu-appbar>
-      <div class="user-bar" v-if="userInfo.isLogined">
+      <!-- <div class="user-bar" v-if="userInfo.isLogined">
         <mu-button flat>
           <p>0</p>
           动态
@@ -63,8 +66,8 @@
           <p>0</p>
           粉丝
         </mu-button>
-      </div>
-      <mu-divider></mu-divider>
+      </div> -->
+      <!-- <mu-divider></mu-divider> -->
       <mu-list :value="this.routeFirstPath" @change="open = false">
         <mu-list-item button value="Home" :to="{ name:'Home'}">
           <mu-list-item-action>
@@ -626,10 +629,12 @@ export default {
   background: url('../assets/image/back-img.png') 60% 65% no-repeat;
   background-size: 70%;
 }
-.user-base h3{
+.user-base .user-info-1{
   font-weight: normal;
   font-size: 0.8rem;
   margin: 0;
+  line-height: 23px;
+  margin-top: 14px;
 }
 .user-bar{
   display: flex;

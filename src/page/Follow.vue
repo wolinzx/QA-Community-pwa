@@ -42,7 +42,7 @@
           <mu-list-item avatar button>
             <mu-list-item-action>
               <mu-avatar>
-                <img src="../assets/image/avatar.jpeg">
+                <img :src="topic.topicAvatar">
               </mu-avatar>
             </mu-list-item-action>
             <mu-list-item-content>
@@ -66,7 +66,7 @@
           <mu-list-item avatar button>
             <mu-list-item-action>
               <mu-avatar>
-                <img src="../assets/image/avatar.jpeg">
+                <img :src="user.userAvatar || default_avatar">
               </mu-avatar>
             </mu-list-item-action>
             <mu-list-item-content>
@@ -101,7 +101,7 @@
 </template>
 
 <script>
-import { getFollowQuestionGet, getFollowUsersGet, unFollowUserGet, getFollowTopicGet } from '../api/api.js'
+import { getFollowQuestionGet, getFollowUsersGet, unFollowUserGet, getFollowTopicGet, getUsersProfileGet } from '../api/api.js'
 import { mapState } from 'vuex'
 export default {
   data () {
@@ -112,7 +112,8 @@ export default {
       followQuestions: [],
       followUsers: [],
       followTopics: [],
-      unFollower: ''
+      unFollower: '',
+      default_avatar: '/static/img/default_avatar.jpeg'
     }
   },
   methods: {
@@ -141,6 +142,11 @@ export default {
       getFollowUsersGet({
         follower: this.userInfo.user_datas[0].account
       }).then(res => {
+        // this.getUsersProfile(res.data).then(res => {
+        //   this.followUsers = res
+        // }).catch(err => {
+        //   console.log(err)
+        // })
         this.followUsers = res.data
       }).catch(err => {
         console.log(err)
@@ -148,6 +154,17 @@ export default {
     },
     toTopicDetail (topicName) {
       this.$router.push({ name: 'TopicDetail', query: { topicName } })
+    },
+    getUsersProfile (accounts) {
+      return new Promise(function (resolve, reject) {
+        getUsersProfileGet({
+          accounts
+        }).then(res => {
+          resolve(res.data)
+        }).catch(err => {
+          reject(err)
+        })
+      })
     }
   },
   created () {

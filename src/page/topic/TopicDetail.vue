@@ -10,7 +10,7 @@
       <mu-flex class="flex-wrapper" justify-content="center" align-items="center" style=" padding: 16px; border-bottom: 1px solid #dcdcdc;">
         <mu-flex class="flex-demo" justify-content="start">
           <div style="width: 80px;">
-            <img style="width: 100%; border-radius: 10%" src="../../assets/image/avatar.jpeg" alt="">
+            <img style="width: 100%; border-radius: 10%" :src="topicDetail.topicAvatar" alt="">
           </div>
         </mu-flex>
         <mu-flex class="flex-demo" fill>

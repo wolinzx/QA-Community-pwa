@@ -93,6 +93,10 @@ const questionSchema = mongoose.Schema({
   handled: {
     type: Boolean,
     default: false
+  },
+  questionDate: {
+    type: Date,
+    default: Date.now()
   }
 })
 // 提问评论
@@ -238,7 +242,8 @@ const topicSchema = mongoose.Schema({
   topicQList: Array,
   addDate: {
     type: Date
-  }
+  },
+  topicAvatar: String
 })
 // 举报
 const reportSchema = mongoose.Schema({
@@ -252,10 +257,6 @@ const reportSchema = mongoose.Schema({
     ref: 'Answer'
   },
   reportType: String,
-  handled: {
-    type: Boolean,
-    default: false
-  },
   reportDate: Date
 })
 /**

@@ -1,5 +1,9 @@
 <template>
   <div class="detail">
+    <mu-dialog title="此提问已被封禁" width="360" :open.sync="openHanded" :overlay-close="false">
+      此提问存在违规内容，已被封禁！
+      <mu-button slot="actions" flat color="primary" @click="routerBack">返回</mu-button>
+    </mu-dialog>
     <mu-appbar style="width: 100%;" color="primary">
       <mu-button icon slot="left" @click="routerBack">
         <mu-icon value="arrow_back"></mu-icon>
@@ -63,15 +67,18 @@
         </mu-menu>
       </mu-sub-header>
     </mu-list>
-    <div>
-      <mu-card style="width: 100%; margin: 0 auto 10px;" v-for="(answer,index) of answers" :key="index" @click="toAnswer(index)">
+    <div v-for="(answer,index) of answers" :key="index">
+      <mu-card style="width: 100%; margin: 0 auto 10px;" @click="toAnswer(index)">
         <mu-card-header :title="answer.answerer">
           <mu-avatar slot="avatar" :size="20">
             <img :src="answer.avatar || default_avatar">
           </mu-avatar>
         </mu-card-header>
-        <mu-card-text>
+        <mu-card-text v-if="!answer.handled">
           {{answer.contentData | contentFilter}}
+        </mu-card-text>
+        <mu-card-text v-else>
+          内容涉嫌违规已被封禁！
         </mu-card-text>
         <mu-card-actions>
           <span>{{ answer.endorseCount }} 赞同 · {{answer.computedDate}}</span>
@@ -121,6 +128,7 @@ import { globalBus } from '@/util/globalBus'
 export default {
   data () {
     return {
+      openHanded: false,
       sortWay: '按质量排序',
       openAnswer: false,
       showMore: false,
@@ -200,7 +208,8 @@ export default {
           sortWay: this.sortWay,
           questionTitle: this.questionTitle,
           questionId: this.$route.query.questionId,
-          answersCount: this.questionDetail.answers
+          answersCount: this.questionDetail.answers,
+          handled: this.questionDetail.handled
         }
       })
     },
@@ -369,6 +378,9 @@ export default {
       questionId: this.$route.query.questionId
     }
     getQuestionGet(param).then(res => {
+      if (res.data.handled) {
+        this.openHanded = true
+      }
       this.questionDetail = res.data
       this.questionTitle = res.data.title
       this.questionContent = res.data.contentData

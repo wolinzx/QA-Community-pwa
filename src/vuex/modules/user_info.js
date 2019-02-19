@@ -1,5 +1,5 @@
 import * as types from '../mutation-types'
-import axios from 'axios'
+// import axios from 'axios'
 import * as localStorage from '../../util/localStorage'
 
 const state = {
@@ -38,28 +38,33 @@ const mutations = {
 
 const actions = {
   [types.GET_USERINFO] (context) {
-    if (localStorage.userInfo.get()) {
-      axios.get('/api/login/accountState')
-        .then((response) => {
-          if (response.data) {
-            context.commit('SET_USERINFO', {
-              logined: true,
-              data: localStorage.userInfo.get()
-            })
-          } else {
-            context.commit('SET_USERINFO', {
-              logined: false
-            })
-          }
-        })
-        .catch((err) => {
-          throw err
-        })
+    let arr = localStorage.userInfo.get()
+    if (arr) {
+      context.commit('SET_USERINFO', {
+        logined: true,
+        data: arr
+      })
+      // axios.post('/api/login', { account: arr[0].account, password: arr[0].password }).then(res => {
+      //   console.log(res)
+      //   if (res.data) {
+      //     context.commit('SET_USERINFO', {
+      //       logined: true,
+      //       data: res.data
+      //     })
+      //   } else {
+      //     context.commit('SET_USERINFO', {
+      //       logined: false
+      //     })
+      //   }
+      // }).catch(err => {
+      //   throw err
+      // })
     } else {
-      // 本地没有用户数据，需要重新未登录
+      context.commit('SET_USERINFO', {
+        logined: false
+      })
     }
   }
-
 }
 
 const userInfo = {

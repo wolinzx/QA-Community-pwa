@@ -1,5 +1,5 @@
 <template>
-  <div id="home">
+  <div id="home" ref="globalClick">
     <mu-tabs class="home-tabs" :value.sync="active1" indicator-color="white" full-width>
       <mu-tab>关注</mu-tab>
       <mu-tab>推荐</mu-tab>
@@ -10,10 +10,10 @@
         <div ref="container1" class="demo-loadmore-content">
           <mu-load-more @refresh="refresh1" :refreshing="refreshing1" :loading="loading1" @load="load1">
             <div v-for="(answer, i) in answerList" :key="i">
-              <mu-card style="width: 100%; margin: 10px auto;">
+              <mu-card style="width: 100%; margin: 10px auto;" v-if="!answer.handled">
                 <mu-card-header :title="answer.answerer" :sub-title="'回答了问题 · ' + answer.computedDate">
                   <mu-avatar slot="avatar">
-                    <img src="../../assets/image/avatar.jpeg">
+                    <img :src="answer.avatar || default_avatar">
                   </mu-avatar>
                 </mu-card-header>
                 <mu-card-title :title="answer.questionId.title" @click="toAnswer(answer)"></mu-card-title>
@@ -27,13 +27,7 @@
                       <mu-icon value="more_vert"></mu-icon>
                     </mu-button>
                     <mu-list slot="content">
-                      <mu-list-item button>
-                        <mu-list-item-title>不感兴趣</mu-list-item-title>
-                      </mu-list-item>
-                      <mu-list-item button>
-                        <mu-list-item-title>取消关注</mu-list-item-title>
-                      </mu-list-item>
-                      <mu-list-item button>
+                      <mu-list-item button @click="toAReport(answer._id)">
                         <mu-list-item-title>举报</mu-list-item-title>
                       </mu-list-item>
                     </mu-list>
@@ -47,7 +41,7 @@
                 <span style="color: #b0b0b0">关注更多用户以获取信息</span>
               </mu-flex>
             </mu-flex>
-            <span class="nomore" v-else>无更多内容</span>
+            <span class="nomore" v-if="nomore1">无更多内容</span>
           </mu-load-more>
         </div>
       </div>
@@ -57,20 +51,17 @@
         <div ref="container2" class="demo-loadmore-content">
           <mu-load-more @refresh="refresh2" :refreshing="refreshing2" :loading="loading2" @load="load2">
             <div v-for="(recommend, i) of recommendlist" :key="i">
-              <mu-card style="width: 100%; margin: 10px auto;">
+              <mu-card style="width: 100%; margin: 10px auto;" v-if="!recommend.handled">
                 <mu-card-title :title="recommend.title" @click="toDetail(recommend._id, recommend.title)"></mu-card-title>
                 <mu-card-text v-html="recommend.contentData.replace(/<[^>]+>/g,'')" @click="toDetail(recommend._id, recommend.title)"></mu-card-text>
                 <mu-card-actions class="list-buttom">
                   <span>{{recommend.follows}} 人关注</span>
-                  <mu-menu cover placement="bottom-end">
+                  <mu-menu cover placement="bottom-end" :key="i">
                     <mu-button icon color="rgba(0,0,0,.57)">
                       <mu-icon value="more_vert"></mu-icon>
                     </mu-button>
                     <mu-list slot="content">
-                      <mu-list-item button>
-                        <mu-list-item-title>不感兴趣</mu-list-item-title>
-                      </mu-list-item>
-                      <mu-list-item button>
+                      <mu-list-item button @click="toReport(recommend._id)">
                         <mu-list-item-title>举报</mu-list-item-title>
                       </mu-list-item>
                     </mu-list>
@@ -84,7 +75,7 @@
                 <span style="color: #b0b0b0">关注更多用话题以获取信息</span>
               </mu-flex>
             </mu-flex>
-            <span class="nomore" v-else>无更多内容</span>
+            <span class="nomore" v-if="nomore2">无更多内容</span>
           </mu-load-more>
         </div>
       </div>
@@ -102,7 +93,7 @@
                 </div>
               </div>
             </template>
-            <span class="nomore">无更多内容</span>
+            <span class="nomore" v-show="nomore3">无更多内容</span>
           </mu-load-more>
         </div>
       </div>
@@ -164,11 +155,23 @@ import contentFilter from '../../util/contentFilter.js'
 import { globalBus } from '@/util/globalBus'
 // import ImageResize from 'quill-image-resize-module'
 // Quill.register('modules/imageResize', ImageResize)
-import { commitQuestionGet, getQuestionListGet, getTopicGet, getFollowUsersGet, getFollowListGet, getFollwTopicListGet } from '../../api/api.js'
+import {
+  commitQuestionGet,
+  getQuestionListGet,
+  getTopicGet,
+  getFollowUsersGet,
+  getFollowListGet,
+  getFollwTopicListGet,
+  getUsersProfileGet,
+  getReprotedGet
+} from '../../api/api.js'
 
 export default {
   data () {
     return {
+      nomore1: false,
+      nomore2: false,
+      nomore3: false,
       active1: 0,
       num: 0,
       refreshing1: false,
@@ -177,6 +180,12 @@ export default {
       loading2: false,
       refreshing3: false,
       loading3: false,
+      pagesize1: 10,
+      currentPage1: 1,
+      pagesize2: 10,
+      currentPage2: 1,
+      pagesize3: 10,
+      currentPage3: 1,
       text: 'List',
       containerScroll: 0,
       showEdit: true,
@@ -202,57 +211,66 @@ export default {
       },
       recommendlist: [],
       hotList: [],
-      pagesize: 10,
-      currentPage: 1,
       selsectTags: [],
       languages: [],
       followUsers: [],
-      answerList: []
+      answerList: [],
+      default_avatar: '/static/img/default_avatar.jpeg',
+      accounts: []
     }
   },
   methods: {
     ...mapMutations(['SET_SCROLLED']),
     refresh1 () {
+      this.nomore1 = false
       this.refreshing1 = true
       this.$refs.container1.scrollTop = 0
       setTimeout(() => {
         this.refreshing1 = false
-        this.getFollowUsers()
-        // this.pagesize = 10
-        // this.currentPage = 1
+        this.getFollowUsers(10, 1, true)
+        this.pagesize1 = 10
+        this.currentPage1 = 1
       }, 1000)
     },
     load1 () {
-      // this.loading = true
-      // this.getRecommendlist(this.pagesize, ++this.currentPage, false)
+      if (!this.nomore1) {
+        this.loading1 = true
+        this.getFollowUsers(this.pagesize1, ++this.currentPage1, false)
+      }
     },
     refresh2 () {
+      this.nomore2 = false
       this.refreshing2 = true
       this.$refs.container2.scrollTop = 0
       setTimeout(() => {
         this.refreshing2 = false
         this.getRecommendlist(10, 1, true)
-        this.pagesize = 10
-        this.currentPage = 1
+        this.pagesize2 = 10
+        this.currentPage2 = 1
       }, 1000)
     },
     load2 () {
-      this.loading2 = true
-      this.getRecommendlist(this.pagesize, ++this.currentPage, false)
+      if (!this.nomore2) {
+        this.loading2 = true
+        this.getRecommendlist(this.pagesize2, ++this.currentPage2, false)
+      }
     },
     refresh3 () {
+      this.nomore3 = false
       this.refreshing3 = true
       this.$refs.container3.scrollTop = 0
       setTimeout(() => {
         this.refreshing3 = false
         this.getHotList(10, 1, true)
-        this.pagesize = 10
-        this.currentPage = 1
+        this.pagesize3 = 10
+        this.currentPage3 = 1
       }, 1000)
     },
     load3 () {
-      this.loading3 = true
-      this.getHotList(this.pagesize, ++this.currentPage, false)
+      if (!this.nomore3) {
+        this.loading3 = true
+        this.getHotList(this.pagesize3, ++this.currentPage3, false)
+      }
     },
     handleScroll () {
       let scrollTop = this.$refs.container1.scrollTop || this.$refs.container2.scrollTop || this.$refs.container3.scrollTop
@@ -277,15 +295,56 @@ export default {
       this.$router.push({ name: 'Detail', query: { questionId: id } })
     },
     toAnswer (answer) {
+      console.log(answer)
       this.$router.push({
         name: 'Answer',
         query: {
+          handled: answer.questionId.handled,
           answerId: answer._id,
           questionTitle: answer.questionId.title,
           questionId: answer.questionId._id,
           answersCount: answer.questionId.answers
         }
       })
+    },
+    toReport (questionId) {
+      this.$refs.globalClick.click()
+      if (this.userInfo.isLogined) {
+        getReprotedGet({
+          reporter: this.userInfo.user_datas[0].account,
+          reportQId: questionId
+        }).then(res => {
+          console.log(res.data)
+          if (!res.data.length) {
+            this.$router.push({ name: 'Report', query: { questionId } })
+          } else {
+            this.$toast.error('您已举报过该问题')
+          }
+        })
+      } else {
+        this.$toast.error('请先登录')
+        globalBus.$emit('openLogin')
+      }
+    },
+    toAReport (answerId) {
+      this.$refs.globalClick.click()
+      if (this.userInfo.isLogined) {
+        getReprotedGet({
+          reporter: this.userInfo.user_datas[0].account,
+          reportAId: answerId
+        }).then(res => {
+          console.log(res.data)
+          if (!res.data.length) {
+            this.$router.push({ name: 'Report', query: { answerId: answerId } })
+          } else {
+            this.$toast.error('您已举报过该回答')
+          }
+        })
+      } else {
+        this.$toast.error('请先登录')
+        globalBus.$emit('openLogin')
+      }
+      this.openTheme = false
     },
     commitQuestion () {
       let param = {
@@ -309,25 +368,34 @@ export default {
     },
     getRecommendlist (pagesize, currentPage, isFresh) {
       getFollwTopicListGet({
-        follower: this.userInfo.user_datas[0].account
+        follower: this.userInfo.user_datas[0].account,
+        pagesize,
+        currentPage
       }).then(res => {
-        if (res.data) {
+        console.log(res.data, 'fff')
+        if (res.data.length) {
           isFresh ? this.recommendlist = res.data.concat() : this.recommendlist = this.recommendlist.concat(res.data)
+          console.log(this.recommendlist, 'fff')
+          this.loading2 = false
+        } else {
+          this.nomore2 = true
           this.loading2 = false
         }
       })
     },
     openSelectDialog () {
       this.openSelect = true
+      this.languages = []
       getTopicGet().then(res => {
-        for (const topic of res.data) {
+        console.log(res.data)
+        for (const topic of res.data.docs) {
           this.languages.push(topic.topicName)
         }
       }).catch(err => {
         console.log(err)
       })
     },
-    getFollowUsers () {
+    getFollowUsers (pagesize, currentPage, isFresh) {
       getFollowUsersGet({
         follower: this.userInfo.user_datas[0].account
       }).then(res => {
@@ -340,19 +408,29 @@ export default {
           }
           console.log('arr', arr)
           getFollowListGet({
-            answerer: arr
+            answerer: arr,
+            pagesize,
+            currentPage
           }).then(res => {
-            this.answerList = res.data
-            console.log(res.data)
-            console.log('fsdfsd', this.answerList)
-            for (const answer of this.answerList) {
-              let answerDate = answer.answerDate
-              answer['computedDate'] = dateDiff(answerDate).diff
-              answer['sec'] = dateDiff(answerDate).sec
+            if (res.data.length) {
+              isFresh ? this.answerList = res.data.concat() : this.answerList = this.answerList.concat(res.data)
+              this.loading1 = false
+              for (const answer of this.answerList) {
+                let answerDate = answer.answerDate
+                answer['computedDate'] = dateDiff(answerDate).diff
+                answer['sec'] = dateDiff(answerDate).sec
+              }
+              this.answerList.sort((a, b) => {
+                return a.sec - b.sec
+              })
+              for (const i of this.answerList) {
+                this.accounts.push(i.answerer)
+              }
+              this.getUsersProfile()
+            } else {
+              this.nomore1 = true
+              this.loading1 = false
             }
-            this.answerList.sort((a, b) => {
-              return a.sec - b.sec
-            })
           }).catch(err => {
             console.log(err)
           })
@@ -367,10 +445,18 @@ export default {
         currentPage
       }
       getQuestionListGet(param).then(res => {
+        if (!res.data.length) {
+          this.nomore3 = true
+        }
         isFresh ? this.hotList = res.data.concat() : this.hotList = this.hotList.concat(res.data)
+        let filterHot = []
         for (const hot of this.hotList) {
           hot['computedHotValue'] = Number(hot.follows) + Number(hot.answers) * 2
+          if (!hot.handled) {
+            filterHot.push(hot)
+          }
         }
+        this.hotList = filterHot.concat()
         this.hotList.sort((a, b) => {
           return b.computedHotValue - a.computedHotValue
         })
@@ -383,15 +469,39 @@ export default {
       } else {
         globalBus.$emit('openLogin')
       }
+    },
+    getUsersProfile () {
+      console.log({
+        accounts: this.accounts
+      })
+      getUsersProfileGet({
+        accounts: this.accounts
+      }).then(res => {
+        console.log(res.data)
+        let temp = this.answerList.concat()
+        for (const i of temp) {
+          for (const j of res.data) {
+            console.log(i.answerer, j.accountName)
+            if (i.answerer === j.accountName) {
+              i['avatar'] = j.userAvatar
+            }
+          }
+        }
+        this.answerList = temp.concat()
+        console.log(this.answerList)
+      }).catch(err => {
+        console.log(err)
+      })
     }
   },
   mounted () {
     this.$refs.container1.addEventListener('scroll', this.handleScroll)
     this.$refs.container2.addEventListener('scroll', this.handleScroll)
     this.$refs.container3.addEventListener('scroll', this.handleScroll)
+    console.log(this.userInfo.isLogined)
     if (this.userInfo.isLogined) {
       // 获取关注
-      this.getFollowUsers()
+      this.getFollowUsers(10, 1, true)
       // 获取提问列表
       this.getRecommendlist(10, 1, true)
     }

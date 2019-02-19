@@ -113,6 +113,7 @@ export default {
           questionTitle: this.thisTitle,
           questionId: answer.questionId,
           answersCount: this.answersCount
+          // handled: this.newAnswersList.handled
         }
       })
     }

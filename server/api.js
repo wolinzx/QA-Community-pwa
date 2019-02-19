@@ -143,7 +143,13 @@ router.get('/api/setProfileGet', (req, res) => {
 })
 
 router.post('/api/commitQuestionGet', (req, res) => {
-  let questionModels = new models.Question({ questioner: req.body.account, title: req.body.title, contentData: req.body.content, topics: req.body.topics })
+  let questionModels = new models.Question({
+    questioner: req.body.account,
+    title: req.body.title,
+    contentData: req.body.content,
+    topics: req.body.topics,
+    questionDate: Date.now()
+  })
   questionModels.save((err, data) => {
     if (err) {
       res.send(false)
@@ -804,10 +810,16 @@ router.get('/api/getFollowTopicGet', (req, res) => {
 
 // 获取提问标题与回答内容
 router.get('/api/getFollowListGet', (req, res) => {
-  console.log(req.query.answerId)
+  const pagesize = Number(req.query.pagesize)
+  const currentPage = Number(req.query.currentPage)
+  console.log({
+    pagesize,
+    currentPage,
+    answerer: req.query.answerer
+  })
   models.Answer.find({
     answerer: req.query.answerer
-  }).populate({ path: 'questionId', select: 'title answers' }).exec((err, data) => {
+  }).populate({ path: 'questionId', select: 'title answers handled' }).skip(pagesize * (currentPage - 1)).limit(pagesize).exec((err, data) => {
     if (!err) {
       res.send(data)
     } else {
@@ -818,14 +830,16 @@ router.get('/api/getFollowListGet', (req, res) => {
 
 // 根据关注的话题获取问题列表
 router.get('/api/getFollwTopicListGet', (req, res) => {
+  const pagesize = Number(req.query.pagesize)
+  const currentPage = Number(req.query.currentPage)
   models.FollowTopic.findOne({
     follower: req.query.follower
   }, (err, data) => {
     if (!err) {
       if (data) {
         models.Question.find({
-          topics: { $in: data.topics }
-        }, (err, data) => {
+          $or: [ { topics: { $in: data.topics } }, { answers: { $gt: 5 } }, { follows: { $gt: 5 } } ]
+        }).skip(pagesize * (currentPage - 1)).limit(pagesize).exec((err, data) => {
           if (!err) {
             res.send(data)
           } else {
@@ -1058,11 +1072,9 @@ router.get('/api/getHandleReportGet', (req, res) => {
     reportAId: req.query.reportAId,
     handled: req.query.handle
   }
-  let dbModle = parmas.reportQId ? 'Question' : 'Answer'
-  let qaId = parmas.reportQId ? 'questionId' : 'answerId'
-  console.log(dbModle, qaId, parmas.reportQId || parmas.reportAId)
-  models[dbModle].update(
-    { [qaId]: parmas.reportQId || parmas.reportAId },
+  console.log(parmas.handled)
+  models.Question.update(
+    { _id: parmas.reportQId || parmas.reportAId },
     { $set: { handled: parmas.handled } }
   ).exec((err, data) => {
     if (!err) {

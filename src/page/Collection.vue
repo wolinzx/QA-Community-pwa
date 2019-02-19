@@ -22,10 +22,11 @@
     </mu-list>
     <mu-container>
       <mu-dialog width="360" transition="slide-bottom" fullscreen :open.sync="openFullscreen">
-        <mu-appbar color="primary" :title="collectionTitle">
+        <mu-appbar color="primary">
           <mu-button slot="left" icon @click="closeFullscreenDialog">
             <mu-icon value="close"></mu-icon>
           </mu-button>
+          {{collectionTitle}}
           <mu-menu slot="right" cover placement="bottom-end">
             <mu-button icon>
               <mu-icon value="more_vert"></mu-icon>
@@ -133,7 +134,8 @@ export default {
           // sortWay: this.sortWay,
           questionTitle: answer.questionId.title,
           questionId: answer.questionId._id,
-          answersCount: answer.questionId.answers
+          answersCount: answer.questionId.answers,
+          handled: answer.questionId.handled
         }
       })
     },
@@ -154,10 +156,13 @@ export default {
     },
     getCollectionList () {
       let that = this
+      console.log(this.userInfo.user_datas)
       return new Promise(function (resolve, reject) {
+        console.log(that.userInfo.user_datas[0].account)
         getCollectionListGet({
           collecter: that.userInfo.user_datas[0].account
         }).then(res => {
+          console.log(res)
           that.collectionList = res.data.collections
           console.log(that.collectionList)
           resolve()
@@ -181,11 +186,11 @@ export default {
       })
     }
   },
-  mounted () {
-    this.getCollectionList()
-  },
   computed: {
     ...mapState(['userInfo'])
+  },
+  mounted () {
+    this.getCollectionList()
   },
   filters: {
     contentFilter

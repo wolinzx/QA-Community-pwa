@@ -1,5 +1,9 @@
 <template>
   <div class="answer">
+    <mu-dialog title="此提问已被封禁" width="360" :open.sync="openHanded" :overlay-close="false">
+      此提问存在违规内容，已被封禁！
+      <mu-button slot="actions" flat color="primary" @click="routerBack">返回</mu-button>
+    </mu-dialog>
     <mu-appbar style="width: 100%;" color="primary">
       <mu-button icon slot="left" @click="routerBack">
         <mu-icon value="arrow_back"></mu-icon>
@@ -68,7 +72,7 @@
         <mu-divider></mu-divider>
       </mu-list>
       <swiper class="answer-swiper" :options="swiperOption" ref="mySwiper">
-        <swiper-slide v-for="(answer,i) of answers" :key="i" v-html="answers[i].contentData">
+        <swiper-slide v-for="(answer,i) of answers" :key="i" v-html=" !answer.handled ? answers[i].contentData : '内容涉嫌违规已被封禁！'">
         </swiper-slide>
       </swiper>
     </mu-paper>
@@ -169,6 +173,7 @@ export default {
   data () {
     let that = this
     return {
+      openHanded: false,
       swiperOption: {
         initialSlide: 0,
         autoHeight: true,
@@ -210,6 +215,9 @@ export default {
     }
   },
   created () {
+    if (this.$route.query.handled) {
+      this.openHanded = true
+    }
     this.getAnswerList(this.$route.query.sortWay)
     this.themeMode = localStorage.getItem('theme')
     if (this.themeMode !== 'dark') {

@@ -20,7 +20,7 @@
             <mu-list-item avatar button>
               <mu-list-item-action>
                 <mu-avatar>
-                  <img src="../../assets/image/avatar.jpeg">
+                  <img :src="topic.topicAvatar">
                 </mu-avatar>
               </mu-list-item-action>
               <mu-list-item-content>

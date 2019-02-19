@@ -29,7 +29,7 @@
       </mu-appbar>
       <mu-container>
         <mu-avatar class="edit-avatar" :size="70" @click="openMenu = true">
-          <img :src="form.avatar || this.default_avatar" alt="">
+          <img :src="form.userAvatar || this.default_avatar" alt="">
           <mu-icon class="camera-alt" value="camera_alt" color="primary"></mu-icon>
           <mu-bottom-sheet :open.sync="openMenu">
             <mu-list @item-click="openMenu = false">
@@ -75,7 +75,7 @@
       <img src="../../assets/image/flat-back.png" alt="">
     </div>
     <mu-avatar :size="80" class="mine-avatar">
-      <img :src="form.avatar || this.default_avatar" alt="">
+      <img :src="form.userAvatar || this.default_avatar" alt="">
     </mu-avatar>
     <div class="mine-content">
       <h3>{{this.$route.query.user}}</h3>
@@ -150,7 +150,8 @@ export default {
         userSex: '',
         userDescribe: '',
         userIndustry: '',
-        userBirth: ''
+        userBirth: '',
+        userAvatar: ''
       },
       loading2: false,
       default_avatar: '/static/img/default_avatar.jpeg',
@@ -255,7 +256,8 @@ export default {
           answerId: answer._id,
           questionTitle: answer.questionId.title,
           questionId: answer.questionId._id,
-          answersCount: answer.questionId.answers
+          answersCount: answer.questionId.answers,
+          handled: answer.questionId.handled
         }
       })
     },
@@ -287,6 +289,8 @@ export default {
       account: this.$route.query.user
     }
     accountProfileGet(param).then(res => {
+      console.log(res);
+      
       this.form = Object.assign({}, res.data)
     }).catch(err => {
       console.log(err)
