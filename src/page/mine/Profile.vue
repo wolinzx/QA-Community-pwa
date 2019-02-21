@@ -256,8 +256,7 @@ export default {
           answerId: answer._id,
           questionTitle: answer.questionId.title,
           questionId: answer.questionId._id,
-          answersCount: answer.questionId.answers,
-          handled: answer.questionId.handled
+          answersCount: answer.questionId.answers
         }
       })
     },

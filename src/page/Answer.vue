@@ -1,5 +1,5 @@
 <template>
-  <div class="answer">
+  <div class="answer" ref="globalClick">
     <mu-dialog title="此提问已被封禁" width="360" :open.sync="openHanded" :overlay-close="false">
       此提问存在违规内容，已被封禁！
       <mu-button slot="actions" flat color="primary" @click="routerBack">返回</mu-button>
@@ -160,7 +160,8 @@ import {
   getCollectionListGet,
   getAnswerListGet,
   getUsersProfileGet,
-  getReprotedGet
+  getReprotedGet,
+  getQuestionGet
 } from '../api/api.js'
 import { mapState, mapMutations } from 'vuex'
 import { globalBus } from '@/util/globalBus'
@@ -211,24 +212,25 @@ export default {
       default_avatar: '/static/img/default_avatar.jpeg',
       accounts: [],
       themeMode: 'light',
-      openTheme: false
+      openTheme: false,
+      question: {}
     }
   },
   created () {
-    if (this.$route.query.handled) {
-      this.openHanded = true
-    }
     this.getAnswerList(this.$route.query.sortWay)
     this.themeMode = localStorage.getItem('theme')
     if (this.themeMode !== 'dark') {
       this.themeMode = 'light'
     }
-    // this.answers = this.$route.params.answers
-    // console.log(this.answers)
-    // console.log(this.$route.params.tapAnswer)
-    // this.getEndorseAnswer()
-    // this.getFollow()
-    // this.getCollectionList()
+    getQuestionGet({
+      questionId: this.$route.query.questionId
+    }).then(res => {
+      if (res.data.handled) {
+        this.openHanded = true
+      }
+    }).catch(err => {
+      console.log(err)
+    })
   },
   methods: {
     ...mapMutations(['SET_THEME']),
@@ -239,6 +241,7 @@ export default {
       this.$router.push({ name: 'Detail', query: { questionId: this.$route.query.questionId } })
     },
     toReport () {
+      this.$refs.globalClick.click()
       if (this.userInfo.isLogined) {
         getReprotedGet({
           reporter: this.userInfo.user_datas[0].account,

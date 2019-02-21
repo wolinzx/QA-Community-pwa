@@ -148,6 +148,14 @@ const answerSchema = mongoose.Schema({
     default: false
   }
 })
+answerSchema.virtual('members', {
+  ref: 'Account', // The model to use
+  localField: 'answerer', // Find people where `localField`
+  foreignField: 'accountName', // is equal to `foreignField`
+  // If `justOne` is true, 'members' will be a single doc as opposed to
+  // an array. `justOne` is false by default.
+  justOne: true
+})
 // 回答评论
 const answerCommentSchema = mongoose.Schema({
   contentData: {
@@ -243,7 +251,8 @@ const topicSchema = mongoose.Schema({
   addDate: {
     type: Date
   },
-  topicAvatar: String
+  topicAvatar: String,
+  topicHandled: Boolean
 })
 // 举报
 const reportSchema = mongoose.Schema({

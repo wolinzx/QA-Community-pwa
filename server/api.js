@@ -692,6 +692,7 @@ router.get('/api/getQaListGet', (req, res) => {
     _id: req.query.answerId
   }).populate({ path: 'questionId', select: 'title answers' }).exec((err, data) => {
     if (!err) {
+      console.log(data)
       res.send(data)
     } else {
       res.send(err)
@@ -800,8 +801,44 @@ router.get('/api/getFollowTopicGet', (req, res) => {
   models.FollowTopic.findOne({
     follower: req.query.follower
   }, (err, docs) => {
-    if (!err) {
-      res.send(docs)
+    if (err) throw err
+    if (docs) {
+      models.Topic.find({
+        topicName: docs.topics
+      }, (err, data) => {
+        if (err) throw err
+        if (data) {
+          res.json({
+            topics: docs.topics,
+            obj: data
+          })
+        } else {
+          res.send(false)
+        }
+      })
+    } else {
+      res.send(false)
+    }
+  })
+})
+// 获取关注者关注的话题详细信息
+router.get('/api/getFollowTopicDetailGet', (req, res) => {
+  models.FollowTopic.findOne({
+    follower: req.query.follower
+  }, (err, docs) => {
+    if (err) throw err
+    if (docs) {
+      console.log(docs.topics, 'ffff')
+      models.Topic.find({
+        topicName: docs.topics
+      }, (err, data) => {
+        if (err) throw err
+        if (data) {
+          res.send(data)
+        } else {
+          res.send(false)
+        }
+      })
     } else {
       res.send(false)
     }
@@ -1028,15 +1065,33 @@ router.get('/api/getReprotedGet', (req, res) => {
   })
 })
 
+// 获取热门
+router.get('/api/getHotListGet', (req, res) => {
+  const pagesize = Number(req.query.pagesize)
+  const currentPage = Number(req.query.currentPage)
+  models.Question.aggregate(
+    [
+      { $project: { title: 1, count: { $add: [ '$follows', { $multiply: [ '$answers', 2 ] } ] } } }
+    ]
+  ).sort({ count: -1 }).skip(pagesize * (currentPage - 1)).limit(pagesize).exec((err, data) => {
+    if (err) throw err
+    if (data) {
+      res.send(data)
+    } else {
+      res.send(false)
+    }
+  })
+})
+
 // **************admin**************
 // 删除话题
 router.get('/api/deleteTopicGet', (req, res) => {
   console.log({
     topicName: req.query.topicName
   })
-  models.Topic.remove({
+  models.Topic.update({
     topicName: req.query.topicName
-  }, (err, data) => {
+  }, { $set: { topicHandled: req.query.topicHandled } }, (err, data) => {
     if (!err) {
       res.send(true)
     } else {
@@ -1086,6 +1141,21 @@ router.get('/api/getHandleReportGet', (req, res) => {
       }
     } else {
       console.log(err)
+      res.send(false)
+    }
+  })
+})
+
+// 模糊查询话题详情
+router.get('/api/getSomeTopicDetailGet', (req, res) => {
+  console.log(req.query.topicName)
+  var qs = new RegExp(req.query.topicName)
+  models.Topic.find({
+    topicName: { '$regex': qs, $options: '$i' }
+  }, (err, data) => {
+    if (!err) {
+      res.send(data)
+    } else {
       res.send(false)
     }
   })

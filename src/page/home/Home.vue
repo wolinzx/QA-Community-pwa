@@ -41,7 +41,7 @@
                 <span style="color: #b0b0b0">关注更多用户以获取信息</span>
               </mu-flex>
             </mu-flex>
-            <span class="nomore" v-if="nomore1">无更多内容</span>
+            <span class="nomore" v-else-if="nomore1">无更多内容</span>
           </mu-load-more>
         </div>
       </div>
@@ -75,7 +75,7 @@
                 <span style="color: #b0b0b0">关注更多用话题以获取信息</span>
               </mu-flex>
             </mu-flex>
-            <span class="nomore" v-if="nomore2">无更多内容</span>
+            <span class="nomore" v-else-if="nomore2">无更多内容</span>
           </mu-load-more>
         </div>
       </div>
@@ -89,7 +89,7 @@
                 <p>{{i + 1}}</p>
                 <div>
                   <h3>{{hot.title}}</h3>
-                  <span>{{hot.computedHotValue}} 万热度</span>
+                  <span>{{hot.count}} 万热度</span>
                 </div>
               </div>
             </template>
@@ -157,7 +157,7 @@ import { globalBus } from '@/util/globalBus'
 // Quill.register('modules/imageResize', ImageResize)
 import {
   commitQuestionGet,
-  getQuestionListGet,
+  getHotListGet,
   getTopicGet,
   getFollowUsersGet,
   getFollowListGet,
@@ -299,7 +299,6 @@ export default {
       this.$router.push({
         name: 'Answer',
         query: {
-          handled: answer.questionId.handled,
           answerId: answer._id,
           questionTitle: answer.questionId.title,
           questionId: answer.questionId._id,
@@ -389,7 +388,9 @@ export default {
       getTopicGet().then(res => {
         console.log(res.data)
         for (const topic of res.data.docs) {
-          this.languages.push(topic.topicName)
+          if (!topic.topicHandled) {
+            this.languages.push(topic.topicName)
+          }
         }
       }).catch(err => {
         console.log(err)
@@ -444,22 +445,11 @@ export default {
         pagesize,
         currentPage
       }
-      getQuestionListGet(param).then(res => {
+      getHotListGet(param).then(res => {
         if (!res.data.length) {
           this.nomore3 = true
         }
         isFresh ? this.hotList = res.data.concat() : this.hotList = this.hotList.concat(res.data)
-        let filterHot = []
-        for (const hot of this.hotList) {
-          hot['computedHotValue'] = Number(hot.follows) + Number(hot.answers) * 2
-          if (!hot.handled) {
-            filterHot.push(hot)
-          }
-        }
-        this.hotList = filterHot.concat()
-        this.hotList.sort((a, b) => {
-          return b.computedHotValue - a.computedHotValue
-        })
         this.loading3 = false
       })
     },

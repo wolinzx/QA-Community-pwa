@@ -38,7 +38,7 @@
     </div>
     <div class="follow-topic" v-if="active === 1">
       <mu-list textline="two-line">
-        <div v-for="(topic,i) of followTopics" :key="i" @click="toTopicDetail(topic)">
+        <div v-for="(topic,i) of followTopics" :key="i" @click="toTopicDetail(topic.topicName)">
           <mu-list-item avatar button>
             <mu-list-item-action>
               <mu-avatar>
@@ -46,7 +46,7 @@
               </mu-avatar>
             </mu-list-item-action>
             <mu-list-item-content>
-              <mu-list-item-title>{{topic}}</mu-list-item-title>
+              <mu-list-item-title>{{topic.topicName}}</mu-list-item-title>
             </mu-list-item-content>
           </mu-list-item>
           <mu-divider></mu-divider>
@@ -101,7 +101,7 @@
 </template>
 
 <script>
-import { getFollowQuestionGet, getFollowUsersGet, unFollowUserGet, getFollowTopicGet, getUsersProfileGet } from '../api/api.js'
+import { getFollowQuestionGet, getFollowUsersGet, unFollowUserGet, getUsersProfileGet, getFollowTopicDetailGet } from '../api/api.js'
 import { mapState } from 'vuex'
 export default {
   data () {
@@ -177,10 +177,11 @@ export default {
       }).catch(err => {
         console.log(err)
       })
-      getFollowTopicGet({
+      getFollowTopicDetailGet({
         follower: this.userInfo.user_datas[0].account
       }).then(res => {
-        this.followTopics = res.data.topics
+        console.log(res)
+        this.followTopics = res.data
       }).catch(err => {
         console.log(err)
       })

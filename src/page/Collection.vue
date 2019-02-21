@@ -1,5 +1,5 @@
 <template>
-  <div class="collection">
+  <div class="collection" ref="globalClick">
     <mu-appbar style="width: 100%;" color="primary">
       <mu-button icon slot="left" @click="routerBack">
         <mu-icon value="arrow_back"></mu-icon>
@@ -52,7 +52,7 @@
         <mu-card style="width: 100%; margin: 10px auto;" v-for="(answer,i) of answerList" :key="i">
           <mu-card-header :title="answer.answerer" @click="toAnswer(answer)">
             <mu-avatar slot="avatar" :size="25">
-              <img src="../assets/image/avatar.jpeg">
+              <img :src="answer.avatar">
             </mu-avatar>
           </mu-card-header>
           <mu-card-title :title="answer.questionId.title" @click="toAnswer(answer)"></mu-card-title>
@@ -60,8 +60,8 @@
             {{answer.contentData | contentFilter}}
           </mu-card-text>
           <mu-card-actions class="list-buttom">
-            <span>{{answer.endorseCount}} 赞同 · 66 评论</span>
-            <mu-menu cover placement="bottom-end" :open="openSinDelete">
+            <span>{{answer.endorseCount}} 赞同</span>
+            <mu-menu cover placement="bottom-end">
               <mu-button icon color="rgba(0,0,0,.57)">
                 <mu-icon value="more_vert"></mu-icon>
               </mu-button>
@@ -85,7 +85,7 @@
 </template>
 
 <script>
-import { getCollectionListGet, getQaListGet, deleteCollectionListGet, deleteCollectionGet } from '../api/api.js'
+import { getCollectionListGet, getQaListGet, deleteCollectionListGet, deleteCollectionGet, getUsersProfileGet } from '../api/api.js'
 import { mapState } from 'vuex'
 import contentFilter from '../util/contentFilter.js'
 export default {
@@ -97,7 +97,8 @@ export default {
       collectionTitle: '',
       collectionIndex: 0,
       openSinDelete: false,
-      openAlert: false
+      openAlert: false,
+      accounts: []
     }
   },
   methods: {
@@ -115,14 +116,39 @@ export default {
         answerId: ids
       }).then(res => {
         this.answerList = res.data
-        console.log(res.data)
-        console.log(this.answerList)
+        for (const i of this.answerList) {
+          this.accounts.push(i.answerer)
+        }
+        this.getUsersProfile()
         this.collectionTitle = collectionTitle || this.collectionTitle
         this.collectionIndex = index || this.collectionIndex
       }).catch(err => {
         console.log(err)
       })
       this.openFullscreen = true
+    },
+    getUsersProfile () {
+      console.log({
+        accounts: this.accounts
+      })
+      getUsersProfileGet({
+        accounts: this.accounts
+      }).then(res => {
+        console.log(res.data)
+        let temp = this.answerList.concat()
+        for (const i of temp) {
+          for (const j of res.data) {
+            console.log(i.answerer, j.accountName)
+            if (i.answerer === j.accountName) {
+              i['avatar'] = j.userAvatar
+            }
+          }
+        }
+        this.answerList = temp.concat()
+        console.log(this.answerList)
+      }).catch(err => {
+        console.log(err)
+      })
     },
     toAnswer (answer) {
       // let answerArr = [answer]
@@ -134,12 +160,12 @@ export default {
           // sortWay: this.sortWay,
           questionTitle: answer.questionId.title,
           questionId: answer.questionId._id,
-          answersCount: answer.questionId.answers,
-          handled: answer.questionId.handled
+          answersCount: answer.questionId.answers
         }
       })
     },
     deleteCollectionList (id, index) {
+      this.$refs.globalClick.click()
       deleteCollectionListGet({
         collecter: this.userInfo.user_datas[0].account,
         collectionTitle: this.collectionTitle,

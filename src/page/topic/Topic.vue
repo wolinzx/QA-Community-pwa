@@ -4,11 +4,11 @@
       <div slot="header">已关注话题</div>
       <mu-list textline="three-line">
         <div class="chip-container">
-          <mu-chip :color="initChips[i % 10]" v-for="(topic, i) of followTopics" :key="i"  @click="toTopicDetail(topic)">
-            {{topic}}
+          <mu-chip :color="initChips[i % 10]" v-for="(topic, i) of filterTopic" :key="i"  @click="toTopicDetail(topic)">
+            {{topic.topicName}}
           </mu-chip>
           <span class="nomore" v-if="!userInfo.isLogined">登陆更精彩</span>
-          <span class="nomore" v-else-if="followTopics === undefined || followTopics.length === 0">去关注话题吧</span>
+          <span class="nomore" v-else-if="filterTopic === undefined || filterTopic.length === 0">去关注话题吧</span>
         </div>
       </mu-list>
     </mu-expansion-panel>
@@ -16,7 +16,7 @@
       <mu-sub-header>话题广场</mu-sub-header>
       <div>
         <mu-load-more @refresh="refresh" :refreshing="refreshing" :loading="loading" @load="load">
-          <div v-for="(topic,i) of topicList" :key="i" @click="toTopicDetail(topic.topicName)">
+          <div v-for="(topic,i) of topicList" v-if="!topic.topicHandled" :key="i" @click="toTopicDetail(topic.topicName)">
             <mu-list-item avatar button>
               <mu-list-item-action>
                 <mu-avatar>
@@ -71,7 +71,8 @@ export default {
       loading: false,
       pageSize: 10,
       currentPage: 1,
-      nomore: false
+      nomore: false,
+      filterTopic: {}
     }
   },
   methods: {
@@ -161,6 +162,7 @@ export default {
               i.followed = res.data.topics.includes(i.topicName)
             }
             this.followTopics = res.data.topics
+            this.filterTopic = res.data.obj.filter(item => !item.topicHandled)
           }
         }).catch(err => {
           console.log(err)

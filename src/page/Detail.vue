@@ -1,5 +1,5 @@
 <template>
-  <div class="detail">
+  <div class="detail" ref="globalClick">
     <mu-dialog title="此提问已被封禁" width="360" :open.sync="openHanded" :overlay-close="false">
       此提问存在违规内容，已被封禁！
       <mu-button slot="actions" flat color="primary" @click="routerBack">返回</mu-button>
@@ -168,6 +168,7 @@ export default {
       this.$router.go(-1)
     },
     toReport () {
+      this.$refs.globalClick.click()
       if (this.userInfo.isLogined) {
         getReprotedGet({
           reporter: this.userInfo.user_datas[0].account,
@@ -208,8 +209,7 @@ export default {
           sortWay: this.sortWay,
           questionTitle: this.questionTitle,
           questionId: this.$route.query.questionId,
-          answersCount: this.questionDetail.answers,
-          handled: this.questionDetail.handled
+          answersCount: this.questionDetail.answers
         }
       })
     },

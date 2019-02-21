@@ -1,5 +1,9 @@
 <template>
   <div>
+    <mu-dialog title="此话题已禁用" width="360" :open.sync="openHanded" :overlay-close="false">
+      此话题已禁用！
+      <mu-button slot="actions" flat color="primary" @click="routerBack">返回</mu-button>
+    </mu-dialog>
     <mu-appbar style="width: 100%;" color="primary">
       <mu-button icon slot="left" @click="routerBack">
         <mu-icon value="arrow_back"></mu-icon>
@@ -16,7 +20,7 @@
         <mu-flex class="flex-demo" fill>
           <mu-flex class="flex-wrapper" direction="column" justify-content="start" style="padding: 0 10px;">
             <h3 style="margin: 0">{{this.$route.query.topicName}}</h3>
-            <div class="topic-describe">{{topicDetail.topicDescribe}}</div>
+            <div class="topic-describe">{{topicDetail.topicDescribe | contentFilter}}</div>
             <span>{{topicDetail.followCount}} 人关注</span>
           </mu-flex>
         </mu-flex>
@@ -28,8 +32,7 @@
     </mu-paper>
     <mu-paper :z-depth="1" class="topic-info-card">
       <h4>话题简介</h4>
-      <div>
-        {{topicDetail.topicDescribe}}
+      <div v-html="topicDetail.topicDescribe">
       </div>
     </mu-paper>
   </div>
@@ -38,12 +41,14 @@
 <script>
 import { mapState } from 'vuex'
 import { getTopicDetailGet, getFollowTopicGet, followTopicGet, unFollowTopicGet } from '../../api/api.js'
+import contentFilter from '../../util/contentFilter.js'
 export default {
   data () {
     return {
       topicDetail: {},
       followTopics: [],
-      isFollowed: false
+      isFollowed: false,
+      openHanded: false
     }
   },
   methods: {
@@ -56,6 +61,10 @@ export default {
       }).then(res => {
         console.log(res)
         this.topicDetail = res.data
+        if (this.topicDetail.topicHandled) {
+          this.openHanded = true
+          return ''
+        }
       }).catch(err => {
         console.log(err)
       })
@@ -99,6 +108,9 @@ export default {
   },
   computed: {
     ...mapState(['userInfo'])
+  },
+  filters: {
+    contentFilter
   }
 }
 </script>

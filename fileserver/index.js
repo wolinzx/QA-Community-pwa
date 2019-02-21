@@ -78,7 +78,7 @@ app.post('/img/uploadTopicAvatar', function (req, res) {
     var time = '_' + date.getFullYear() + '_' + date.getMonth() + '_' + date.getDay() + '_' + date.getHours() + '_' + date.getMinutes()
     var avatarName = fields.topicName + '.' + type
     var newPath = form.uploadDir + '/' + avatarName
-    var imgServerPath = url.parse('http://img.wolinzx.com/page/upload/topic' + '/' + avatarName)
+    var imgServerPath = url.parse('http://localhost:8080/page/upload/topic' + '/' + avatarName)
     console.log(fields.topicName)
     models.Topic.updateOne(
       { topicName: fields.topicName },

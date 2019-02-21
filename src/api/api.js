@@ -85,3 +85,7 @@ export const getSearchGet = params => { return axios.get(`/api/getSearchGet`, { 
 export const commitReprotGet = params => { return axios.get(`/api/commitReprotGet`, { params: params }) }
 
 export const getReprotedGet = params => { return axios.get(`/api/getReprotedGet`, { params: params }) }
+
+export const getFollowTopicDetailGet = params => { return axios.get(`/api/getFollowTopicDetailGet`, { params: params }) }
+
+export const getHotListGet = params => { return axios.get(`/api/getHotListGet`, { params: params }) }
