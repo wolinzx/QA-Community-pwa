@@ -1,7 +1,6 @@
 const express = require('express')
 const models = require('./db')
 const router = express.Router()
-let mongoose = require('mongoose')
 // const images = require('images');
 // const multiparty = require('multiparty');
 // var path = require("path");
