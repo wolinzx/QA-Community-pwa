@@ -62,6 +62,9 @@ const accountSchema = mongoose.Schema({
   userAvatar: {
     type: String,
     default: ''
+  },
+  addDate: {
+    type: Date
   }
 })
 // 提问

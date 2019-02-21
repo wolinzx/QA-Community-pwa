@@ -1,6 +1,7 @@
 const express = require('express')
 const models = require('./db')
 const router = express.Router()
+let mongoose = require('mongoose')
 // const images = require('images');
 // const multiparty = require('multiparty');
 // var path = require("path");
@@ -98,7 +99,7 @@ router.post('/api/login/createAccount', (req, res) => {
       }
     } else {
       // 创建成功后也写进account表
-      let accountModels = new models.Account({ accountName: req.body.account })
+      let accountModels = new models.Account({ accountName: req.body.account, addDate: Date.now() })
       accountModels.save((err, data) => {
         console.log(err)
       })
@@ -1160,5 +1161,31 @@ router.get('/api/getSomeTopicDetailGet', (req, res) => {
     }
   })
 })
+
+// 根据时间获取统计
+// router.get('/api/getChartDataGet', (req, res) => {
+//   const start = new Date(req.query.start)
+//   const end = new Date(req.query.end)
+//   models.Question.count({
+//     questionDate: { $gte: start, $lt: end }
+//   }, (err, qCount) => {
+//     if (err) throw err
+//     models.Answer.count({
+//       answerDate: { $gte: start, $lt: end }
+//     }, (err, aCount) => {
+//       if (err) throw err
+//       models.Account.count({
+//         addDate: { $gte: start, $lt: end }
+//       }, (err, acCount) => {
+//         if (err) throw err
+//         res.json({
+//           qCount,
+//           aCount,
+//           acCount
+//         })
+//       })
+//     })
+//   })
+// })
 
 module.exports = router
