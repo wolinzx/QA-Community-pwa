@@ -133,7 +133,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapMutations } from 'vuex'
 import { accountProfileGet, setProfileGet, getQandAListGet, getFollowUserGet2, setFollowUserGet, unFollowUserGet } from '../../api/api.js'
 import contentFilter from '../../util/contentFilter.js'
 import dateDiff from '../../util/dateDiff.js'
@@ -161,6 +161,7 @@ export default {
     }
   },
   methods: {
+    ...mapMutations(['SET_LOGINUSERINFO']),
     routerBack () {
       this.$router.go(-1)
     },
@@ -197,6 +198,18 @@ export default {
         console.log(param)
         setProfileGet(param).then(res => {
           this.$toast.success('修改成功')
+          let param = {
+            account: this.$route.query.user
+          }
+          accountProfileGet(param).then(res => {
+            console.log(res)
+            this.SET_LOGINUSERINFO({
+              data: res.data
+            })
+            this.form = Object.assign({}, res.data)
+          }).catch(err => {
+            console.log(err)
+          })
         }).catch(err => {
           console.log(err)
           this.$toast.error('修改错误')
@@ -288,8 +301,7 @@ export default {
       account: this.$route.query.user
     }
     accountProfileGet(param).then(res => {
-      console.log(res);
-      
+      console.log(res)
       this.form = Object.assign({}, res.data)
     }).catch(err => {
       console.log(err)

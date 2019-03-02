@@ -866,6 +866,7 @@ router.get('/api/getFollowListGet', (req, res) => {
 })
 
 // 根据关注的话题获取问题列表
+// 也是获取推荐
 router.get('/api/getFollwTopicListGet', (req, res) => {
   const pagesize = Number(req.query.pagesize)
   const currentPage = Number(req.query.currentPage)
@@ -875,8 +876,8 @@ router.get('/api/getFollwTopicListGet', (req, res) => {
     if (!err) {
       if (data) {
         models.Question.find({
-          $or: [ { topics: { $in: data.topics } }, { answers: { $gt: 5 } }, { follows: { $gt: 5 } } ]
-        }).skip(pagesize * (currentPage - 1)).limit(pagesize).exec((err, data) => {
+          $and: [ { handled: false }, { $or: [ { topics: { $in: data.topics } }, { answers: { $gt: 5 } }, { follows: { $gt: 5 } } ] } ]
+        }).sort({ answers: -1 }).skip(pagesize * (currentPage - 1)).limit(pagesize).exec((err, data) => {
           if (!err) {
             res.send(data)
           } else {
@@ -1071,7 +1072,8 @@ router.get('/api/getHotListGet', (req, res) => {
   const currentPage = Number(req.query.currentPage)
   models.Question.aggregate(
     [
-      { $project: { title: 1, count: { $add: [ '$follows', { $multiply: [ '$answers', 2 ] } ] } } }
+      { $project: { title: 1, handled: 1, count: { $add: [ '$follows', { $multiply: [ '$answers', 2 ] } ] } } },
+      { $match: { handled: false } }
     ]
   ).sort({ count: -1 }).skip(pagesize * (currentPage - 1)).limit(pagesize).exec((err, data) => {
     if (err) throw err
@@ -1082,6 +1084,39 @@ router.get('/api/getHotListGet', (req, res) => {
     }
   })
 })
+
+router.get('/api/getReportNoticeGet', (req, res) => {
+  models.Question.find({ questioner: req.query.account, handled: true }, (err, ques) => {
+    if (err) throw err
+    if (ques) {
+      models.Answer.find({ answerer: req.query.account, handled: true }, (err, answ) => {
+        if (err) throw err
+        if (answ) {
+          res.json({
+            ques,
+            answ
+          })
+        } else {
+          res.send(false)
+        }
+      })
+    } else {
+      res.send(false)
+    }
+  })
+})
+
+// 获取举报结果
+// router.get('/api/getReportResGet', (req, res) => {
+//   models.Report.find({ reporter: req.query.account }).populate({ path: 'reportQId reportAId' }).exec((err, data) => {
+//     if (err) throw err
+//     if (data) {
+//       res.send(data)
+//     } else {
+//       res.send(false)
+//     }
+//   })
+// })
 
 // **************admin**************
 // 删除话题
@@ -1128,22 +1163,41 @@ router.get('/api/getHandleReportGet', (req, res) => {
     handled: req.query.handle
   }
   console.log(parmas.handled)
-  models.Question.update(
-    { _id: parmas.reportQId || parmas.reportAId },
-    { $set: { handled: parmas.handled } }
-  ).exec((err, data) => {
-    if (!err) {
-      console.log(data)
-      if (data.nModified) {
-        res.send(true)
+  if (parmas.reportQId) {
+    models.Question.update(
+      { _id: parmas.reportQId },
+      { $set: { handled: parmas.handled } }
+    ).exec((err, data) => {
+      if (!err) {
+        console.log(data)
+        if (data.nModified) {
+          res.send(true)
+        } else {
+          res.send(false)
+        }
       } else {
+        console.log(err)
         res.send(false)
       }
-    } else {
-      console.log(err)
-      res.send(false)
-    }
-  })
+    })
+  } else {
+    models.Answer.update(
+      { _id: parmas.reportAId },
+      { $set: { handled: parmas.handled } }
+    ).exec((err, data) => {
+      if (!err) {
+        console.log(data)
+        if (data.nModified) {
+          res.send(true)
+        } else {
+          res.send(false)
+        }
+      } else {
+        console.log(err)
+        res.send(false)
+      }
+    })
+  }
 })
 
 // 模糊查询话题详情

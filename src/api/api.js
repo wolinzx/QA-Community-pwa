@@ -89,3 +89,7 @@ export const getReprotedGet = params => { return axios.get(`/api/getReprotedGet`
 export const getFollowTopicDetailGet = params => { return axios.get(`/api/getFollowTopicDetailGet`, { params: params }) }
 
 export const getHotListGet = params => { return axios.get(`/api/getHotListGet`, { params: params }) }
+
+export const getReportNoticeGet = params => { return axios.get(`/api/getReportNoticeGet`, { params: params }) }
+
+export const getReportResGet = params => { return axios.get(`/api/getReportResGet`, { params: params }) }

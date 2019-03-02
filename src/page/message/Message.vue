@@ -13,6 +13,17 @@
           <mu-list-item-sub-title>{{newAnswer.newAnswers.length}} 个新增回答</mu-list-item-sub-title>
         </mu-list-item-content>
       </mu-list-item>
+      <mu-list-item avatar button @click="openFullscreen1 = true" v-if="reportNum">
+        <mu-list-item-action>
+          <mu-avatar color="orange500">
+            <mu-icon value="report"></mu-icon>
+          </mu-avatar>
+        </mu-list-item-action>
+        <mu-list-item-content>
+          <mu-list-item-title>站务提醒</mu-list-item-title>
+          <mu-list-item-sub-title>{{reportNum}} 个 提问/回答 被封禁</mu-list-item-sub-title>
+        </mu-list-item-content>
+      </mu-list-item>
     </mu-list>
     <mu-container>
       <mu-dialog width="360" transition="slide-bottom" fullscreen :open.sync="openFullscreen">
@@ -22,11 +33,11 @@
           </mu-button>
         </mu-appbar>
         <mu-list textline="three-line">
-          <mu-sub-header>通知列表</mu-sub-header>
+          <mu-sub-header>新增回答</mu-sub-header>
           <mu-list-item avatar button v-for="(list,i) of newAnswersList" :key="i" @click="toAnswer(list)">
             <mu-list-item-action>
               <mu-avatar>
-                <img src="../../assets/image/avatar.jpeg">
+                <mu-icon value="person"></mu-icon>
               </mu-avatar>
             </mu-list-item-action>
             <mu-list-item-content>
@@ -43,6 +54,26 @@
         </mu-list>
       </mu-dialog>
     </mu-container>
+    <mu-container>
+      <mu-dialog width="360" transition="slide-bottom" fullscreen :open.sync="openFullscreen1">
+        <mu-appbar color="primary" title="站务提醒">
+          <mu-button slot="left" icon @click="openFullscreen1 = false">
+            <mu-icon value="close"></mu-icon>
+          </mu-button>
+        </mu-appbar>
+        <mu-list textline="three-line">
+          <mu-sub-header>被处理的举报</mu-sub-header>
+          <mu-list-item avatar button v-for="(list,i) of reportItem" :key="i">
+            <mu-list-item-content>
+              <mu-list-item-title>{{list.title ? '该提问被封禁' : '该回答被封禁'}}</mu-list-item-title>
+              <mu-list-item-sub-title>
+                {{list.title || list.contentData | contentFilter}}
+              </mu-list-item-sub-title>
+            </mu-list-item-content>
+          </mu-list-item>
+        </mu-list>
+      </mu-dialog>
+    </mu-container>
     <mu-flex class="flex-wrapper" justify-content="center" direction="column" align-items="center" style="width:100%; height: 20rem;" v-if="newAnswers.length === 0">
       <mu-flex class="flex-wrapper" justify-content="center" direction="column" align-items="center">
         <mu-icon value="storage" size="150" color="#ececec"></mu-icon>
@@ -53,7 +84,7 @@
 </template>
 
 <script>
-import { getTimeAnswersGet } from '../../api/api.js'
+import { getTimeAnswersGet, getReportNoticeGet, getReportResGet } from '../../api/api.js'
 import { mapState } from 'vuex'
 import dateDiff from '../../util/dateDiff.js'
 import contentFilter from '../../util/contentFilter.js'
@@ -64,13 +95,18 @@ export default {
       newAnswers: [],
       newAnswersList: [],
       openFullscreen: false,
+      openFullscreen1: false,
       thisTitle: '通知详情',
-      answersCount: 0
+      answersCount: 0,
+      reportNum: 0,
+      reportItem: []
     }
   },
   mounted () {
     if (this.userInfo.isLogined) {
       this.getFollowQuestionMsg()
+      this.getReportNotice()
+      this.getReportRes()
     }
   },
   methods: {
@@ -83,6 +119,36 @@ export default {
         }
       }).catch(err => {
         console.log(err)
+      })
+    },
+    getReportNotice () {
+      getReportNoticeGet({
+        account: this.userInfo.user_datas[0].account
+      }).then(res => {
+        let data = res.data
+        this.reportNum = data.ques.length + data.answ.length
+        this.reportItem = [...data.ques, ...data.answ]
+      }).catch(err => {
+        throw err
+      })
+    },
+    getReportRes () {
+      getReportResGet({
+        account: this.userInfo.user_datas[0].account
+      }).then(res => {
+        console.log(res)
+        let hh = res.data.filter(item => {
+          if (item.reportQId) {
+            return item.reportQId.handled
+          } else if (item.reportAId) {
+            return item.reportAId.handled
+          } else {
+            return false
+          }
+        })
+        console.log(hh)
+      }).catch(err => {
+        throw err
       })
     },
     openFullscreenDialog () {

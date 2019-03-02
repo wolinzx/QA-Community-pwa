@@ -271,6 +271,19 @@ const reportSchema = mongoose.Schema({
   reportType: String,
   reportDate: Date
 })
+// 举报通知
+const reportNoticeSchema = mongoose.Schema({
+  noticer: String,
+  reportQId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Question'
+  },
+  reportAId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Answer'
+  },
+  handleDate: Date
+})
 /**
  * 定义模型Model
  */
@@ -290,7 +303,8 @@ const Models = {
   FollowTopic: mongoose.model('FollowTopic', followTopicSchema),
   Collections: mongoose.model('Collections', collectionsSchema),
   Topic: mongoose.model('Topic', topicSchema),
-  Report: mongoose.model('Report', reportSchema)
+  Report: mongoose.model('Report', reportSchema),
+  ReportNotice: mongoose.model('reportNotice', reportNoticeSchema)
 }
 
 module.exports = Models

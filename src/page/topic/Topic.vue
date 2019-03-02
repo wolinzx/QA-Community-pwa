@@ -4,7 +4,7 @@
       <div slot="header">已关注话题</div>
       <mu-list textline="three-line">
         <div class="chip-container">
-          <mu-chip :color="initChips[i % 10]" v-for="(topic, i) of filterTopic" :key="i"  @click="toTopicDetail(topic)">
+          <mu-chip :color="initChips[i % 10]" v-for="(topic, i) of filterTopic" :key="i"  @click="toTopicDetail(topic.topicName)">
             {{topic.topicName}}
           </mu-chip>
           <span class="nomore" v-if="!userInfo.isLogined">登陆更精彩</span>
@@ -26,7 +26,7 @@
               <mu-list-item-content>
                 <mu-list-item-title>{{topic.topicName}}</mu-list-item-title>
                 <mu-list-item-sub-title>
-                  {{topic.topicDescribe}}
+                  {{topic.topicDescribe | contentFilter}}
                 </mu-list-item-sub-title>
               </mu-list-item-content>
               <mu-list-item-action @click.stop="followTopic(topic.topicName)" v-if="!topic.followed">
@@ -175,6 +175,11 @@ export default {
   },
   computed: {
     ...mapState(['userInfo'])
+  },
+  filters: {
+    contentFilter: function (value) {
+      return value.replace(/<[^>]+>/g, '')
+    }
   }
 }
 </script>

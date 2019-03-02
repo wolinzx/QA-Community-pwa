@@ -51,7 +51,7 @@
         <div ref="container2" class="demo-loadmore-content">
           <mu-load-more @refresh="refresh2" :refreshing="refreshing2" :loading="loading2" @load="load2">
             <div v-for="(recommend, i) of recommendlist" :key="i">
-              <mu-card style="width: 100%; margin: 10px auto;" v-if="!recommend.handled">
+              <mu-card style="width: 100%; margin: 10px auto;">
                 <mu-card-title :title="recommend.title" @click="toDetail(recommend._id, recommend.title)"></mu-card-title>
                 <mu-card-text v-html="recommend.contentData.replace(/<[^>]+>/g,'')" @click="toDetail(recommend._id, recommend.title)"></mu-card-text>
                 <mu-card-actions class="list-buttom">

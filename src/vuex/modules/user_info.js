@@ -28,6 +28,11 @@ const mutations = {
       console.log('seterr:' + err)
     }
   },
+  [types.SET_LOGINUSERINFO] (state, {
+    data
+  }) {
+    state.user_datas[1] = data
+  },
   [types.CLEAR_USERINFO] () {
     localStorage.userInfo.clear()
   },
