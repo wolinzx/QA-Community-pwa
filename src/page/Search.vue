@@ -165,6 +165,7 @@ export default {
   },
   mounted () {
     this.getSearch()
+    this.searchContent = this.$route.query.search
   },
   computed: {
     ...mapState(['userInfo'])

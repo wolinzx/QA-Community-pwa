@@ -359,7 +359,6 @@ export default {
           this.loading1 = true
           setTimeout(() => {
             this.loginApi(params)
-            this.loading1 = false
           }, 500)
         }
       })
@@ -410,13 +409,15 @@ export default {
             data: res
           })
           console.log(res)
-          this.$router.go(0) // 将整个页面刷新
+          // this.$router.go(0) // 将整个页面刷新
+          window.location.reload()
         } else {
           this.$toast.error('用户名或密码错误')
         }
       }).catch((err) => {
         console.log(err)
       })
+      this.loading1 = false
     },
     logout () {
       this.$http.get('/api/logout', {})
@@ -424,7 +425,8 @@ export default {
           console.log(res.data)
           this.SET_USERINFO({ logined: false })
           this.CLEAR_USERINFO({ logined: false })
-          this.$router.go(0) // 将整个页面刷新
+          // this.$router.go(0) // 将整个页面刷新
+          window.location.reload()
         })
         .catch((err) => {
           console.log(err)

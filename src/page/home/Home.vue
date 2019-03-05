@@ -21,7 +21,7 @@
                   {{answer.contentData | contentFilter}}
                 </mu-card-text>
                 <mu-card-actions class="list-buttom">
-                  <span>{{answer.endorseCount}} 赞同 · 66 评论</span>
+                  <span>{{answer.endorseCount}} 赞同</span>
                   <mu-menu cover placement="bottom-end">
                     <mu-button icon color="rgba(0,0,0,.57)">
                       <mu-icon value="more_vert"></mu-icon>
@@ -89,7 +89,7 @@
                 <p>{{i + 1}}</p>
                 <div>
                   <h3>{{hot.title}}</h3>
-                  <span>{{hot.count}} 万热度</span>
+                  <span>{{hot.count}} 热度</span>
                 </div>
               </div>
             </template>
@@ -123,6 +123,7 @@
             :options="editorOption">
           </quill-editor>
         </div>
+        <div class="stand"></div>
       </mu-dialog>
       <mu-dialog width="360" transition="slide-right" :overlay="false" fullscreen :open.sync="openSelect">
         <mu-appbar color="primary" title="添加话题">
@@ -585,6 +586,7 @@ export default {
   left: 0;
   border: none;
   box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12);
+  background: #ffffff;
 }
 .question-edit >>> .ql-toolbar.ql-snow + .ql-container.ql-snow{
   border: none;
@@ -594,5 +596,8 @@ export default {
   text-align: center;
   margin: 20px;
   color: #aaaaaa;
+}
+.stand{
+  height: 50px;
 }
 </style>

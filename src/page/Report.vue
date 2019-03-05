@@ -29,7 +29,7 @@ export default {
   data () {
     return {
       reportList: [
-        { reportTitle: '低质问题' },
+        { reportTitle: '低质问题/回答' },
         { reportTitle: '垃圾广告信息' },
         { reportTitle: '有害信息' },
         { reportTitle: '涉嫌侵权' }

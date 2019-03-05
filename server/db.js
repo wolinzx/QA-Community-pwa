@@ -15,9 +15,6 @@ db.once('open', () => {
  */
 // 登陆
 const loginSchema = mongoose.Schema({
-  avatar: {
-    type: String
-  },
   account: {
     type: String,
     unique: true,
@@ -89,10 +86,10 @@ const questionSchema = mongoose.Schema({
   topics: {
     type: Array
   },
-  answersDetail: [{
-    answerer: String,
-    answerDate: Date
-  }],
+  // answersDetail: [{
+  //   answerer: String,
+  //   answerDate: Date
+  // }],
   handled: {
     type: Boolean,
     default: false
@@ -291,20 +288,33 @@ const Models = {
   Login: mongoose.model('Login', loginSchema),
   Account: mongoose.model('Account', accountSchema),
   Question: mongoose.model('Question', questionSchema),
-  QuestionComment: mongoose.model('QuestionComment', questionCommentSchema),
-  QuestionReply: mongoose.model('QuestionReply', questionReplySchema),
   Answer: mongoose.model('Answer', answerSchema),
-  AnswerComment: mongoose.model('AnswerComment', answerCommentSchema),
-  AnswerReply: mongoose.model('AnswerReply', answerReplySchema),
   AnswerEndorse: mongoose.model('AnswerEndorse', answerEndorseSchema),
-  QaRelation: mongoose.model('QaRelation', qaRelationSchema),
   FollowQuestion: mongoose.model('FollowQuestion', followQuestionSchema),
   FollowUser: mongoose.model('FollowUser', followUserSchema),
   FollowTopic: mongoose.model('FollowTopic', followTopicSchema),
   Collections: mongoose.model('Collections', collectionsSchema),
   Topic: mongoose.model('Topic', topicSchema),
-  Report: mongoose.model('Report', reportSchema),
-  ReportNotice: mongoose.model('reportNotice', reportNoticeSchema)
+  Report: mongoose.model('Report', reportSchema)
 }
+// const Models = {
+//   Login: mongoose.model('Login', loginSchema),
+//   Account: mongoose.model('Account', accountSchema),
+//   Question: mongoose.model('Question', questionSchema),
+//   QuestionComment: mongoose.model('QuestionComment', questionCommentSchema),
+//   QuestionReply: mongoose.model('QuestionReply', questionReplySchema),
+//   Answer: mongoose.model('Answer', answerSchema),
+//   AnswerComment: mongoose.model('AnswerComment', answerCommentSchema),
+//   AnswerReply: mongoose.model('AnswerReply', answerReplySchema),
+//   AnswerEndorse: mongoose.model('AnswerEndorse', answerEndorseSchema),
+//   QaRelation: mongoose.model('QaRelation', qaRelationSchema),
+//   FollowQuestion: mongoose.model('FollowQuestion', followQuestionSchema),
+//   FollowUser: mongoose.model('FollowUser', followUserSchema),
+//   FollowTopic: mongoose.model('FollowTopic', followTopicSchema),
+//   Collections: mongoose.model('Collections', collectionsSchema),
+//   Topic: mongoose.model('Topic', topicSchema),
+//   Report: mongoose.model('Report', reportSchema),
+//   ReportNotice: mongoose.model('reportNotice', reportNoticeSchema)
+// }
 
 module.exports = Models

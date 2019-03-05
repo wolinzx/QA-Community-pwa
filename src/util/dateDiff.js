@@ -17,13 +17,13 @@ export default function (time) {
   //   minutes,
   //   seconds
   // }
-  if (dayDiff !== 0) {
+  if (dayDiff > 0) {
     return { diff: dayDiff + '天前', sec: dateDiff }
-  } else if (hours !== 0) {
+  } else if (hours > 0) {
     return { diff: hours + '小时前', sec: dateDiff }
-  } else if (minutes !== 0) {
+  } else if (minutes > 0) {
     return { diff: minutes + '分钟前', sec: dateDiff }
-  } else if (seconds !== 0) {
+  } else if (seconds > 0) {
     return { diff: seconds + '秒前', sec: dateDiff }
   } else {
     return { diff: '刚刚', sec: dateDiff }

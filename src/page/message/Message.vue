@@ -106,7 +106,7 @@ export default {
     if (this.userInfo.isLogined) {
       this.getFollowQuestionMsg()
       this.getReportNotice()
-      this.getReportRes()
+      // this.getReportRes()
     }
   },
   methods: {

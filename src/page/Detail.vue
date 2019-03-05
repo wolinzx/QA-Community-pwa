@@ -105,6 +105,7 @@
         ref="myQuillEditor"
         :options="editorOption">
       </quill-editor>
+      <div class="stand"></div>
     </mu-dialog>
     <div class="answer-action">
       <mu-button fab color="premary" @click="isAnswered">
@@ -446,6 +447,7 @@ export default {
   left: 0;
   border: none;
   box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12);
+  background: #ffffff;
 }
 .question-edit >>> .ql-toolbar.ql-snow + .ql-container.ql-snow{
   border: none;
@@ -464,5 +466,8 @@ export default {
   text-align: center;
   margin: 20px;
   color: #aaaaaa;
+}
+.stand{
+  height: 50px;
 }
 </style>

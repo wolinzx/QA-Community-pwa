@@ -2,8 +2,8 @@
 	"name": "qa-community-pwa",
 	"short_name": "community",
 	"icons": [{
-			"src": "/static/img/icons/android-chrome-192x192.png",
-			"sizes": "192x192",
+			"src": "/static/img/icons/android-chrome-198x198.png",
+			"sizes": "198x198",
 			"type": "image/png"
 		},
 		{
@@ -14,6 +14,6 @@
 	],
 	"start_url": "/index.html",
 	"display": "standalone",
-	"background_color": "#0091EA",
-	"theme_color": "#0091EA"
+	"background_color": "#FFFFFF",
+	"theme_color": "#000000"
 }
